@@ -46,6 +46,11 @@ export function getMe(): Me {
   return seed.me;
 }
 
+/** Overwrites the cached/mock archetype once the AI personality call resolves. */
+export function setMeArchetype(archetype: Archetype): void {
+  seed.me = { ...seed.me, archetype };
+}
+
 export function getUsers(): DiscoverUser[] {
   return seed.users;
 }

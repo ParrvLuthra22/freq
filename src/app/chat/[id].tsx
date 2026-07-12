@@ -7,15 +7,18 @@ import { Avatar } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
 import { Body, Mono } from '@/components/ui/typography';
-import { getUserById } from '@/lib/seed';
+import { getIcebreakers } from '@/lib/ai';
+import { getMe, getUserById } from '@/lib/seed';
 import { cn } from '@/lib/utils';
 
 export default function ChatByIdScreen() {
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id, opener } = useLocalSearchParams<{ id: string; opener?: string }>();
   const user = getUserById(id);
   const scrollRef = React.useRef<ScrollView>(null);
   const [messages, setMessages] = React.useState(user?.chatThread ?? []);
-  const [draft, setDraft] = React.useState('');
+  const [draft, setDraft] = React.useState(opener ?? '');
+  const [suggestions, setSuggestions] = React.useState<string[] | null>(null);
+  const [suggesting, setSuggesting] = React.useState(false);
 
   const handleSend = () => {
     const text = draft.trim();
@@ -25,7 +28,28 @@ export default function ChatByIdScreen() {
       { id: `local-${Date.now()}`, sender: 'me', text, sentAt: new Date().toISOString() },
     ]);
     setDraft('');
+    setSuggestions(null);
   };
+
+  // §6.3 — refreshable icebreakers, in case the thread stalls.
+  const handleSuggest = React.useCallback(async () => {
+    if (!user) return;
+    setSuggesting(true);
+    const me = getMe();
+    const result = await getIcebreakers(
+      `${me.id}:${user.id}`,
+      {
+        meName: me.name,
+        matchName: user.name,
+        reasons: user.match.reasons,
+        sharedArtists: user.match.sharedArtists,
+        sharedSong: user.match.sharedSong,
+      },
+      { refresh: true }
+    );
+    setSuggestions(result.openers);
+    setSuggesting(false);
+  }, [user]);
 
   if (!user) {
     return (
@@ -80,19 +104,43 @@ export default function ChatByIdScreen() {
           ) : null}
         </ScrollView>
 
-        <View className="flex-row items-center gap-2 border-t border-border px-4 py-3">
-          <TextInput
-            value={draft}
-            onChangeText={setDraft}
-            onSubmitEditing={handleSend}
-            returnKeyType="send"
-            placeholder="Say something…"
-            placeholderClassName="text-muted-foreground"
-            className="flex-1 rounded-full border border-border bg-card px-4 py-2.5 font-body text-foreground"
-          />
-          <Button size="icon" onPress={handleSend} disabled={!draft.trim()}>
-            <Text>→</Text>
-          </Button>
+        <View className="gap-2 border-t border-border px-4 py-3">
+          {suggestions ? (
+            <View className="gap-2 pb-1">
+              {suggestions.map((suggestion) => (
+                <Pressable
+                  key={suggestion}
+                  onPress={() => {
+                    setDraft(suggestion);
+                    setSuggestions(null);
+                  }}
+                  className="rounded-xl border border-border bg-card px-3 py-2 active:opacity-70">
+                  <Body className="text-sm">{suggestion}</Body>
+                </Pressable>
+              ))}
+            </View>
+          ) : (
+            <Pressable onPress={handleSuggest} disabled={suggesting} className="self-start active:opacity-60">
+              <Mono className="text-accent">
+                {suggesting ? 'Thinking of something…' : '✨ Suggest an opener'}
+              </Mono>
+            </Pressable>
+          )}
+
+          <View className="flex-row items-center gap-2">
+            <TextInput
+              value={draft}
+              onChangeText={setDraft}
+              onSubmitEditing={handleSend}
+              returnKeyType="send"
+              placeholder="Say something…"
+              placeholderClassName="text-muted-foreground"
+              className="flex-1 rounded-full border border-border bg-card px-4 py-2.5 font-body text-foreground"
+            />
+            <Button size="icon" onPress={handleSend} disabled={!draft.trim()}>
+              <Text>→</Text>
+            </Button>
+          </View>
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>

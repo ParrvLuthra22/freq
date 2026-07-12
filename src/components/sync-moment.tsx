@@ -1,7 +1,7 @@
 import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
 import * as React from 'react';
-import { ScrollView, View } from 'react-native';
+import { Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/ui/button';
@@ -9,14 +9,9 @@ import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/ca
 import { FreqDial } from '@/components/ui/freq-dial';
 import { Text } from '@/components/ui/text';
 import { Body, Display, Mono } from '@/components/ui/typography';
-import type { DiscoverUser } from '@/lib/seed';
-
-function formatList(items: string[]) {
-  if (items.length === 0) return '';
-  if (items.length === 1) return items[0];
-  if (items.length === 2) return `${items[0]} and ${items[1]}`;
-  return `${items.slice(0, -1).join(', ')}, and ${items[items.length - 1]}`;
-}
+import { getExplanation, getIcebreakers } from '@/lib/ai';
+import { getMe, type DiscoverUser } from '@/lib/seed';
+import { formatList } from '@/lib/utils';
 
 type SyncMomentProps = {
   user: DiscoverUser;
@@ -27,6 +22,15 @@ type SyncMomentProps = {
 /** The emotional peak — replaces "It's a match!" */
 function SyncMoment({ user, onBack }: SyncMomentProps) {
   const router = useRouter();
+  const me = React.useMemo(() => getMe(), []);
+  const pairKey = `${me.id}:${user.id}`;
+
+  const [explanation, setExplanation] = React.useState(
+    user.match.sharedArtists.length > 0
+      ? `You both know ${formatList(user.match.sharedArtists)}.`
+      : "A stretch, but a promising one — you'll have to find out why."
+  );
+  const [openers, setOpeners] = React.useState<string[]>([]);
 
   React.useEffect(() => {
     const timer = setTimeout(() => {
@@ -34,6 +38,27 @@ function SyncMoment({ user, onBack }: SyncMomentProps) {
     }, 350);
     return () => clearTimeout(timer);
   }, []);
+
+  // §6.2 explanation + §6.3 icebreakers — both fire here, cached per pair.
+  React.useEffect(() => {
+    let cancelled = false;
+    const pairInput = {
+      meName: me.name,
+      matchName: user.name,
+      reasons: user.match.reasons,
+      sharedArtists: user.match.sharedArtists,
+      sharedSong: user.match.sharedSong,
+    };
+    getExplanation(pairKey, pairInput).then((result) => {
+      if (!cancelled) setExplanation(result.text);
+    });
+    getIcebreakers(pairKey, pairInput).then((result) => {
+      if (!cancelled) setOpeners(result.openers);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [pairKey, me.name, user.name, user.match.reasons, user.match.sharedArtists, user.match.sharedSong]);
 
   return (
     <SafeAreaView className="flex-1 bg-background">
@@ -47,11 +72,7 @@ function SyncMoment({ user, onBack }: SyncMomentProps) {
           </Display>
         </View>
 
-        <Body className="px-4 text-center text-muted-foreground">
-          {user.match.sharedArtists.length > 0
-            ? `You both know ${formatList(user.match.sharedArtists)}.`
-            : "A stretch, but a promising one — you'll have to find out why."}
-        </Body>
+        <Body className="px-4 text-center text-muted-foreground">{explanation}</Body>
 
         {user.match.sharedSong ? (
           <Card className="w-full">
@@ -61,6 +82,22 @@ function SyncMoment({ user, onBack }: SyncMomentProps) {
               <CardDescription>{user.match.sharedSong.artist}</CardDescription>
             </CardHeader>
           </Card>
+        ) : null}
+
+        {openers.length > 0 ? (
+          <View className="w-full gap-2">
+            <Mono>Icebreakers</Mono>
+            {openers.map((opener) => (
+              <Pressable
+                key={opener}
+                onPress={() =>
+                  router.push({ pathname: '/chat/[id]', params: { id: user.id, opener } })
+                }
+                className="rounded-xl border border-border bg-card px-4 py-3 active:opacity-70">
+                <Body className="text-sm">{opener}</Body>
+              </Pressable>
+            ))}
+          </View>
         ) : null}
 
         <View className="w-full gap-3 pt-2">

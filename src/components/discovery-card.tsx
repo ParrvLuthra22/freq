@@ -15,7 +15,8 @@ import { Avatar } from '@/components/ui/avatar';
 import { Card, CardContent } from '@/components/ui/card';
 import { FreqDial } from '@/components/ui/freq-dial';
 import { Body, Mono } from '@/components/ui/typography';
-import type { DiscoverUser } from '@/lib/seed';
+import { getExplanation } from '@/lib/ai';
+import { getMe, type DiscoverUser } from '@/lib/seed';
 
 const LIKE_THRESHOLD = 90;
 const MAX_DRAG = 130;
@@ -29,7 +30,27 @@ function DiscoveryCard({ user }: DiscoveryCardProps) {
   const router = useRouter();
   const topReason = user.match.reasons[0];
   const [pulseTrigger, setPulseTrigger] = React.useState(0);
+  const [explanation, setExplanation] = React.useState<string | null>(null);
   const translateX = useSharedValue(0);
+
+  // §6.2 — compatibility explanation, cached per pair. The reason chip above
+  // renders instantly from local data; this fills in a beat later.
+  React.useEffect(() => {
+    let cancelled = false;
+    const me = getMe();
+    getExplanation(`${me.id}:${user.id}`, {
+      meName: me.name,
+      matchName: user.name,
+      reasons: user.match.reasons,
+      sharedArtists: user.match.sharedArtists,
+      sharedSong: user.match.sharedSong,
+    }).then((result) => {
+      if (!cancelled) setExplanation(result.text);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [user.id, user.name, user.match.reasons, user.match.sharedArtists, user.match.sharedSong]);
 
   const goToSync = React.useCallback(() => {
     router.push(`/sync/${user.id}`);
@@ -88,6 +109,8 @@ function DiscoveryCard({ user }: DiscoveryCardProps) {
               className="flex-row self-start rounded-full border border-accent bg-accent/10 px-4 py-2 active:opacity-70">
               <Mono className="text-accent">{topReason}</Mono>
             </Pressable>
+
+            {explanation ? <Body className="text-sm text-muted-foreground">{explanation}</Body> : null}
 
             {user.match.sharedSong ? (
               <Pressable

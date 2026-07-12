@@ -9,7 +9,8 @@ import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/ca
 import { FreqDial } from '@/components/ui/freq-dial';
 import { Text } from '@/components/ui/text';
 import { Mono } from '@/components/ui/typography';
-import { getMe } from '@/lib/seed';
+import { getPersonality } from '@/lib/ai';
+import { getMe, setMeArchetype, type Archetype } from '@/lib/seed';
 
 const STATUS_LINES = [
   'Reading 2am habits…',
@@ -43,14 +44,39 @@ export default function BuildingFreqScreen() {
   const signature = Math.round(energyValues.reduce((a, b) => a + b, 0) / energyValues.length);
 
   const [phase, setPhase] = React.useState<'dial' | 'lines' | 'reveal'>('dial');
+  const [archetype, setArchetype] = React.useState<Archetype | null>(null);
 
   React.useEffect(() => {
     const timer = setTimeout(() => setPhase('lines'), DIAL_DURATION);
     return () => clearTimeout(timer);
   }, []);
 
+  // Fires alongside the animation, not after it — the AI call and the ~3.5s
+  // orchestrated sequence run in parallel so neither one blocks the other.
+  React.useEffect(() => {
+    let cancelled = false;
+    getPersonality({
+      name: me.name,
+      topArtists: me.topArtists.map((a) => a.name),
+      tags: me.tags,
+      listeningHours: me.listeningHours,
+    }).then((result) => {
+      if (cancelled) return;
+      const resolved: Archetype = { name: result.archetype, description: result.description };
+      setMeArchetype(resolved);
+      setArchetype(resolved);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [me.name, me.topArtists, me.tags, me.listeningHours]);
+
   const handleLinesDone = React.useCallback(() => setPhase('reveal'), []);
   const currentLine = useStatusLines(phase === 'lines', handleLinesDone);
+
+  // Reveal waits on whichever finishes later: the animation floor, or the AI
+  // call (which always resolves — getPersonality falls back locally on error).
+  const ready = phase === 'reveal' && archetype !== null;
 
   return (
     <SafeAreaView className="flex-1 bg-background">
@@ -65,14 +91,14 @@ export default function BuildingFreqScreen() {
           ) : null}
         </View>
 
-        {phase === 'reveal' ? (
+        {ready ? (
           <View className="w-full gap-6">
             <Animated.View entering={ZoomIn.duration(450)}>
               <Card>
                 <CardHeader>
                   <Mono>Your archetype</Mono>
-                  <CardTitle>{me.archetype.name}</CardTitle>
-                  <CardDescription>{me.archetype.description}</CardDescription>
+                  <CardTitle>{archetype.name}</CardTitle>
+                  <CardDescription>{archetype.description}</CardDescription>
                 </CardHeader>
               </Card>
             </Animated.View>
