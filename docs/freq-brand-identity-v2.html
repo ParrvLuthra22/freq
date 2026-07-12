@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FREQ — Brand Identity v2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..600;1,9..144,300..600&family=Geist:wght@300..700&family=Geist+Mono:wght@300..500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#100F0D;
+    --charcoal:#1B1815;
+    --charcoal-2:#211D19;
+    --ivory:#F3ECE1;
+    --ash:#8B857A;
+    --signal:#E6A99E;
+    --champagne:#C9B79C;
+    --line:rgba(243,236,225,0.09);
+    --line-strong:rgba(243,236,225,0.16);
+    --display:"Fraunces",Georgia,serif;
+    --sans:"Geist","Inter",system-ui,sans-serif;
+    --mono:"Geist Mono",ui-monospace,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--ink);color:var(--ivory);font-family:var(--sans);font-weight:400;line-height:1.5;
+    -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+    padding:clamp(28px,6vw,88px) clamp(20px,6vw,88px) 80px;max-width:1160px;margin:0 auto;overflow-x:hidden;
+  }
+  body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+    background:radial-gradient(120% 80% at 78% -10%, rgba(230,169,158,0.07), transparent 60%),
+               radial-gradient(90% 60% at 0% 100%, rgba(201,183,156,0.05), transparent 55%);}
+  main{position:relative;z-index:1}
+  .mono{font-family:var(--mono);font-weight:400;letter-spacing:0.14em;text-transform:uppercase;font-size:11px;color:var(--ash)}
+  .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:var(--signal);display:block;margin-bottom:20px}
+  section{padding-block:clamp(48px,7vw,84px);border-top:1px solid var(--line)}
+  h2{font-family:var(--display);font-weight:340;font-size:clamp(28px,4.4vw,46px);line-height:1.05;letter-spacing:-0.01em;font-optical-sizing:auto}
+  .lede{font-family:var(--display);font-weight:330;font-size:clamp(19px,2.3vw,25px);line-height:1.45;color:var(--ivory);max-width:44ch}
+  .lede em{font-style:italic;color:var(--signal)}
+  p.body{color:var(--ash);max-width:56ch;font-size:15.5px;line-height:1.65;margin-top:18px}
+
+  /* HERO */
+  .hero{padding-top:8px;border-top:none}
+  .wordmark{font-family:var(--display);font-weight:350;font-size:clamp(76px,17vw,168px);line-height:.9;letter-spacing:-0.03em}
+  .tagline{font-family:var(--display);font-style:italic;font-weight:330;font-size:clamp(20px,3vw,30px);color:var(--ivory);margin-top:18px}
+  .kicker{display:flex;flex-wrap:wrap;gap:8px 22px;margin-top:28px}
+  .kicker span{font-family:var(--mono);font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ash)}
+  .kicker span b{color:var(--champagne);font-weight:400}
+  .wave{display:block;width:100%;height:26px;color:var(--champagne);opacity:.5;margin:8px 0}
+
+  /* PALETTE */
+  .swatches{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:2px;margin-top:36px;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+  .sw{padding:22px 18px 18px;min-height:150px;display:flex;flex-direction:column;justify-content:flex-end}
+  .sw .name{font-weight:500;font-size:14px}
+  .sw .hex{font-family:var(--mono);font-size:11px;letter-spacing:.08em;margin-top:4px;opacity:.85}
+  .sw .use{font-size:11.5px;margin-top:8px;line-height:1.4;opacity:.65}
+  .sw.ink{background:var(--ink);color:var(--ivory);box-shadow:inset 0 0 0 1px var(--line)}
+  .sw.char{background:var(--charcoal);color:var(--ivory)}
+  .sw.ivory{background:var(--ivory);color:#2a231d}
+  .sw.ash{background:#3a352f;color:var(--ivory)}
+  .sw.signal{background:var(--signal);color:#3a201b}
+  .sw.champ{background:var(--champagne);color:#33291b}
+  /* light-mode swatches */
+  .sw.l-paper{background:#F1E8DB;color:#2a231d}
+  .sw.l-card{background:#F8F1E6;color:#2a231d;box-shadow:inset 0 0 0 1px rgba(16,15,13,0.08)}
+  .sw.l-inkt{background:#171310;color:var(--ivory)}
+  .sw.l-taupe{background:#726A5E;color:var(--ivory)}
+  .sw.l-signal{background:#C67E6F;color:#2a1512}
+  .sw.l-bronze{background:#9C7C4E;color:#211603}
+  .sub{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--ash);margin:34px 0 4px}
+
+  /* TYPE */
+  .type-block{margin-top:34px;padding:30px;border:1px solid var(--line);border-radius:16px;background:linear-gradient(180deg,var(--charcoal),var(--ink))}
+  .type-block + .type-block{margin-top:16px}
+  .type-role{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+  .type-role .n{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--signal)}
+  .type-role .meta{font-family:var(--mono);font-size:11px;color:var(--ash)}
+  .spec-fraunces{font-family:var(--display);font-weight:340;font-size:clamp(34px,6vw,60px);line-height:1;letter-spacing:-0.015em}
+  .spec-fraunces .it{font-style:italic;color:var(--signal)}
+  .spec-geist{font-family:var(--sans);font-weight:400;font-size:clamp(19px,2.6vw,26px);line-height:1.35}
+  .spec-geist b{font-weight:600}
+  .spec-mono{font-family:var(--mono);font-size:clamp(15px,2vw,19px);letter-spacing:.05em;color:var(--champagne)}
+  .scale{display:flex;flex-wrap:wrap;gap:10px 26px;margin-top:20px;font-family:var(--mono);font-size:11px;color:var(--ash)}
+  .scale b{color:var(--ivory);font-weight:400}
+
+  /* MARK / LOGO */
+  .mark-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:16px;margin-top:36px}
+  .mcell{border:1px solid var(--line);border-radius:18px;padding:30px 24px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;min-height:210px}
+  .mcell.dark{background:var(--charcoal)}
+  .mcell.lite{background:#F1E8DB}
+  .mcell .tag{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--ash)}
+  .mcell.lite .tag{color:#8a7f70}
+  .m-svg{width:88px;height:88px;display:block}
+  .lockup{display:flex;align-items:center;gap:16px}
+  .lockup .lk-word{font-family:var(--display);font-weight:360;font-size:44px;letter-spacing:-0.02em;line-height:1}
+  .lockup.dark .lk-word{color:var(--ivory)}
+  .icon-app{width:96px;height:96px;border-radius:24px;background:var(--ink);display:flex;align-items:center;justify-content:center;box-shadow:0 16px 30px -14px rgba(0,0,0,.8),inset 0 0 0 1px var(--line-strong)}
+  .icon-app .m-svg{width:60px;height:60px}
+  .mnote{margin-top:16px;font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--ash)}
+
+  /* SIGNATURE */
+  .sig-wrap{display:grid;grid-template-columns:220px 1fr;gap:40px;align-items:center;margin-top:36px}
+  .ring-card{display:flex;flex-direction:column;align-items:center;gap:14px}
+  .ring-svg{width:200px;height:200px}
+  .ring-label{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--ash)}
+  @media(max-width:640px){.sig-wrap{grid-template-columns:1fr;justify-items:center;text-align:center}.sig-wrap .body{margin-inline:auto}}
+
+  /* VOICE */
+  .voice-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:32px}
+  @media(max-width:680px){.voice-grid{grid-template-columns:1fr}}
+  .vcard{border:1px solid var(--line);border-radius:16px;padding:24px;background:var(--charcoal)}
+  .vcard h4{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;margin-bottom:14px}
+  .vcard.do h4{color:var(--signal)}
+  .vcard.dont h4{color:var(--ash)}
+  .vcard ul{list-style:none;display:flex;flex-direction:column;gap:12px}
+  .vcard li{font-size:14.5px;line-height:1.5;padding-left:18px;position:relative;color:var(--ivory)}
+  .vcard.dont li{color:var(--ash)}
+  .vcard li::before{content:"";position:absolute;left:0;top:9px;width:6px;height:6px;border-radius:50%}
+  .vcard.do li::before{background:var(--signal)}
+  .vcard.dont li::before{background:var(--ash);border-radius:1px;transform:rotate(45deg)}
+  .icebreakers{margin-top:24px;border:1px solid var(--line);border-radius:16px;padding:26px;background:linear-gradient(180deg,var(--charcoal-2),var(--ink))}
+  .icebreakers .ib{font-family:var(--display);font-style:italic;font-weight:330;font-size:clamp(17px,2.2vw,22px);line-height:1.4;padding:14px 0;border-bottom:1px solid var(--line)}
+  .icebreakers .ib:last-child{border-bottom:none}
+  .icebreakers .ib::before{content:"\201C";color:var(--signal);font-style:normal}
+  .icebreakers .ib::after{content:"\201D";color:var(--signal);font-style:normal}
+
+  /* APPLICATIONS */
+  .apps{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:22px;margin-top:36px}
+  .phone{background:var(--ink);border:1px solid var(--line-strong);border-radius:30px;padding:22px;box-shadow:0 30px 60px -30px rgba(0,0,0,0.8)}
+  .phone .cap{font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--ash);margin-bottom:18px}
+  .pf-img{height:180px;border-radius:20px;background:
+      radial-gradient(90% 120% at 30% 10%, rgba(230,169,158,0.35), transparent 55%),
+      radial-gradient(80% 90% at 90% 90%, rgba(201,183,156,0.30), transparent 60%),var(--charcoal-2);
+      position:relative;overflow:hidden;display:flex;align-items:flex-end;padding:16px}
+  .pf-badge{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;background:rgba(16,15,13,0.6);backdrop-filter:blur(6px);border:1px solid var(--line);color:var(--champagne);padding:6px 10px;border-radius:999px}
+  .pf-name{font-family:var(--display);font-weight:340;font-size:30px;margin-top:16px;letter-spacing:-0.01em}
+  .pf-arche{font-family:var(--display);font-style:italic;color:var(--signal);font-size:16px;margin-top:2px}
+  .pf-row{display:flex;justify-content:space-between;align-items:baseline;margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}
+  .pf-row .l{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ash)}
+  .pf-row .v{font-size:13px;color:var(--ivory)}
+  .pf-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+  .pf-tags span{font-size:11.5px;color:var(--ivory);border:1px solid var(--line-strong);padding:5px 10px;border-radius:999px}
+  .pf-tags span.rare{border-color:var(--signal);color:var(--signal)}
+
+  /* LIGHT PREVIEW (scoped) */
+  .light-preview{background:#F1E8DB;border:1px solid rgba(16,15,13,0.10);border-radius:30px;padding:22px}
+  .light-preview .cap{font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:#8a7f70;margin-bottom:18px}
+  .light-preview .lp-img{height:180px;border-radius:20px;background:
+      radial-gradient(90% 120% at 25% 10%, rgba(198,126,111,0.30), transparent 55%),
+      radial-gradient(80% 90% at 95% 95%, rgba(156,124,78,0.28), transparent 60%),#EDE2D2;
+      display:flex;align-items:flex-end;padding:16px}
+  .light-preview .lp-badge{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;background:rgba(255,252,246,0.7);backdrop-filter:blur(6px);border:1px solid rgba(16,15,13,0.10);color:#8a5f42;padding:6px 10px;border-radius:999px}
+  .light-preview .lp-name{font-family:var(--display);font-weight:360;font-size:30px;margin-top:16px;color:#171310;letter-spacing:-0.01em}
+  .light-preview .lp-arche{font-family:var(--display);font-style:italic;color:#C0675A;font-size:16px;margin-top:2px}
+  .light-preview .lp-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+  .light-preview .lp-tags span{font-size:11.5px;color:#3a322a;border:1px solid rgba(16,15,13,0.16);padding:5px 10px;border-radius:999px}
+  .light-preview .lp-tags span.rare{border-color:#C67E6F;color:#B15E4F}
+  .light-preview .lp-row{display:flex;justify-content:space-between;align-items:baseline;margin-top:16px;padding-top:14px;border-top:1px solid rgba(16,15,13,0.10)}
+  .light-preview .lp-row .l{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#8a7f70}
+  .light-preview .lp-row .v{font-size:13px;color:#171310}
+  .lp-hold{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:22px;margin-top:8px;align-items:start}
+  .lp-note{border:1px solid var(--line);border-radius:18px;padding:24px;background:var(--charcoal)}
+  .lp-note p{color:var(--ash);font-size:14.5px;line-height:1.6}
+  .lp-note p + p{margin-top:12px}
+
+  footer{border-top:1px solid var(--line);margin-top:20px;padding-top:40px}
+  .lock{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:24px}
+  @media(max-width:680px){.lock{grid-template-columns:1fr}}
+  .lock div{border:1px solid var(--line);border-radius:14px;padding:20px}
+  .lock h4{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;margin-bottom:12px;color:var(--champagne)}
+  .lock li{font-size:14px;color:var(--ash);line-height:1.5;list-style:none;margin-bottom:8px;padding-left:16px;position:relative}
+  .lock li::before{content:"\00B7";position:absolute;left:4px;color:var(--signal)}
+  a{color:var(--signal)}
+  :focus-visible{outline:2px solid var(--signal);outline-offset:3px;border-radius:4px}
+  @media(prefers-reduced-motion:no-preference){
+    .ring-prog{animation:draw 1.4s cubic-bezier(.2,.8,.2,1) forwards}
+    @keyframes draw{from{stroke-dashoffset:var(--circ)}to{stroke-dashoffset:var(--off)}}
+  }
+</style>
+</head>
+<body>
+<main>
+
+  <!-- HERO -->
+  <header class="hero">
+    <div class="mono">Brand Identity — v2 · Dark-first · Editorial</div>
+    <div class="lockup dark" style="margin-top:22px;gap:22px">
+      <svg class="m-svg" style="width:clamp(64px,11vw,104px);height:clamp(64px,11vw,104px)" viewBox="0 0 120 120" role="img" aria-label="FREQ mark">
+        <circle cx="60" cy="60" r="53" fill="none" stroke="#E6A99E" stroke-width="3.5"/>
+        <path d="M20 60 Q30 54 40 60 Q50 78 60 60 Q70 42 80 60 Q90 66 100 60" fill="none" stroke="#E6A99E" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <div class="wordmark">FREQ</div>
+    </div>
+    <div class="tagline">Find your frequency.</div>
+    <svg class="wave" viewBox="0 0 1200 40" preserveAspectRatio="none" aria-hidden="true"><path d="M0 20 Q 30 0 60 20 T 120 20 T 180 20 T 240 20 T 300 20 T 360 20 T 420 20 T 480 20 T 540 20 T 600 20 T 660 20 T 720 20 T 780 20 T 840 20 T 900 20 T 960 20 T 1020 20 T 1080 20 T 1140 20 T 1200 20" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+    <div class="kicker">
+      <span>Mode · <b>Dating</b></span>
+      <span>Register · <b>Flirty, refined</b></span>
+      <span>Feel · <b>Elite, nocturnal</b></span>
+      <span>Data · <b>Spotify + Last.fm</b></span>
+    </div>
+  </header>
+
+  <!-- ESSENCE -->
+  <section>
+    <span class="eyebrow">01 — The Essence</span>
+    <p class="lede">FREQ reads who you <em>actually</em> are at 2am — not the version you'd write in a bio. Your taste is the most honest thing about you, and it flirts before you say a word.</p>
+    <p class="body">Four instincts meet here: Hinge's warm editorial restraint, Apple Watch's quiet precision, Cosmos's gallery-grade curation, and the ease of a good text thread. Dark, warm, confident. It flirts through wit and specificity, never volume. Nothing shouts. The luxury is in the restraint.</p>
+  </section>
+
+  <!-- MARK -->
+  <section>
+    <span class="eyebrow">02 — The Mark</span>
+    <h2>One glyph: a dial that's<br>also a waveform.</h2>
+    <p class="body">The mark is a miniature of the signature — a precision ring holding a single frequency wave. Logo and app icon are the same object, so the brand is recognisable at 24px on a home screen and at billboard scale. Rose on ink is primary; it inverts cleanly to ink on cream for light surfaces.</p>
+    <div class="mark-grid">
+      <div class="mcell dark">
+        <svg class="m-svg" viewBox="0 0 120 120" role="img" aria-label="FREQ primary mark">
+          <circle cx="60" cy="60" r="53" fill="none" stroke="#E6A99E" stroke-width="3.5"/>
+          <path d="M20 60 Q30 54 40 60 Q50 78 60 60 Q70 42 80 60 Q90 66 100 60" fill="none" stroke="#E6A99E" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div class="tag">Primary — rose on ink</div>
+      </div>
+      <div class="mcell lite">
+        <svg class="m-svg" viewBox="0 0 120 120" role="img" aria-label="FREQ mark on cream">
+          <circle cx="60" cy="60" r="53" fill="none" stroke="#171310" stroke-width="3.5"/>
+          <path d="M20 60 Q30 54 40 60 Q50 78 60 60 Q70 42 80 60 Q90 66 100 60" fill="none" stroke="#171310" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div class="tag">Reversed — ink on cream</div>
+      </div>
+      <div class="mcell dark">
+        <div class="lockup dark">
+          <svg class="m-svg" style="width:52px;height:52px" viewBox="0 0 120 120" aria-hidden="true">
+            <circle cx="60" cy="60" r="53" fill="none" stroke="#E6A99E" stroke-width="4"/>
+            <path d="M20 60 Q30 54 40 60 Q50 78 60 60 Q70 42 80 60 Q90 66 100 60" fill="none" stroke="#E6A99E" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span class="lk-word">FREQ</span>
+        </div>
+        <div class="tag">Horizontal lockup</div>
+      </div>
+      <div class="mcell dark">
+        <div class="icon-app">
+          <svg class="m-svg" viewBox="0 0 120 120" aria-hidden="true">
+            <circle cx="60" cy="60" r="53" fill="none" stroke="#E6A99E" stroke-width="4.5"/>
+            <path d="M20 60 Q30 54 40 60 Q50 78 60 60 Q70 42 80 60 Q90 66 100 60" fill="none" stroke="#E6A99E" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="tag">App icon</div>
+      </div>
+    </div>
+    <div class="mnote">Clear space = the ring's radius on all sides · Minimum mark size 20px · Never recolour the wave outside Signal / Ink / Ivory</div>
+  </section>
+
+  <!-- COLOR -->
+  <section>
+    <span class="eyebrow">03 — Colour</span>
+    <h2>Warm black, editorial cream,<br>and one rose that flirts.</h2>
+    <p class="body">Desaturated on purpose. The dusty rose signals romance without tipping into Tinder-red; champagne carries the elite, metallic note. No purple, no green, no primary red — the palette stays adult.</p>
+    <div class="sub">Dark — default</div>
+    <div class="swatches">
+      <div class="sw ink"><div class="name">Ink</div><div class="hex">#100F0D</div><div class="use">Base canvas — warm near-black</div></div>
+      <div class="sw char"><div class="name">Charcoal</div><div class="hex">#1B1815</div><div class="use">Cards &amp; elevated surfaces</div></div>
+      <div class="sw ivory"><div class="name">Ivory</div><div class="hex">#F3ECE1</div><div class="use">Primary text — editorial cream</div></div>
+      <div class="sw ash"><div class="name">Ash</div><div class="hex">#8B857A</div><div class="use">Secondary text &amp; labels</div></div>
+      <div class="sw signal"><div class="name">Signal</div><div class="hex">#E6A99E</div><div class="use">The flirt — accents, matches</div></div>
+      <div class="sw champ"><div class="name">Champagne</div><div class="hex">#C9B79C</div><div class="use">Luxe details, data, metals</div></div>
+    </div>
+    <div class="sub">Light — cream mode</div>
+    <div class="swatches">
+      <div class="sw l-paper"><div class="name">Paper</div><div class="hex">#F1E8DB</div><div class="use">Base canvas — warm cream</div></div>
+      <div class="sw l-card"><div class="name">Card</div><div class="hex">#F8F1E6</div><div class="use">Lifted surfaces</div></div>
+      <div class="sw l-inkt"><div class="name">Ink Text</div><div class="hex">#171310</div><div class="use">Primary text on cream</div></div>
+      <div class="sw l-taupe"><div class="name">Taupe</div><div class="hex">#726A5E</div><div class="use">Secondary text &amp; labels</div></div>
+      <div class="sw l-signal"><div class="name">Signal Deep</div><div class="hex">#C67E6F</div><div class="use">Rose, darkened for contrast</div></div>
+      <div class="sw l-bronze"><div class="name">Bronze</div><div class="hex">#9C7C4E</div><div class="use">Champagne's light-mode twin</div></div>
+    </div>
+  </section>
+
+  <!-- LIGHT APPLIED -->
+  <section>
+    <span class="eyebrow">04 — Light Mode, Applied</span>
+    <h2>Same soul, daylight.</h2>
+    <div class="lp-hold">
+      <div class="light-preview">
+        <div class="cap">Discovery — light</div>
+        <div class="lp-img"><span class="lp-badge">◍ 91% FREQ</span></div>
+        <div class="lp-name">Ananya, 20</div>
+        <div class="lp-arche">The Midnight Romantic</div>
+        <div class="lp-tags"><span class="rare">◇ Rare: CAS</span><span>Frank Ocean</span><span>The Weeknd</span></div>
+        <div class="lp-row"><span class="l">Shared song</span><span class="v">Apocalypse</span></div>
+        <div class="lp-row"><span class="l">Current freq</span><span class="v">Late-night R&amp;B</span></div>
+      </div>
+      <div class="lp-note">
+        <p><b style="color:var(--ivory);font-weight:500">The rule:</b> light mode isn't a colour swap, it's a tone swap. Cream replaces ink, ink-text replaces ivory, and both accents <em>darken</em> so they hold contrast on paper — rose to Signal Deep, champagne to Bronze.</p>
+        <p>Dark stays the default and the hero — it's the 2am brand. Light is the polite daytime twin for share cards, email, and anyone who lives in light mode. The editorial serif and the mark carry across untouched, so it always reads as FREQ.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- TYPE -->
+  <section>
+    <span class="eyebrow">05 — Typography</span>
+    <h2>An editorial serif that flirts in italic,<br>a grotesque that keeps its cool.</h2>
+    <div class="type-block">
+      <div class="type-role"><span class="n">Display — Fraunces</span><span class="meta">opsz · light–semibold · italic</span></div>
+      <div class="spec-fraunces">You're in <span class="it">sync.</span></div>
+      <div class="scale"><span>H1 · <b>46/1.05 · -1%</b></span><span>Score · <b>Fraunces 340</b></span><span>Flirt · <b>italic Signal</b></span></div>
+    </div>
+    <div class="type-block">
+      <div class="type-role"><span class="n">Text &amp; UI — Geist</span><span class="meta">300–700 · sentence case</span></div>
+      <div class="spec-geist">You both love <b>Cigarettes After Sex</b> — and almost no one else here does.</div>
+      <div class="scale"><span>Body · <b>15.5/1.65</b></span><span>Button · <b>Geist 500</b></span><span>Never · <b>ALL CAPS SANS</b></span></div>
+    </div>
+    <div class="type-block">
+      <div class="type-role"><span class="n">Data &amp; labels — Geist Mono</span><span class="meta">tracking 0.14em · uppercase</span></div>
+      <div class="spec-mono">92% FREQ · 23 ARTISTS · 2AM LISTENER</div>
+      <div class="scale"><span>Labels · <b>11px</b></span><span>Scores · <b>Mono / Fraunces</b></span><span>Feel · <b>instrument-grade</b></span></div>
+    </div>
+  </section>
+
+  <!-- SIGNATURE -->
+  <section>
+    <span class="eyebrow">06 — The Signature</span>
+    <h2>The FREQ Dial.</h2>
+    <div class="sig-wrap">
+      <div class="ring-card">
+        <svg class="ring-svg" viewBox="0 0 200 200" role="img" aria-label="92 percent FREQ score dial">
+          <circle cx="100" cy="100" r="86" fill="none" stroke="rgba(243,236,225,0.10)" stroke-width="10"/>
+          <circle class="ring-prog" cx="100" cy="100" r="86" fill="none" stroke="#E6A99E" stroke-width="10" stroke-linecap="round"
+                  transform="rotate(-90 100 100)" style="--circ:540.35; --off:43.2; stroke-dasharray:540.35; stroke-dashoffset:43.2"/>
+          <text x="100" y="96" text-anchor="middle" font-family="Fraunces,serif" font-size="52" font-weight="340" fill="#F3ECE1">92</text>
+          <text x="100" y="126" text-anchor="middle" font-family="Geist Mono,monospace" font-size="12" letter-spacing="4" fill="#8B857A">% FREQ</text>
+        </svg>
+        <div class="ring-label">Apple-Watch DNA × frequency</div>
+      </div>
+      <div>
+        <p class="body" style="margin-top:0">One object carries the whole brand: a precision dial borrowed from Apple Watch, wrapped in the sine-wave that gives FREQ its name. It's the compatibility score, the loading state, the profile centrepiece, and the shareable card — all the same shape. The waveform repeats everywhere as a hairline divider and texture, so the frequency motif is felt long before it's noticed.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- VOICE -->
+  <section>
+    <span class="eyebrow">07 — Voice &amp; Tone</span>
+    <h2>Flirts through wit, never volume.</h2>
+    <div class="voice-grid">
+      <div class="vcard do">
+        <h4>We sound like</h4>
+        <ul>
+          <li>Specific and knowing — name the artist, the hour, the rare overlap.</li>
+          <li>Playfully bold, a little teasing, always in on the joke.</li>
+          <li>Warm and adult. Confident enough to be brief.</li>
+          <li>Sentence case. Real punctuation. A well-placed em dash.</li>
+        </ul>
+      </div>
+      <div class="vcard dont">
+        <h4>We never sound like</h4>
+        <ul>
+          <li>Thirsty, crude, or trying too hard.</li>
+          <li>Generic dating-app filler — "Hey, you two matched!"</li>
+          <li>Loud, emoji-stuffed, or exclamation-heavy.</li>
+          <li>Judgmental about anyone's taste. Cheeky, not mean.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="icebreakers">
+      <div class="mono" style="margin-bottom:8px">Auto-generated openers, in voice</div>
+      <div class="ib">You both listen to sad music after midnight. Concerning — but compatible.</div>
+      <div class="ib">She found this artist two years before you did. Settle it.</div>
+      <div class="ib">94% aligned, completely opposite favourite albums. Someone's wrong.</div>
+    </div>
+  </section>
+
+  <!-- APPLICATIONS -->
+  <section>
+    <span class="eyebrow">08 — In the Wild</span>
+    <h2>The brand, applied.</h2>
+    <div class="apps">
+      <div class="phone">
+        <div class="cap">Discovery — a profile</div>
+        <div class="pf-img"><span class="pf-badge">◍ 91% FREQ</span></div>
+        <div class="pf-name">Ananya, 20</div>
+        <div class="pf-arche">The Midnight Romantic</div>
+        <div class="pf-tags"><span class="rare">◇ Rare: CAS</span><span>Frank Ocean</span><span>The Weeknd</span></div>
+        <div class="pf-row"><span class="l">Shared song</span><span class="v">Apocalypse</span></div>
+        <div class="pf-row"><span class="l">Current freq</span><span class="v">Late-night R&amp;B</span></div>
+      </div>
+      <div class="phone">
+        <div class="cap">The match moment</div>
+        <div class="sync" style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px;padding-top:6px">
+          <div class="mono" style="letter-spacing:.28em;color:var(--signal)">You're in sync</div>
+          <svg class="ring-svg" style="width:150px;height:150px;margin:6px 0" viewBox="0 0 200 200" role="img" aria-label="92 percent match">
+            <circle cx="100" cy="100" r="86" fill="none" stroke="rgba(243,236,225,0.10)" stroke-width="12"/>
+            <circle cx="100" cy="100" r="86" fill="none" stroke="#E6A99E" stroke-width="12" stroke-linecap="round" transform="rotate(-90 100 100)" stroke-dasharray="540.35" stroke-dashoffset="43.2"/>
+            <text x="100" y="112" text-anchor="middle" font-family="Fraunces,serif" font-size="58" font-weight="340" fill="#F3ECE1">92</text>
+          </svg>
+          <div style="font-size:13.5px;color:var(--ash);max-width:26ch;line-height:1.5"><b style="color:var(--ivory);font-weight:500">23 shared artists.</b> The same current obsession. You're both up too late.</div>
+        </div>
+      </div>
+      <div class="phone">
+        <div class="cap">Chat — iMessage-familiar</div>
+        <div class="chat" style="display:flex;flex-direction:column;gap:9px">
+          <div style="align-self:center;text-align:center;max-width:92%;font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--ash);padding:8px 12px;border:1px dashed var(--line-strong);border-radius:12px;line-height:1.5">FREQ opened with · <span style="color:var(--signal)">you both play sad music at 2am</span></div>
+          <div style="align-self:flex-start;max-width:80%;padding:10px 14px;border-radius:20px;border-bottom-left-radius:7px;font-size:14px;line-height:1.4;background:var(--charcoal-2);border:1px solid var(--line);color:var(--ivory)">okay the 2am thing is a personal attack</div>
+          <div style="align-self:flex-end;max-width:80%;padding:10px 14px;border-radius:20px;border-bottom-right-radius:7px;font-size:14px;line-height:1.4;background:var(--signal);color:#3a201b">it's a compatibility flag, actually</div>
+          <div style="align-self:flex-start;max-width:80%;padding:10px 14px;border-radius:20px;border-bottom-left-radius:7px;font-size:14px;line-height:1.4;background:var(--charcoal-2);border:1px solid var(--line);color:var(--ivory)">defend Apocalypse in one sentence, go</div>
+          <div style="align-self:flex-end;max-width:80%;padding:10px 14px;border-radius:20px;border-bottom-right-radius:7px;font-size:14px;line-height:1.4;background:var(--signal);color:#3a201b">it's the only sad song that also feels like a hug</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- LOCK -->
+  <footer>
+    <span class="eyebrow">Where we are</span>
+    <h2 style="font-size:clamp(24px,3.4vw,34px)">Brand locked. Next: the app.</h2>
+    <div class="lock">
+      <div>
+        <h4>Locked in v2</h4>
+        <ul>
+          <li>Dark-first system + cream light mode</li>
+          <li>The waveform Dial mark — logo &amp; app icon</li>
+          <li>Fraunces × Geist × Geist Mono</li>
+          <li>Signal rose · flirty-but-refined voice</li>
+        </ul>
+      </div>
+      <div>
+        <h4>Next phase — the app</h4>
+        <ul>
+          <li>Screen-by-screen references (Mobbin, Awwwards)</li>
+          <li>React Native component map</li>
+          <li>The AI feature set, specced</li>
+          <li>A plan of action for you to edit</li>
+        </ul>
+      </div>
+    </div>
+  </footer>
+
+</main>
+</body>
+</html>

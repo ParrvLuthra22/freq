@@ -1,18 +1,53 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
-import { useColorScheme } from 'react-native';
+import '../global.css';
 
-import { AnimatedSplashOverlay } from '@/components/animated-icon';
-import AppTabs from '@/components/app-tabs';
+import { PortalHost } from '@rn-primitives/portal';
+import { Stack, ThemeProvider } from 'expo-router';
+import * as SplashScreen from 'expo-splash-screen';
+import { StatusBar } from 'expo-status-bar';
+import { colorScheme, useColorScheme } from 'nativewind';
+import * as React from 'react';
+import { Platform } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+
+import { useAppFonts } from '@/hooks/use-app-fonts';
+import { NAV_THEME } from '@/lib/theme';
 
 SplashScreen.preventAutoHideAsync();
 
-export default function TabLayout() {
-  const colorScheme = useColorScheme();
+// FREQ is dark-first: default the app to dark before the first paint, unless
+// the user has already picked a scheme this session. Guarded because on web
+// this runs during server rendering too, before `window` exists.
+if (typeof window !== 'undefined' || Platform.OS !== 'web') {
+  colorScheme.set('dark');
+}
+
+export default function RootLayout() {
+  const [fontsLoaded, fontError] = useAppFonts();
+  const { colorScheme: scheme } = useColorScheme();
+
+  React.useEffect(() => {
+    if (fontsLoaded || fontError) {
+      SplashScreen.hideAsync();
+    }
+  }, [fontsLoaded, fontError]);
+
+  if (!fontsLoaded && !fontError) {
+    return null;
+  }
+
+  const theme = NAV_THEME[scheme ?? 'dark'];
+
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <AnimatedSplashOverlay />
-      <AppTabs />
+    <ThemeProvider value={theme}>
+      <StatusBar style={scheme === 'light' ? 'dark' : 'light'} />
+      <GestureHandlerRootView style={{ flex: 1, backgroundColor: theme.colors.background }}>
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="(tabs)" />
+          <Stack.Screen name="onboarding" options={{ presentation: 'modal' }} />
+          <Stack.Screen name="share" options={{ presentation: 'modal' }} />
+        </Stack>
+        <PortalHost />
+      </GestureHandlerRootView>
     </ThemeProvider>
   );
 }
