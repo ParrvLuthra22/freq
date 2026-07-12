@@ -33,8 +33,7 @@ function OnboardingStep({
       <Animated.View
         entering={FadeInRight.duration(380)}
         exiting={FadeOutLeft.duration(220)}
-        style={{ flex: 1, justifyContent: 'center' }}
-        className="gap-6 px-6">
+        style={{ flex: 1, justifyContent: 'center', gap: 24, paddingHorizontal: 24 }}>
         <Mono>{step}</Mono>
         <View>
           <Display className="text-4xl leading-tight">{question}</Display>

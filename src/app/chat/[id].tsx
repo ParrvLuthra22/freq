@@ -14,6 +14,18 @@ export default function ChatByIdScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const user = getUserById(id);
   const scrollRef = React.useRef<ScrollView>(null);
+  const [messages, setMessages] = React.useState(user?.chatThread ?? []);
+  const [draft, setDraft] = React.useState('');
+
+  const handleSend = () => {
+    const text = draft.trim();
+    if (!text) return;
+    setMessages((prev) => [
+      ...prev,
+      { id: `local-${Date.now()}`, sender: 'me', text, sentAt: new Date().toISOString() },
+    ]);
+    setDraft('');
+  };
 
   if (!user) {
     return (
@@ -48,7 +60,7 @@ export default function ChatByIdScreen() {
             </View>
           ) : null}
 
-          {(user.chatThread ?? []).map((message) => (
+          {messages.map((message) => (
             <View
               key={message.id}
               className={cn(
@@ -61,7 +73,7 @@ export default function ChatByIdScreen() {
             </View>
           ))}
 
-          {!user.chatThread || user.chatThread.length === 0 ? (
+          {messages.length === 0 ? (
             <Body className="pt-2 text-center text-muted-foreground">
               No messages yet — say something.
             </Body>
@@ -70,11 +82,15 @@ export default function ChatByIdScreen() {
 
         <View className="flex-row items-center gap-2 border-t border-border px-4 py-3">
           <TextInput
+            value={draft}
+            onChangeText={setDraft}
+            onSubmitEditing={handleSend}
+            returnKeyType="send"
             placeholder="Say something…"
             placeholderClassName="text-muted-foreground"
             className="flex-1 rounded-full border border-border bg-card px-4 py-2.5 font-body text-foreground"
           />
-          <Button size="icon">
+          <Button size="icon" onPress={handleSend} disabled={!draft.trim()}>
             <Text>→</Text>
           </Button>
         </View>

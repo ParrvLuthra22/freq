@@ -1,9 +1,11 @@
 import * as React from 'react';
 import { View } from 'react-native';
+import { useColorScheme } from 'nativewind';
 import Animated, { Easing, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 
 import { Mono } from '@/components/ui/typography';
 import { cn } from '@/lib/utils';
+import { THEME } from '@/lib/theme';
 import type { Energy } from '@/lib/seed';
 
 const ROWS: { key: keyof Energy; label: string }[] = [
@@ -15,12 +17,22 @@ const ROWS: { key: keyof Energy; label: string }[] = [
 
 function EnergyBar({ label, value }: { label: string; value: number }) {
   const progress = useSharedValue(0);
+  const { colorScheme } = useColorScheme();
+  const accentColor = THEME[colorScheme ?? 'dark'].accent;
 
   React.useEffect(() => {
     progress.value = withTiming(value, { duration: 900, easing: Easing.out(Easing.cubic) });
   }, [value, progress]);
 
-  const style = useAnimatedStyle(() => ({ width: `${progress.value}%` }));
+  // Animated.View drops NativeWind className styles when a style prop is also
+  // present (see onboarding-step.tsx), so the fill's static appearance has to
+  // travel through style too, not className.
+  const style = useAnimatedStyle(() => ({
+    width: `${progress.value}%`,
+    height: '100%',
+    borderRadius: 9999,
+    backgroundColor: accentColor,
+  }));
 
   return (
     <View className="gap-1.5">
@@ -29,7 +41,7 @@ function EnergyBar({ label, value }: { label: string; value: number }) {
         <Mono>{Math.round(value)}</Mono>
       </View>
       <View className="h-2 overflow-hidden rounded-full bg-muted">
-        <Animated.View className="h-full rounded-full bg-accent" style={style} />
+        <Animated.View style={style} />
       </View>
     </View>
   );
