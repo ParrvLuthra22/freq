@@ -1,6 +1,5 @@
 import * as React from 'react';
 import { View } from 'react-native';
-import Animated, { FadeInRight, FadeOutLeft } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/ui/button';
@@ -18,7 +17,7 @@ type OnboardingStepProps = {
   nextLabel?: string;
 };
 
-/** One editorial question per screen — slide+fade in, steady CTA at the bottom. */
+/** One editorial question per screen, steady CTA at the bottom. */
 function OnboardingStep({
   step,
   question,
@@ -30,10 +29,7 @@ function OnboardingStep({
 }: OnboardingStepProps) {
   return (
     <SafeAreaView className="flex-1 bg-background">
-      <Animated.View
-        entering={FadeInRight.duration(380)}
-        exiting={FadeOutLeft.duration(220)}
-        style={{ flex: 1, justifyContent: 'center', gap: 24, paddingHorizontal: 24 }}>
+      <View style={{ flex: 1, justifyContent: 'center', gap: 24, paddingHorizontal: 24 }}>
         <Mono>{step}</Mono>
         <View>
           <Display className="text-4xl leading-tight">{question}</Display>
@@ -45,7 +41,7 @@ function OnboardingStep({
         </View>
         <Waveform />
         {children ? <View className="gap-4">{children}</View> : null}
-      </Animated.View>
+      </View>
       <View className="px-6 pb-8 pt-4">
         <Button size="lg" onPress={onNext} disabled={nextDisabled}>
           <Text>{nextLabel}</Text>

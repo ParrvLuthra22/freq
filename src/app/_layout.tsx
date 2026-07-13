@@ -25,6 +25,13 @@ export default function RootLayout() {
   const [fontsLoaded, fontError] = useAppFonts();
   const { colorScheme: scheme } = useColorScheme();
 
+  // Re-assert dark on mount too: the module-scope call above can be raced by
+  // nativewind's own system-appearance sync, leaving background and text
+  // resolved from different schemes for a frame (or longer, on native).
+  React.useEffect(() => {
+    colorScheme.set('dark');
+  }, []);
+
   React.useEffect(() => {
     if (fontsLoaded || fontError) {
       SplashScreen.hideAsync();

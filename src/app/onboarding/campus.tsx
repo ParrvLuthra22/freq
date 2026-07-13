@@ -4,6 +4,7 @@ import { TextInput } from 'react-native';
 
 import { OnboardingStep } from '@/components/onboarding-step';
 import { Body } from '@/components/ui/typography';
+import { updateMe } from '@/lib/seed';
 
 export default function OnboardingCampusScreen() {
   const [campus, setCampus] = React.useState('');
@@ -13,7 +14,10 @@ export default function OnboardingCampusScreen() {
       step="Step 3 of 4"
       question="Where do you"
       accent="go?"
-      onNext={() => router.push('/onboarding/looking-for')}
+      onNext={() => {
+        updateMe({ campus: campus.trim() });
+        router.push('/onboarding/looking-for');
+      }}
       nextDisabled={campus.trim().length === 0}>
       <TextInput
         value={campus}

@@ -51,6 +51,11 @@ export function setMeArchetype(archetype: Archetype): void {
   seed.me = { ...seed.me, archetype };
 }
 
+/** Overwrites the cached/mock profile fields collected during onboarding. */
+export function updateMe(patch: Partial<Me>): void {
+  seed.me = { ...seed.me, ...patch };
+}
+
 export function getUsers(): DiscoverUser[] {
   return seed.users;
 }
