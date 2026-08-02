@@ -63,7 +63,13 @@ function SyncMoment({ user, onBack }: SyncMomentProps) {
   return (
     <SafeAreaView className="flex-1 bg-background">
       <ScrollView contentContainerClassName="flex-grow items-center justify-center gap-6 px-6 py-12">
-        <FreqDial score={user.match.score} size={220} label="Sync" />
+        {/* The dial is the score, so it is also the way into how the score was made. */}
+        <Pressable
+          onPress={() => router.push(`/breakdown/${user.id}`)}
+          className="items-center gap-3 active:opacity-80">
+          <FreqDial score={user.match.score} size={220} label="Sync" />
+          <Mono className="text-accent">Why this score →</Mono>
+        </Pressable>
 
         <View className="items-center">
           <Display className="text-center text-4xl leading-tight">You&apos;re in</Display>

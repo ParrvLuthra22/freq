@@ -5,6 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Avatar } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { EnergyBars } from '@/components/ui/energy-bars';
+import { RhythmChart } from '@/components/ui/rhythm-chart';
 import { FreqDial } from '@/components/ui/freq-dial';
 import { Text } from '@/components/ui/text';
 import { Body, Display, Mono } from '@/components/ui/typography';
@@ -59,6 +60,13 @@ export default function FreqScreen() {
         <View className="gap-4">
           <Mono>Energy</Mono>
           <EnergyBars energy={me.energy} />
+        </View>
+
+        <Waveform />
+
+        <View className="gap-3">
+          <Mono>Your clock</Mono>
+          <RhythmChart mine={me.listeningHours} height={100} />
         </View>
 
         <Waveform />
