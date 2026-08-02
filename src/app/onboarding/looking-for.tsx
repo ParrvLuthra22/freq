@@ -7,7 +7,7 @@ import { Body } from '@/components/ui/typography';
 import { saveProfile } from '@/lib/store';
 import { cn } from '@/lib/utils';
 
-const OPTIONS = ['Date', 'Friends', 'Rooms'] as const;
+const OPTIONS = ['Date', 'Friends', 'See where it goes'] as const;
 
 export default function OnboardingLookingForScreen() {
   const [choice, setChoice] = React.useState<(typeof OPTIONS)[number] | null>(null);

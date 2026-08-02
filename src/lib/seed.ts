@@ -109,6 +109,21 @@ export function getUsers(): DiscoverUser[] {
   return seed.users.map(withLiveMatch).sort((a, b) => b.match.score - a.match.score);
 }
 
+/** How many people surface in a single day's drop. Scarcity is the point. */
+export const DROP_SIZE = 4;
+
+/**
+ * The candidates for a fresh drop: your strongest frequencies that you have not
+ * already reacted to. Selection leads with the best available rather than
+ * rotating at random — a curated drop should open with your best match, not a
+ * mediocre one that happened to land on today's index.
+ */
+export function getDropCandidates(excludeIds: string[]): DiscoverUser[] {
+  return getUsers()
+    .filter((user) => !excludeIds.includes(user.id))
+    .slice(0, DROP_SIZE);
+}
+
 export function getUserById(id: string): DiscoverUser | undefined {
   const user = seed.users.find((u) => u.id === id);
   return user ? withLiveMatch(user) : undefined;

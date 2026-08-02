@@ -17,6 +17,7 @@ import { FreqDial } from '@/components/ui/freq-dial';
 import { Body, Mono } from '@/components/ui/typography';
 import { getExplanation } from '@/lib/ai';
 import { getMe, type DiscoverUser } from '@/lib/seed';
+import { toggleLike } from '@/lib/store';
 
 const LIKE_THRESHOLD = 90;
 const MAX_DRAG = 130;
@@ -59,8 +60,11 @@ function DiscoveryCard({ user }: DiscoveryCardProps) {
   const like = React.useCallback(() => {
     setPulseTrigger((n) => n + 1);
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    // Persist before navigating so the card is spent from today's drop even if
+    // the user backs out of the sync moment.
+    toggleLike(user.id);
     setTimeout(goToSync, 260);
-  }, [goToSync]);
+  }, [goToSync, user.id]);
 
   const pan = Gesture.Pan()
     .activeOffsetX([-1000, 10])

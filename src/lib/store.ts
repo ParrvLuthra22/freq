@@ -1,7 +1,13 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as React from 'react';
 
-import { updateMe, type Me } from '@/lib/seed';
+import {
+  getDropCandidates,
+  getUserById,
+  updateMe,
+  type DiscoverUser,
+  type Me,
+} from '@/lib/seed';
 
 /**
  * Local persistence for everything the user actually creates: their profile,
@@ -19,16 +25,21 @@ export type ProfileDraft = Pick<Me, 'name' | 'age' | 'campus'> & {
   lookingFor: string | null;
 };
 
+/** Today's drop, frozen once chosen so it cannot reshuffle underneath the user. */
+export type Drop = { date: string; ids: string[] };
+
 export type PersistedState = {
   profile: Partial<ProfileDraft>;
   likedIds: string[];
   onboarded: boolean;
+  drop: Drop | null;
 };
 
 const EMPTY: PersistedState = {
   profile: {},
   likedIds: [],
   onboarded: false,
+  drop: null,
 };
 
 let state: PersistedState = EMPTY;
@@ -69,6 +80,7 @@ export async function hydrateStore(): Promise<void> {
       profile: parsed.profile ?? {},
       likedIds: Array.isArray(parsed.likedIds) ? parsed.likedIds : [],
       onboarded: parsed.onboarded === true,
+      drop: parsed.drop ?? null,
     };
 
     // Push the saved identity back into the seed profile so every screen that
@@ -138,4 +150,37 @@ export function usePersistedState(): PersistedState {
 /** Convenience selector for the liked set. */
 export function useLikedIds(): string[] {
   return usePersistedState().likedIds;
+}
+
+const todayKey = () => new Date().toISOString().slice(0, 10);
+
+/**
+ * Today's drop, and what is left of it.
+ *
+ * The set is chosen once per day and then frozen: reacting to someone spends
+ * them from the drop rather than pulling a replacement in. That finiteness is
+ * the product — you get a considered handful, not a feed that refills as fast
+ * as you can empty it.
+ */
+export function useDailyDrop(): { drop: DiscoverUser[]; remaining: DiscoverUser[] } {
+  const { likedIds, drop } = usePersistedState();
+  const today = todayKey();
+  const isCurrent = drop?.date === today;
+
+  React.useEffect(() => {
+    if (isCurrent) return;
+    // Deliberately not keyed on likedIds — a new like must never re-roll the day.
+    const ids = getDropCandidates(state.likedIds).map((user) => user.id);
+    setState({ ...state, drop: { date: today, ids } });
+  }, [isCurrent, today]);
+
+  return React.useMemo(() => {
+    if (!isCurrent || !drop) return { drop: [], remaining: [] };
+
+    const users = drop.ids
+      .map((id) => getUserById(id))
+      .filter((user): user is DiscoverUser => user !== undefined);
+
+    return { drop: users, remaining: users.filter((user) => !likedIds.includes(user.id)) };
+  }, [isCurrent, drop, likedIds]);
 }
