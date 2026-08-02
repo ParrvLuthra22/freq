@@ -4,6 +4,7 @@ import { Pressable, View } from 'react-native';
 
 import { OnboardingStep } from '@/components/onboarding-step';
 import { Body } from '@/components/ui/typography';
+import { saveProfile } from '@/lib/store';
 import { cn } from '@/lib/utils';
 
 const OPTIONS = ['Date', 'Friends', 'Rooms'] as const;
@@ -16,7 +17,10 @@ export default function OnboardingLookingForScreen() {
       step="Step 4 of 4"
       question="What are you"
       accent="looking for?"
-      onNext={() => router.push('/onboarding/connect')}
+      onNext={() => {
+        saveProfile({ lookingFor: choice });
+        router.push('/onboarding/connect');
+      }}
       nextDisabled={!choice}>
       <View className="flex-row flex-wrap gap-3">
         {OPTIONS.map((option) => {

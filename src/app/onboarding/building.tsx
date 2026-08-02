@@ -11,6 +11,7 @@ import { Text } from '@/components/ui/text';
 import { Mono } from '@/components/ui/typography';
 import { getPersonality } from '@/lib/ai';
 import { getMe, setMeArchetype, type Archetype } from '@/lib/seed';
+import { completeOnboarding } from '@/lib/store';
 
 const STATUS_LINES = [
   'Reading 2am habits…',
@@ -103,7 +104,12 @@ export default function BuildingFreqScreen() {
               </Card>
             </Animated.View>
             <Animated.View entering={FadeIn.delay(400).duration(400)}>
-              <Button size="lg" onPress={() => router.replace('/freq')}>
+              <Button
+                size="lg"
+                onPress={() => {
+                  completeOnboarding();
+                  router.replace('/freq');
+                }}>
                 <Text>Enter FREQ</Text>
               </Button>
             </Animated.View>

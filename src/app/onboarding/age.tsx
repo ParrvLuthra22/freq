@@ -3,7 +3,7 @@ import * as React from 'react';
 import { TextInput } from 'react-native';
 
 import { OnboardingStep } from '@/components/onboarding-step';
-import { updateMe } from '@/lib/seed';
+import { saveProfile } from '@/lib/store';
 
 export default function OnboardingAgeScreen() {
   const [age, setAge] = React.useState('');
@@ -16,7 +16,7 @@ export default function OnboardingAgeScreen() {
       question="How old are"
       accent="you?"
       onNext={() => {
-        updateMe({ age: parsed });
+        saveProfile({ age: parsed });
         router.push('/onboarding/campus');
       }}
       nextDisabled={!valid}>

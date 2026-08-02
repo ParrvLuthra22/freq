@@ -10,6 +10,7 @@ import { Platform } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import { useAppFonts } from '@/hooks/use-app-fonts';
+import { hydrateStore } from '@/lib/store';
 import { NAV_THEME } from '@/lib/theme';
 
 SplashScreen.preventAutoHideAsync();
@@ -24,6 +25,13 @@ if (typeof window !== 'undefined' || Platform.OS !== 'web') {
 export default function RootLayout() {
   const [fontsLoaded, fontError] = useAppFonts();
   const { colorScheme: scheme } = useColorScheme();
+  const [storeReady, setStoreReady] = React.useState(false);
+
+  // Read persisted profile/likes before the first paint, so no screen ever
+  // flashes the seed defaults and then swaps to the real values.
+  React.useEffect(() => {
+    hydrateStore().finally(() => setStoreReady(true));
+  }, []);
 
   // Re-assert dark on mount too: the module-scope call above can be raced by
   // nativewind's own system-appearance sync, leaving background and text
@@ -33,12 +41,12 @@ export default function RootLayout() {
   }, []);
 
   React.useEffect(() => {
-    if (fontsLoaded || fontError) {
+    if ((fontsLoaded || fontError) && storeReady) {
       SplashScreen.hideAsync();
     }
-  }, [fontsLoaded, fontError]);
+  }, [fontsLoaded, fontError, storeReady]);
 
-  if (!fontsLoaded && !fontError) {
+  if ((!fontsLoaded && !fontError) || !storeReady) {
     return null;
   }
 

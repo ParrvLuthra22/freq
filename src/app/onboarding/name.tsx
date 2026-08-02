@@ -3,7 +3,7 @@ import * as React from 'react';
 import { TextInput } from 'react-native';
 
 import { OnboardingStep } from '@/components/onboarding-step';
-import { updateMe } from '@/lib/seed';
+import { saveProfile } from '@/lib/store';
 
 export default function OnboardingNameScreen() {
   const [name, setName] = React.useState('');
@@ -14,7 +14,7 @@ export default function OnboardingNameScreen() {
       question="What should we"
       accent="call you?"
       onNext={() => {
-        updateMe({ name: name.trim() });
+        saveProfile({ name: name.trim() });
         router.push('/onboarding/age');
       }}
       nextDisabled={name.trim().length === 0}>
