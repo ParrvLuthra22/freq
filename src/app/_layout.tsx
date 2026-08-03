@@ -33,9 +33,11 @@ export default function RootLayout() {
     hydrateStore().finally(() => setStoreReady(true));
   }, []);
 
-  // Re-assert dark on mount too: the module-scope call above can be raced by
-  // nativewind's own system-appearance sync, leaving background and text
-  // resolved from different schemes for a frame (or longer, on native).
+  // Belt and braces for platforms the native manifest does not cover. The real
+  // guarantee is UIUserInterfaceStyle=Dark in app.json/Info.plist: while iOS
+  // reported "automatic" it handed back the simulator's light appearance, and
+  // nativewind's system-appearance sync raced this call and won often enough to
+  // render whole screens in the cream palette.
   React.useEffect(() => {
     colorScheme.set('dark');
   }, []);
