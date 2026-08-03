@@ -98,7 +98,7 @@ function DiscoveryCard({ user }: DiscoveryCardProps) {
         <Card>
           <CardContent className="gap-4 pt-6">
             <View className="flex-row items-center gap-4">
-              <Avatar name={user.name} gradient={user.avatarGradient} size={64} />
+              <Avatar seed={user.id} name={user.name} size={64} />
               <View className="flex-1">
                 <Body className="text-lg">
                   {user.name}, {user.age}

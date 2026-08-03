@@ -65,7 +65,7 @@ export default function ChatByIdScreen() {
         <Pressable onPress={() => router.back()} className="px-2 py-1 active:opacity-60">
           <Mono>Back</Mono>
         </Pressable>
-        <Avatar name={user.name} gradient={user.avatarGradient} size={36} />
+        <Avatar seed={user.id} name={user.name} size={36} />
         <Body>{user.name}</Body>
       </View>
 

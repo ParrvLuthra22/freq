@@ -1,39 +1,21 @@
-import { LinearGradient } from 'expo-linear-gradient';
-
-import { Display } from '@/components/ui/typography';
+import { AlbumArt } from '@/components/ui/album-art';
 
 type AvatarProps = {
+  /** Stable identity for the artwork — a user id. Falls back to the name. */
+  seed?: string;
   name: string;
-  gradient: [string, string];
   size?: number;
   className?: string;
 };
 
-/** On-brand gradient placeholder avatar — no real faces. */
-function Avatar({ name, gradient, size = 64, className }: AvatarProps) {
-  const initial = name.trim().charAt(0).toUpperCase();
-
-  return (
-    // LinearGradient is a third-party native component — NativeWind drops its
-    // className styles whenever a style prop is also present, so alignment and
-    // sizing both have to travel through style (see onboarding-step.tsx).
-    <LinearGradient
-      colors={gradient}
-      start={{ x: 0, y: 0 }}
-      end={{ x: 1, y: 1 }}
-      className={className}
-      style={{
-        width: size,
-        height: size,
-        borderRadius: size / 2,
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}>
-      <Display style={{ fontSize: Math.round(size * 0.4) }} className="leading-none text-ivory">
-        {initial}
-      </Display>
-    </LinearGradient>
-  );
+/**
+ * A person's avatar: their sleeve, not their face.
+ *
+ * Thin wrapper over <AlbumArt> so every existing call site picks up the
+ * generated artwork, and so changing the visual later stays a one-file edit.
+ */
+function Avatar({ seed, name, size = 64, className }: AvatarProps) {
+  return <AlbumArt seed={seed ?? name} size={size} shape="circle" className={className} />;
 }
 
 export { Avatar };

@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import { ScrollView, View } from 'react-native';
+import { Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Avatar } from '@/components/ui/avatar';
@@ -28,7 +28,7 @@ export default function FreqScreen() {
     <SafeAreaView className="flex-1 bg-background">
       <ScrollView contentContainerClassName="gap-8 px-6 pb-16 pt-4">
         <View className="flex-row items-center gap-3">
-          <Avatar name={me.name} gradient={me.avatarGradient} size={48} />
+          <Avatar seed={me.id} name={me.name} size={48} />
           <View>
             <Body>
               {me.name}, {me.age}
@@ -54,6 +54,16 @@ export default function FreqScreen() {
             <Body className="text-sm">{me.currentFrequency}</Body>
           </View>
         </View>
+
+        <Pressable
+          onPress={() => router.push('/weekly')}
+          className="flex-row items-center justify-between rounded-2xl border border-accent bg-accent/10 px-4 py-4 active:opacity-70">
+          <View className="flex-1 gap-0.5 pr-3">
+            <Mono className="text-accent">The weekly drop</Mono>
+            <Body className="text-sm">Your week in sound — ready.</Body>
+          </View>
+          <Mono className="text-accent">Open →</Mono>
+        </Pressable>
 
         <Waveform />
 
