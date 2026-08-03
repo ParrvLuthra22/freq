@@ -10,7 +10,7 @@
     ],
     "archetype": {
       "name": "The Midnight Romantic",
-      "description": "Everything hits harder after midnight. Moody, intense, a little too online at 2am — and completely unbothered about it."
+      "description": "Everything hits harder after midnight. Moody, intense, a little too online at 2am \u2014 and completely unbothered about it."
     },
     "topArtists": [
       {
@@ -100,10 +100,10 @@
     ],
     "tags": [
       "shoegaze",
-      "late-night",
-      "melancholic",
+      "drone",
+      "slowcore",
       "dream pop",
-      "wistful"
+      "late-night"
     ],
     "energy": {
       "night": 90,
@@ -125,7 +125,7 @@
       ],
       "archetype": {
         "name": "The Main Character",
-        "description": "Every walk to the train is a tracking shot. Big, cinematic, a little dramatic — exactly as intended."
+        "description": "Every walk to the train is a tracking shot. Big, cinematic, a little dramatic \u2014 exactly as intended."
       },
       "topArtists": [
         {
@@ -210,12 +210,11 @@
         14
       ],
       "tags": [
-        "jangle pop",
-        "melancholic",
-        "lo-fi",
-        "yacht rock",
-        "hyperpop",
-        "soul"
+        "dream pop",
+        "ambient",
+        "shoegaze",
+        "slowcore",
+        "euphoric"
       ],
       "energy": {
         "night": 36,
@@ -242,12 +241,12 @@
         }
       },
       "matched": true,
-      "opener": "You have Thin Paper Walls in your top tracks too — I thought that one was just mine.",
+      "opener": "You have Thin Paper Walls in your top tracks too \u2014 I thought that one was just mine.",
       "chatThread": [
         {
           "id": "m1",
           "sender": "them",
-          "text": "You have Thin Paper Walls in your top tracks too — I thought that one was just mine.",
+          "text": "You have Thin Paper Walls in your top tracks too \u2014 I thought that one was just mine.",
           "sentAt": "2026-07-10T02:14:00-04:00"
         },
         {
@@ -265,7 +264,7 @@
         {
           "id": "m4",
           "sender": "me",
-          "text": "Never just you at 2am. That’s kind of the whole point of this app.",
+          "text": "Never just you at 2am. That\u2019s kind of the whole point of this app.",
           "sentAt": "2026-07-10T08:41:00-04:00"
         }
       ]
@@ -281,7 +280,7 @@
       ],
       "archetype": {
         "name": "The Crate Digger",
-        "description": "Finds the b-side before anyone else does. Taste as a treasure hunt — the deeper the cut, the better the story."
+        "description": "Finds the b-side before anyone else does. Taste as a treasure hunt \u2014 the deeper the cut, the better the story."
       },
       "topArtists": [
         {
@@ -366,11 +365,11 @@
         82
       ],
       "tags": [
-        "soul",
-        "sun-drenched",
-        "coastal",
-        "crate-dig",
-        "melancholic"
+        "dream pop",
+        "shoegaze",
+        "slowcore",
+        "drone",
+        "late-night"
       ],
       "energy": {
         "night": 71,
@@ -396,12 +395,12 @@
         }
       },
       "matched": true,
-      "opener": "You have Thin Paper Walls in your top tracks too — I thought that one was just mine.",
+      "opener": "You have Thin Paper Walls in your top tracks too \u2014 I thought that one was just mine.",
       "chatThread": [
         {
           "id": "m1",
           "sender": "them",
-          "text": "You have Thin Paper Walls in your top tracks too — I thought that one was just mine.",
+          "text": "You have Thin Paper Walls in your top tracks too \u2014 I thought that one was just mine.",
           "sentAt": "2026-07-10T02:14:00-04:00"
         },
         {
@@ -419,7 +418,7 @@
         {
           "id": "m4",
           "sender": "me",
-          "text": "Never just you at 2am. That’s kind of the whole point of this app.",
+          "text": "Never just you at 2am. That\u2019s kind of the whole point of this app.",
           "sentAt": "2026-07-10T08:41:00-04:00"
         }
       ]
@@ -435,7 +434,7 @@
       ],
       "archetype": {
         "name": "The Quiet Storm",
-        "description": "Understated on the surface, feeling everything underneath. The kind of taste you only notice once you’re paying attention."
+        "description": "Understated on the surface, feeling everything underneath. The kind of taste you only notice once you\u2019re paying attention."
       },
       "topArtists": [
         {
@@ -520,11 +519,11 @@
         10
       ],
       "tags": [
-        "post-punk",
-        "sun-drenched",
-        "crate-dig",
-        "hyperpop",
-        "slowcore"
+        "dream pop",
+        "slowcore",
+        "ambient",
+        "shoegaze",
+        "restless"
       ],
       "energy": {
         "night": 14,
@@ -549,12 +548,12 @@
         }
       },
       "matched": true,
-      "opener": "You have Thin Paper Walls in your top tracks too — I thought that one was just mine.",
+      "opener": "You have Thin Paper Walls in your top tracks too \u2014 I thought that one was just mine.",
       "chatThread": [
         {
           "id": "m1",
           "sender": "them",
-          "text": "You have Thin Paper Walls in your top tracks too — I thought that one was just mine.",
+          "text": "You have Thin Paper Walls in your top tracks too \u2014 I thought that one was just mine.",
           "sentAt": "2026-07-10T02:14:00-04:00"
         },
         {
@@ -572,7 +571,7 @@
         {
           "id": "m4",
           "sender": "me",
-          "text": "Never just you at 2am. That’s kind of the whole point of this app.",
+          "text": "Never just you at 2am. That\u2019s kind of the whole point of this app.",
           "sentAt": "2026-07-10T08:41:00-04:00"
         }
       ]
@@ -588,7 +587,7 @@
       ],
       "archetype": {
         "name": "The Method Actor",
-        "description": "Taste that shape-shifts with the mood — genre-hopping, never quite pinned down, always a little unpredictable."
+        "description": "Taste that shape-shifts with the mood \u2014 genre-hopping, never quite pinned down, always a little unpredictable."
       },
       "topArtists": [
         {
@@ -669,12 +668,11 @@
         88
       ],
       "tags": [
-        "slowcore",
-        "found-sound",
-        "hyperpop",
-        "crate-dig",
-        "bedroom pop",
-        "slow-burn"
+        "dream pop",
+        "surf",
+        "indie pop",
+        "ambient",
+        "late-night"
       ],
       "energy": {
         "night": 76,
@@ -711,7 +709,7 @@
       ],
       "archetype": {
         "name": "The Comeback Kid",
-        "description": "Replays the same fifteen songs like they owe rent. Nostalgia isn’t a phase, it’s a lifestyle — and a good one."
+        "description": "Replays the same fifteen songs like they owe rent. Nostalgia isn\u2019t a phase, it\u2019s a lifestyle \u2014 and a good one."
       },
       "topArtists": [
         {
@@ -792,12 +790,11 @@
         12
       ],
       "tags": [
-        "shoegaze",
-        "late-night",
-        "melancholic",
-        "jangle pop",
-        "wistful",
-        "ambient"
+        "dream pop",
+        "ambient",
+        "drone",
+        "lo-fi",
+        "restless"
       ],
       "energy": {
         "night": 9,
@@ -832,7 +829,7 @@
       ],
       "archetype": {
         "name": "The Slow Burn",
-        "description": "Patient, textural, in no rush. Likes a song that takes its time getting where it’s going."
+        "description": "Patient, textural, in no rush. Likes a song that takes its time getting where it\u2019s going."
       },
       "topArtists": [
         {
@@ -913,10 +910,11 @@
         17
       ],
       "tags": [
-        "shoegaze",
-        "jangle pop",
-        "soul",
-        "slowcore"
+        "dream pop",
+        "ambient",
+        "drone",
+        "field recording",
+        "restless"
       ],
       "energy": {
         "night": 36,
@@ -1032,11 +1030,11 @@
         10
       ],
       "tags": [
-        "late-night",
-        "crate-dig",
-        "shoegaze",
-        "hyperpop",
-        "wide-eyed"
+        "americana",
+        "ambient",
+        "dream pop",
+        "drone",
+        "euphoric"
       ],
       "energy": {
         "night": 36,
@@ -1071,7 +1069,7 @@
       ],
       "archetype": {
         "name": "The Midnight Romantic",
-        "description": "Everything hits harder after midnight. Moody, intense, a little too online at 2am — and completely unbothered about it."
+        "description": "Everything hits harder after midnight. Moody, intense, a little too online at 2am \u2014 and completely unbothered about it."
       },
       "topArtists": [
         {
@@ -1152,11 +1150,11 @@
         81
       ],
       "tags": [
-        "post-punk",
-        "nostalgic",
-        "dance-punk",
-        "bedroom pop",
-        "wistful"
+        "ambient",
+        "drone",
+        "dream pop",
+        "field recording",
+        "late-night"
       ],
       "energy": {
         "night": 92,
@@ -1192,7 +1190,7 @@
       ],
       "archetype": {
         "name": "The Crate Digger",
-        "description": "Finds the b-side before anyone else does. Taste as a treasure hunt — the deeper the cut, the better the story."
+        "description": "Finds the b-side before anyone else does. Taste as a treasure hunt \u2014 the deeper the cut, the better the story."
       },
       "topArtists": [
         {
@@ -1269,11 +1267,11 @@
         11
       ],
       "tags": [
-        "hyperpop",
-        "slowcore",
-        "wide-eyed",
+        "shoegaze",
+        "ambient",
         "dream pop",
-        "slow-burn"
+        "drone",
+        "wistful"
       ],
       "energy": {
         "night": 26,
@@ -1308,7 +1306,7 @@
       ],
       "archetype": {
         "name": "The Quiet Storm",
-        "description": "Understated on the surface, feeling everything underneath. The kind of taste you only notice once you’re paying attention."
+        "description": "Understated on the surface, feeling everything underneath. The kind of taste you only notice once you\u2019re paying attention."
       },
       "topArtists": [
         {
@@ -1393,12 +1391,11 @@
         91
       ],
       "tags": [
-        "hyperpop",
-        "jangle pop",
-        "nostalgic",
-        "post-punk",
-        "melancholic",
-        "dream pop"
+        "slowcore",
+        "shoegaze",
+        "synth pop",
+        "new wave",
+        "late-night"
       ],
       "energy": {
         "night": 75,
@@ -1433,7 +1430,7 @@
       ],
       "archetype": {
         "name": "The Midnight Romantic",
-        "description": "Everything hits harder after midnight. Moody, intense, a little too online at 2am — and completely unbothered about it."
+        "description": "Everything hits harder after midnight. Moody, intense, a little too online at 2am \u2014 and completely unbothered about it."
       },
       "topArtists": [
         {
@@ -1510,11 +1507,11 @@
         32
       ],
       "tags": [
-        "soul",
-        "melancholic",
-        "rainy-day",
-        "found-sound",
-        "lo-fi"
+        "synth pop",
+        "dream pop",
+        "indie pop",
+        "jangle pop",
+        "melancholic"
       ],
       "energy": {
         "night": 45,
@@ -1549,7 +1546,7 @@
       ],
       "archetype": {
         "name": "The Comeback Kid",
-        "description": "Replays the same fifteen songs like they owe rent. Nostalgia isn’t a phase, it’s a lifestyle — and a good one."
+        "description": "Replays the same fifteen songs like they owe rent. Nostalgia isn\u2019t a phase, it\u2019s a lifestyle \u2014 and a good one."
       },
       "topArtists": [
         {
@@ -1630,11 +1627,11 @@
         35
       ],
       "tags": [
-        "analog-warmth",
-        "wide-eyed",
         "ambient",
-        "rainy-day",
-        "found-sound"
+        "dream pop",
+        "indie pop",
+        "surf",
+        "melancholic"
       ],
       "energy": {
         "night": 36,
@@ -1746,12 +1743,11 @@
         28
       ],
       "tags": [
-        "melancholic",
-        "hyperpop",
-        "post-punk",
-        "bedroom pop",
-        "analog-warmth",
-        "soul"
+        "dream pop",
+        "ambient",
+        "surf",
+        "indie pop",
+        "euphoric"
       ],
       "energy": {
         "night": 43,
@@ -1867,11 +1863,11 @@
         84
       ],
       "tags": [
-        "lo-fi",
-        "shoegaze",
-        "post-punk",
-        "analog-warmth",
-        "soul"
+        "indie rock",
+        "slowcore",
+        "jangle pop",
+        "indie folk",
+        "late-night"
       ],
       "energy": {
         "night": 71,
@@ -1906,7 +1902,7 @@
       ],
       "archetype": {
         "name": "The Late Bloomer",
-        "description": "Just found a whole new sound and won’t stop talking about it. Exploratory, wide-eyed, refreshingly unjaded."
+        "description": "Just found a whole new sound and won\u2019t stop talking about it. Exploratory, wide-eyed, refreshingly unjaded."
       },
       "topArtists": [
         {
@@ -1979,11 +1975,10 @@
         85
       ],
       "tags": [
-        "slow-burn",
-        "rainy-day",
-        "coastal",
+        "lo-fi",
+        "pop",
+        "soul",
         "ambient",
-        "yacht rock",
         "late-night"
       ],
       "energy": {
@@ -2012,7 +2007,7 @@
       ],
       "archetype": {
         "name": "The Main Character",
-        "description": "Every walk to the train is a tracking shot. Big, cinematic, a little dramatic — exactly as intended."
+        "description": "Every walk to the train is a tracking shot. Big, cinematic, a little dramatic \u2014 exactly as intended."
       },
       "topArtists": [
         {
@@ -2093,10 +2088,11 @@
         35
       ],
       "tags": [
-        "wistful",
-        "hyperpop",
+        "dream pop",
+        "shoegaze",
+        "lo-fi",
         "bedroom pop",
-        "found-sound"
+        "euphoric"
       ],
       "energy": {
         "night": 27,
