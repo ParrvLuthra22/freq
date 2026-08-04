@@ -11,6 +11,16 @@ import { Text } from '@/components/ui/text';
 import { Mono } from '@/components/ui/typography';
 import { getMe, getUserById } from '@/lib/seed';
 
+/**
+ * Share card export.
+ *
+ * @deprecated v1-era screen. Its `pair` variant was reached from the sync moment,
+ * which v2 deleted, so only the solo variant is still linked (from `/weekly`).
+ * The v2 share surface hangs off the match reveal and the week hero instead.
+ *
+ * TODO(v2): re-point at the reveal + week hero, drop the `variant` param, and
+ * check `react-native-view-shot` degrades on web — web export is the deploy target.
+ */
 export default function ShareScreen() {
   const { variant, id } = useLocalSearchParams<{ variant?: string; id?: string }>();
   const isPair = variant === 'pair';

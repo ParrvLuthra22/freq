@@ -14,7 +14,7 @@ const MATCH_DELAY = 4200;
 
 export default function DiscoverScreen() {
   const { likedIds, passedIds } = usePersistedState();
-  const [flipSignal, setFlipSignal] = React.useState(0);
+  const [showOverlap, setShowOverlap] = React.useState(false);
 
   const deck = React.useMemo(
     () => getDeck([...likedIds, ...passedIds]),
@@ -53,6 +53,11 @@ export default function DiscoverScreen() {
   const top = deck[0];
   const visible = deck.slice(0, 3);
 
+  // A new card always arrives on its week face, never mid-flip from the last one.
+  React.useEffect(() => {
+    setShowOverlap(false);
+  }, [top?.id]);
+
   return (
     <SafeAreaView className="flex-1 bg-background">
       <View className="flex-row items-end justify-between gap-3 px-6 pb-4 pt-2">
@@ -82,7 +87,8 @@ export default function DiscoverScreen() {
                   key={user.id}
                   user={user}
                   depth={visible.indexOf(user)}
-                  flipSignal={user.id === top.id ? flipSignal : 0}
+                  showOverlap={user.id === top.id && showOverlap}
+                  onToggleFace={() => setShowOverlap((v) => !v)}
                   onDecide={(decision) => decide(user.id, decision)}
                 />
               ))}
@@ -100,7 +106,7 @@ export default function DiscoverScreen() {
               <Mono style={{ color: '#100F0D' }}>LIKE</Mono>
             </Pressable>
             <Pressable
-              onPress={() => setFlipSignal((n) => n + 1)}
+              onPress={() => setShowOverlap((v) => !v)}
               className="h-14 w-14 items-center justify-center rounded-full border border-border active:opacity-70">
               <Mono>FLIP</Mono>
             </Pressable>

@@ -1,7 +1,8 @@
 import { BlurView } from 'expo-blur';
+import { router } from 'expo-router';
 import { useColorScheme } from 'nativewind';
 import * as React from 'react';
-import { View } from 'react-native';
+import { Pressable, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
   interpolate,
@@ -31,8 +32,13 @@ type SwipeCardProps = {
   /** 0 is the top card. Cards behind it are scaled down and inert. */
   depth: number;
   onDecide: (decision: Decision) => void;
-  /** Drives the flip from the deck's buttons as well as a tap. */
-  flipSignal?: number;
+  /**
+   * Which face is showing. Controlled by the deck so the FLIP button and a tap
+   * on the card drive one piece of state — an internal toggle fed by a "signal"
+   * prop needed two presses to take effect.
+   */
+  showOverlap: boolean;
+  onToggleFace: () => void;
 };
 
 /**
@@ -42,19 +48,13 @@ type SwipeCardProps = {
  * them — the avatar is their sleeve behind a blur until a swipe is mutual, which
  * is the whole premise of v2.
  */
-function SwipeCard({ user, depth, onDecide, flipSignal = 0 }: SwipeCardProps) {
+function SwipeCard({ user, depth, onDecide, showOverlap, onToggleFace }: SwipeCardProps) {
   const { colorScheme } = useColorScheme();
   const theme = THEME[colorScheme ?? 'dark'];
   const isTop = depth === 0;
 
-  const [showOverlap, setShowOverlap] = React.useState(false);
   const translateX = useSharedValue(0);
   const translateY = useSharedValue(0);
-
-  // A flip requested by the deck's FLIP button, not by tapping the card itself.
-  React.useEffect(() => {
-    if (flipSignal > 0) setShowOverlap((v) => !v);
-  }, [flipSignal]);
 
   const settle = React.useCallback(
     (decision: Decision) => {
@@ -86,12 +86,15 @@ function SwipeCard({ user, depth, onDecide, flipSignal = 0 }: SwipeCardProps) {
       }
     });
 
+  // Tap-to-flip only arms on the week face. The overlap face carries its own
+  // controls — flip back, and open the breakdown — and a card-wide tap gesture
+  // would race those pressables and fire both.
   const tap = Gesture.Tap()
-    .enabled(isTop)
+    .enabled(isTop && !showOverlap)
     .maxDistance(10)
     .onEnd(() => {
       'worklet';
-      runOnJS(setShowOverlap)(!showOverlap);
+      runOnJS(onToggleFace)();
     });
 
   const gesture = Gesture.Simultaneous(pan, Gesture.Exclusive(tap));
@@ -113,7 +116,7 @@ function SwipeCard({ user, depth, onDecide, flipSignal = 0 }: SwipeCardProps) {
   }));
 
   const content = showOverlap ? (
-    <OverlapFace user={user} />
+    <OverlapFace user={user} onFlipBack={onToggleFace} />
   ) : (
     <WeekFace user={user} theme={theme} />
   );
@@ -220,16 +223,24 @@ function WeekFace({ user, theme }: { user: DiscoverUser; theme: (typeof THEME)['
 }
 
 /** Face two: the actual overlap, computed rather than asserted. */
-function OverlapFace({ user }: { user: DiscoverUser }) {
+function OverlapFace({ user, onFlipBack }: { user: DiscoverUser; onFlipBack: () => void }) {
   return (
     <View className="flex-1 gap-3.5 p-5">
       <View className="flex-row items-center justify-between">
         <Mono>Your overlap</Mono>
-        <Mono className="text-accent">← Their week</Mono>
+        <Pressable onPress={onFlipBack} hitSlop={10} className="active:opacity-60">
+          <Mono className="text-accent">← Their week</Mono>
+        </Pressable>
       </View>
 
       <View className="flex-row items-center gap-4">
-        <FreqDial score={user.match.score} size={112} label="Freq" />
+        {/* The dial is the score, so it is also the way into how the score was made. */}
+        <Pressable
+          onPress={() => router.push(`/breakdown/${user.id}`)}
+          className="items-center gap-1 active:opacity-70">
+          <FreqDial score={user.match.score} size={112} label="Freq" />
+          <Mono className="text-accent">Why this score →</Mono>
+        </Pressable>
         <View className="flex-1 gap-1.5">
           <Display className="text-2xl leading-tight">
             {user.name}, {user.age}

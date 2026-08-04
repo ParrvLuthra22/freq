@@ -13,7 +13,16 @@ import { getMe } from '@/lib/seed';
 import { usePersistedState } from '@/lib/store';
 import { buildWeeklyDrop, formatHour } from '@/lib/weekly';
 
-/** The week in sound — a Wrapped-style moment built only from real numbers. */
+/**
+ * The week in sound — a Wrapped-style moment built only from real numbers.
+ *
+ * @deprecated v1-era screen. v2 replaces this with a "Your week" hero built
+ * around your artist of the week (`me.week`), not a stats recap. Still reachable
+ * from the You tab and still correct, so it stays until that lands.
+ *
+ * TODO(v2): replace with the artist-of-the-week hero, then delete this file and
+ * re-point the You tab's entry card at it.
+ */
 export default function WeeklyDropScreen() {
   const me = getMe();
   const { likedIds } = usePersistedState();

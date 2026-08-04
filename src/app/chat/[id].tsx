@@ -6,7 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Avatar } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
-import { Body, Mono } from '@/components/ui/typography';
+import { Body, Display, Mono } from '@/components/ui/typography';
 import { getIcebreakers } from '@/lib/ai';
 import { getMe, getUserById, type ChatMessage } from '@/lib/seed';
 import { cn } from '@/lib/utils';
@@ -75,7 +75,15 @@ export default function ChatByIdScreen() {
           <Mono>Back</Mono>
         </Pressable>
         <Avatar seed={user.id} name={user.name} size={36} />
-        <Body>{user.name}</Body>
+        <Body className="flex-1">{user.name}</Body>
+        {/* The score in the header doubles as the way into how it was computed. */}
+        <Pressable
+          onPress={() => router.push(`/breakdown/${user.id}`)}
+          hitSlop={8}
+          className="items-end px-1 active:opacity-60">
+          <Display className="text-xl text-accent">{user.match.score}</Display>
+          <Mono>Why →</Mono>
+        </Pressable>
       </View>
 
       <KeyboardAvoidingView
