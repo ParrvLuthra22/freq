@@ -261,39 +261,41 @@ export function scorePair(a: BaseProfile, b: BaseProfile, corpus: Corpus): PairS
 
   const tags = tagCosine(a.tags, b.tags);
   const rhythm = rhythmSimilarity(a.listeningHours, b.listeningHours);
-  const { bridges, candidates } = findBridges(a, b, corpus);
+  const { bridges } = findBridges(a, b, corpus);
 
   // Bridges are near-misses, so they saturate quickly — three strong adjacencies
   // is already a meaningful signal, and shouldn't rival a direct shared artist.
-  const bridgeStrength = clamp01(bridges.reduce((sum, br) => sum + br.strength, 0) / 3);
+  const adjacency = clamp01(bridges.reduce((sum, br) => sum + br.strength, 0) / 3);
+
+  /**
+   * Taste *connection*: what you share outright, plus how well the rest still
+   * reaches across.
+   *
+   * Measuring adjacency on its own inverted the component — the more two people
+   * genuinely shared, the less non-overlapping taste was left to bridge, so the
+   * strongest matches scored zero here and lost to weaker ones with more gaps.
+   * Framing it as connection means direct overlap can only ever help, and full
+   * overlap resolves to 1 rather than needing the weights renormalised.
+   */
+  const directShare =
+    a.topArtists.length === 0 ? 0 : artists.shared.length / a.topArtists.length;
+  const connection = clamp01(directShare + (1 - directShare) * adjacency);
 
   const rawComponents: Record<ComponentKey, number> = {
     artistOverlap: artists.value,
     trackOverlap: tracks.value,
     tagSimilarity: tags.value,
-    depthBridge: bridgeStrength,
+    depthBridge: connection,
     rhythmMatch: rhythm,
   };
 
-  // With no non-shared artists there is nothing left to bridge, so the component
-  // is undefined rather than zero. Scoring it zero would mean two identical
-  // profiles forfeit its weight outright and could never reach 100.
-  const applicable = (Object.keys(WEIGHTS) as ComponentKey[]).filter(
-    (key) => key !== 'depthBridge' || candidates > 0
-  );
-  const weightTotal = applicable.reduce((sum, key) => sum + WEIGHTS[key], 0);
-
-  const components: ScoredComponent[] = applicable.map((key) => {
-    // Redistribute proportionally so the components in play still span 0–100.
-    const weight = WEIGHTS[key] / weightTotal;
-    return {
-      key,
-      label: COMPONENT_LABELS[key],
-      value: rawComponents[key],
-      weight,
-      contribution: rawComponents[key] * weight * 100,
-    };
-  });
+  const components: ScoredComponent[] = (Object.keys(WEIGHTS) as ComponentKey[]).map((key) => ({
+    key,
+    label: COMPONENT_LABELS[key],
+    value: rawComponents[key],
+    weight: WEIGHTS[key],
+    contribution: rawComponents[key] * WEIGHTS[key] * 100,
+  }));
 
   const composite = components.reduce((sum, c) => sum + c.contribution, 0) / 100;
   const score = Math.round(calibrate(composite) * 100);

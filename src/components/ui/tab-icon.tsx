@@ -9,7 +9,7 @@ import Svg, { Circle, Path } from 'react-native-svg';
  * match the editorial line weight used across the app.
  */
 
-export type TabIconName = 'discover' | 'freq' | 'sync';
+export type TabIconName = 'discover' | 'freq' | 'sync' | 'likes';
 
 type TabIconProps = {
   name: TabIconName;
@@ -61,6 +61,22 @@ function TabIcon({ name, color, size = 24, focused = false }: TabIconProps) {
             fillOpacity={fillOpacity}
           />
           <Circle cx={12} cy={12} r={2.25} fill={color} />
+        </>
+      ) : null}
+
+      {name === 'likes' ? (
+        // A sleeve with someone already looking at it.
+        <>
+          <Circle
+            cx={11}
+            cy={13}
+            r={7.5}
+            stroke={color}
+            strokeWidth={1.5}
+            fill={fill}
+            fillOpacity={fillOpacity}
+          />
+          <Circle cx={19.5} cy={5.5} r={2.8} fill={color} />
         </>
       ) : null}
 

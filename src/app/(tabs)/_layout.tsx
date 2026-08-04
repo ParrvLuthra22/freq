@@ -5,7 +5,7 @@ import type { ColorValue } from 'react-native';
 import { TabIcon, type TabIconName } from '@/components/ui/tab-icon';
 import { THEME } from '@/lib/theme';
 
-/** Tabs render an icon each — declared once so the three screens stay identical in shape. */
+/** Tabs render an icon each — declared once so the four screens stay identical in shape. */
 const icon =
   (name: TabIconName) =>
   ({ color, focused }: { color: ColorValue; focused: boolean }) => (
@@ -35,8 +35,9 @@ export default function TabsLayout() {
         name="discover"
         options={{ title: 'Discover', tabBarIcon: icon('discover') }}
       />
-      <Tabs.Screen name="freq" options={{ title: 'FREQ', tabBarIcon: icon('freq') }} />
-      <Tabs.Screen name="sync" options={{ title: 'Sync', tabBarIcon: icon('sync') }} />
+      <Tabs.Screen name="chats" options={{ title: 'Chats', tabBarIcon: icon('sync') }} />
+      <Tabs.Screen name="likes" options={{ title: 'Likes', tabBarIcon: icon('likes') }} />
+      <Tabs.Screen name="freq" options={{ title: 'You', tabBarIcon: icon('freq') }} />
     </Tabs>
   );
 }

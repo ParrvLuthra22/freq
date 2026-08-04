@@ -7,13 +7,16 @@ export type Track = { title: string; artist: string };
 export type Archetype = { name: string; description: string };
 export type Energy = { night: number; emotional: number; highEnergy: number; exploratory: number };
 
+/** The artist someone is meeting people through this week — the face of their card. */
+export type WeekPick = { artist: string; plays: number; stat: string };
+
 export type BaseProfile = {
   id: string;
   name: string;
   age: number;
   campus: string;
-  avatarGradient: [string, string];
   archetype: Archetype;
+  week: WeekPick;
   topArtists: Artist[];
   topTracks: Track[];
   /** 24-bin histogram, one entry per hour of day, 0–100. */
@@ -22,7 +25,11 @@ export type BaseProfile = {
   energy: Energy;
 };
 
-export type Me = BaseProfile & { currentFrequency: string };
+export type Me = BaseProfile & {
+  currentFrequency: string;
+  /** Tracks you can offer in a Blind Swap. */
+  swapPicks: string[];
+};
 
 export type Match = {
   score: number;
@@ -33,11 +40,26 @@ export type Match = {
 
 export type ChatMessage = { id: string; sender: 'me' | 'them'; text: string; sentAt: string };
 
+/** A chip on the overlap face of a card — an artist or a genre, flagged when rare. */
+export type Chip = { label: string; rare: boolean };
+
 export type DiscoverUser = BaseProfile & {
   match: Match;
-  matched?: boolean;
-  opener?: string;
-  chatThread?: ChatMessage[];
+  /** They already swiped right on you, so liking back matches instantly. */
+  likedYou: boolean;
+  /** Editorial copy authored per person — the algorithm supplies the numbers, not the voice. */
+  reason: string;
+  reasonSoft: string;
+  chips: Chip[];
+  line: string;
+  flirt: string;
+  song: Track | null;
+  hoursNote: string;
+  rarityNote: string;
+  quiz: { options: string[]; answer: string };
+  swap: { track: string; verdict: string };
+  takeAnswer: number;
+  thread: { sender: 'me' | 'them'; text: string }[];
 };
 
 type SeedData = { me: Me; users: DiscoverUser[] };
@@ -109,19 +131,14 @@ export function getUsers(): DiscoverUser[] {
   return seed.users.map(withLiveMatch).sort((a, b) => b.match.score - a.match.score);
 }
 
-/** How many people surface in a single day's drop. Scarcity is the point. */
-export const DROP_SIZE = 4;
-
 /**
- * The candidates for a fresh drop: your strongest frequencies that you have not
- * already reacted to. Selection leads with the best available rather than
- * rotating at random — a curated drop should open with your best match, not a
- * mediocre one that happened to land on today's index.
+ * The deck, strongest frequency first, minus anyone already decided on.
+ *
+ * Whether someone has been liked or passed is runtime state, so the caller
+ * supplies it — the seed knows who exists, not what you have done about them.
  */
-export function getDropCandidates(excludeIds: string[]): DiscoverUser[] {
-  return getUsers()
-    .filter((user) => !excludeIds.includes(user.id))
-    .slice(0, DROP_SIZE);
+export function getDeck(decidedIds: string[]): DiscoverUser[] {
+  return getUsers().filter((user) => !decidedIds.includes(user.id));
 }
 
 export function getUserById(id: string): DiscoverUser | undefined {
@@ -129,11 +146,7 @@ export function getUserById(id: string): DiscoverUser | undefined {
   return user ? withLiveMatch(user) : undefined;
 }
 
-export function getMatchedUsers(): DiscoverUser[] {
-  return seed.users.filter((u) => u.matched).map(withLiveMatch);
-}
-
-/** The user shown on the Sync tab and used as the default demo match. */
-export function getDemoMatch(): DiscoverUser {
-  return getMatchedUsers()[0] ?? seed.users[0];
+/** The people who swiped right on you before you ever saw them. */
+export function getAdmirers(): DiscoverUser[] {
+  return getUsers().filter((user) => user.likedYou);
 }

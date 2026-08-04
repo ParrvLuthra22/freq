@@ -1,45 +1,46 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as React from 'react';
 
-import {
-  getDropCandidates,
-  getUserById,
-  updateMe,
-  type DiscoverUser,
-  type Me,
-} from '@/lib/seed';
+import { getUserById, updateMe, type DiscoverUser, type Me } from '@/lib/seed';
 
 /**
- * Local persistence for everything the user actually creates: their profile,
- * who they liked, and how far through onboarding they got.
+ * Local persistence for everything the user actually creates: their profile, who
+ * they swiped on, who it became mutual with, and what they have not read yet.
  *
  * Deliberately a tiny hand-rolled store rather than a state library — the shape
  * is small, and this keeps the app dependency-free and Expo Go safe. Writes go
- * through `persist()`, which is fire-and-forget so no interaction ever waits on
- * disk.
+ * through `persist()`, which is fire-and-forget so no gesture ever waits on disk.
  */
 
-const STORAGE_KEY = 'freq:state:v1';
+const STORAGE_KEY = 'freq:state:v2';
 
 export type ProfileDraft = Pick<Me, 'name' | 'age' | 'campus'> & {
   lookingFor: string | null;
 };
 
-/** Today's drop, frozen once chosen so it cannot reshuffle underneath the user. */
-export type Drop = { date: string; ids: string[] };
-
 export type PersistedState = {
   profile: Partial<ProfileDraft>;
-  likedIds: string[];
   onboarded: boolean;
-  drop: Drop | null;
+  /** Everyone you swiped right on, matched or not. */
+  likedIds: string[];
+  /** Everyone you swiped left on — they do not come back. */
+  passedIds: string[];
+  /** Mutual: you both swiped right. Only these unseal a face and open a thread. */
+  matchIds: string[];
+  /** Threads with something in them you have not opened. */
+  unreadIds: string[];
+  /** Which artist you chose to meet people through. Null falls back to your top. */
+  cardArtist: string | null;
 };
 
 const EMPTY: PersistedState = {
   profile: {},
-  likedIds: [],
   onboarded: false,
-  drop: null,
+  likedIds: [],
+  passedIds: [],
+  matchIds: [],
+  unreadIds: [],
+  cardArtist: null,
 };
 
 let state: PersistedState = EMPTY;
@@ -62,6 +63,8 @@ function setState(next: PersistedState): void {
   persist();
 }
 
+const arr = (value: unknown): string[] => (Array.isArray(value) ? value : []);
+
 /**
  * Load persisted state and re-apply the saved profile onto the seed.
  *
@@ -78,9 +81,12 @@ export async function hydrateStore(): Promise<void> {
     const parsed = JSON.parse(raw) as Partial<PersistedState>;
     state = {
       profile: parsed.profile ?? {},
-      likedIds: Array.isArray(parsed.likedIds) ? parsed.likedIds : [],
       onboarded: parsed.onboarded === true,
-      drop: parsed.drop ?? null,
+      likedIds: arr(parsed.likedIds),
+      passedIds: arr(parsed.passedIds),
+      matchIds: arr(parsed.matchIds),
+      unreadIds: arr(parsed.unreadIds),
+      cardArtist: parsed.cardArtist ?? null,
     };
 
     // Push the saved identity back into the seed profile so every screen that
@@ -114,21 +120,52 @@ export function completeOnboarding(): void {
   setState({ ...state, onboarded: true });
 }
 
-export function toggleLike(userId: string): void {
-  const liked = state.likedIds.includes(userId);
+export function setCardArtist(artist: string): void {
+  setState({ ...state, cardArtist: artist });
+}
+
+/** Swiped left. They leave the deck and do not return. */
+export function pass(userId: string): void {
+  if (state.passedIds.includes(userId)) return;
+  setState({ ...state, passedIds: [...state.passedIds, userId] });
+}
+
+/**
+ * Swiped right.
+ *
+ * Returns whether it matched immediately — true when they had already swiped
+ * right on you. Everyone else stays pending until `confirmMatch` lands, which
+ * the deck delays deliberately: the wait is the point.
+ */
+export function like(userId: string): boolean {
+  const user = getUserById(userId);
+  const mutual = user?.likedYou === true;
+
   setState({
     ...state,
-    likedIds: liked
-      ? state.likedIds.filter((id) => id !== userId)
-      : [...state.likedIds, userId],
+    likedIds: state.likedIds.includes(userId) ? state.likedIds : [...state.likedIds, userId],
+    matchIds: mutual && !state.matchIds.includes(userId) ? [...state.matchIds, userId] : state.matchIds,
+  });
+
+  return mutual;
+}
+
+/** A pending like came back mutual — used for the delayed match. */
+export function confirmMatch(userId: string): void {
+  if (state.matchIds.includes(userId)) return;
+  setState({
+    ...state,
+    matchIds: [...state.matchIds, userId],
+    unreadIds: state.unreadIds.includes(userId) ? state.unreadIds : [...state.unreadIds, userId],
   });
 }
 
-export function isLiked(userId: string): boolean {
-  return state.likedIds.includes(userId);
+export function markRead(userId: string): void {
+  if (!state.unreadIds.includes(userId)) return;
+  setState({ ...state, unreadIds: state.unreadIds.filter((id) => id !== userId) });
 }
 
-/** Wipe everything — used by the settings "start over" affordance. */
+/** Wipe everything — used by the "start over" affordance. */
 export function resetStore(): void {
   setState({ ...EMPTY });
 }
@@ -147,40 +184,20 @@ export function usePersistedState(): PersistedState {
   return React.useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
 }
 
-/** Convenience selector for the liked set. */
-export function useLikedIds(): string[] {
-  return usePersistedState().likedIds;
+/** Everyone you have matched with, strongest frequency first. */
+export function useMatches(): DiscoverUser[] {
+  const { matchIds } = usePersistedState();
+  return React.useMemo(
+    () =>
+      matchIds
+        .map((id) => getUserById(id))
+        .filter((user): user is DiscoverUser => user !== undefined)
+        .sort((a, b) => b.match.score - a.match.score),
+    [matchIds]
+  );
 }
 
-const todayKey = () => new Date().toISOString().slice(0, 10);
-
-/**
- * Today's drop, and what is left of it.
- *
- * The set is chosen once per day and then frozen: reacting to someone spends
- * them from the drop rather than pulling a replacement in. That finiteness is
- * the product — you get a considered handful, not a feed that refills as fast
- * as you can empty it.
- */
-export function useDailyDrop(): { drop: DiscoverUser[]; remaining: DiscoverUser[] } {
-  const { likedIds, drop } = usePersistedState();
-  const today = todayKey();
-  const isCurrent = drop?.date === today;
-
-  React.useEffect(() => {
-    if (isCurrent) return;
-    // Deliberately not keyed on likedIds — a new like must never re-roll the day.
-    const ids = getDropCandidates(state.likedIds).map((user) => user.id);
-    setState({ ...state, drop: { date: today, ids } });
-  }, [isCurrent, today]);
-
-  return React.useMemo(() => {
-    if (!isCurrent || !drop) return { drop: [], remaining: [] };
-
-    const users = drop.ids
-      .map((id) => getUserById(id))
-      .filter((user): user is DiscoverUser => user !== undefined);
-
-    return { drop: users, remaining: users.filter((user) => !likedIds.includes(user.id)) };
-  }, [isCurrent, drop, likedIds]);
+/** True once a face has earned the right to be shown. */
+export function isUnsealed(userId: string): boolean {
+  return state.matchIds.includes(userId);
 }

@@ -168,10 +168,17 @@ type AlbumArtProps = {
   size?: number;
   /** 'circle' for avatars, 'square' for sleeve-style hero art. */
   shape?: 'circle' | 'square';
+  /**
+   * Stretch to the container's width instead of a fixed size, staying square.
+   * `size` sets pixels through an inline style, which NativeWind's className
+   * cannot override — so filling a parent needs its own mode rather than a
+   * `w-full` that silently loses.
+   */
+  fill?: boolean;
   className?: string;
 };
 
-function AlbumArt({ seed, size = 64, shape = 'circle', className }: AlbumArtProps) {
+function AlbumArt({ seed, size = 64, shape = 'circle', fill = false, className }: AlbumArtProps) {
   const { motif, fg, bg, accent, rand } = React.useMemo(() => {
     const h = hashSeed(seed);
     const random = makeRandom(h);
@@ -189,8 +196,10 @@ function AlbumArt({ seed, size = 64, shape = 'circle', className }: AlbumArtProp
   const clipId = `clip-${hashSeed(seed)}`;
 
   return (
-    <View className={className} style={{ width: size, height: size }}>
-      <Svg width={size} height={size} viewBox="0 0 100 100">
+    <View
+      className={className}
+      style={fill ? { width: '100%', aspectRatio: 1 } : { width: size, height: size }}>
+      <Svg width="100%" height="100%" viewBox="0 0 100 100">
         <Defs>
           <ClipPath id={clipId}>
             {shape === 'circle' ? (

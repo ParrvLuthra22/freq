@@ -2,2112 +2,1113 @@
   "me": {
     "id": "me",
     "name": "Alex",
-    "age": 24,
+    "age": 23,
     "campus": "NYU",
-    "avatarGradient": [
-      "#E6A99E",
-      "#100F0D"
-    ],
     "archetype": {
       "name": "The Midnight Romantic",
-      "description": "Everything hits harder after midnight. Moody, intense, a little too online at 2am \u2014 and completely unbothered about it."
+      "description": "You save your best listening for the hours nobody is watching — slowcore, ambient, and one loud record you refuse to explain."
+    },
+    "week": {
+      "artist": "Grouper",
+      "plays": 47,
+      "stat": "47 PLAYS · YOUR HIGHEST YET"
     },
     "topArtists": [
       {
-        "name": "Vellum",
-        "rank": 12
-      },
-      {
-        "name": "Slow Static",
-        "rank": 15
-      },
-      {
-        "name": "Orbit Debris",
-        "rank": 9
-      },
-      {
-        "name": "Field Recordings Vol. 2",
+        "name": "Grouper",
         "rank": 8
       },
       {
-        "name": "Nightbloom",
-        "rank": 68
+        "name": "Duster",
+        "rank": 14
       },
       {
-        "name": "The Coastline",
-        "rank": 81
+        "name": "Alex G",
+        "rank": 22
       },
       {
-        "name": "Halogen Hearts",
-        "rank": 58
+        "name": "Adrianne Lenker",
+        "rank": 27
       },
       {
-        "name": "Dial Tone Choir",
-        "rank": 41
+        "name": "Yves Tumor",
+        "rank": 31
+      },
+      {
+        "name": "Cocteau Twins",
+        "rank": 44
+      },
+      {
+        "name": "Burial",
+        "rank": 52
+      },
+      {
+        "name": "Fiona Apple",
+        "rank": 61
       }
     ],
     "topTracks": [
       {
-        "title": "Thin Paper Walls",
-        "artist": "Vellum"
+        "title": "Heavy Water / I’d Rather Be Sleeping",
+        "artist": "Grouper"
       },
       {
-        "title": "Low Orbit",
-        "artist": "Slow Static"
+        "title": "Cover the Windows and the Walls",
+        "artist": "Grouper"
       },
       {
-        "title": "Debris Waltz",
-        "artist": "Orbit Debris"
+        "title": "Inside Out",
+        "artist": "Duster"
       },
       {
-        "title": "Field Recording No. 4",
-        "artist": "Field Recordings Vol. 2"
+        "title": "Constellations",
+        "artist": "Duster"
       },
       {
-        "title": "2 A.M. In Reverse",
-        "artist": "Nightbloom"
+        "title": "Sandy",
+        "artist": "Alex G"
       },
       {
-        "title": "Salt & Neon",
-        "artist": "The Coastline"
+        "title": "Gretel",
+        "artist": "Alex G"
+      },
+      {
+        "title": "Anything",
+        "artist": "Adrianne Lenker"
       }
     ],
     "listeningHours": [
+      62,
+      88,
       100,
-      100,
-      100,
-      67,
-      35,
-      14,
-      10,
-      10,
-      11,
+      92,
+      70,
+      40,
       18,
-      15,
-      16,
-      15,
-      16,
-      13,
       10,
+      8,
+      9,
+      12,
       16,
-      16,
-      16,
-      17,
-      15,
-      33,
-      51,
-      89
+      20,
+      24,
+      28,
+      34,
+      42,
+      50,
+      58,
+      64,
+      70,
+      76,
+      84,
+      92
     ],
     "tags": [
-      "shoegaze",
-      "drone",
       "slowcore",
-      "dream pop",
+      "lo-fi",
+      "folk",
+      "ambient",
+      "shoegaze",
       "late-night"
     ],
     "energy": {
-      "night": 90,
-      "emotional": 67,
-      "highEnergy": 35,
-      "exploratory": 34
+      "night": 88,
+      "emotional": 79,
+      "highEnergy": 41,
+      "exploratory": 72
     },
-    "currentFrequency": "Rotating slower, sadder Cassette Fog deep cuts on repeat since Tuesday."
+    "currentFrequency": "Rotating slower, sadder Grouper deep cuts on repeat since Tuesday.",
+    "swapPicks": [
+      "Heavy Water / I’d Rather Be Sleeping — Grouper",
+      "Inside Out — Duster",
+      "Sandy — Alex G"
+    ]
   },
   "users": [
     {
-      "id": "u4",
+      "id": "odessa",
       "name": "Odessa",
-      "age": 27,
+      "age": 23,
       "campus": "NYU",
-      "avatarGradient": [
-        "#C9B79C",
-        "#726A5E"
-      ],
       "archetype": {
-        "name": "The Main Character",
-        "description": "Every walk to the train is a tracking shot. Big, cinematic, a little dramatic \u2014 exactly as intended."
+        "name": "The 3AM Archivist",
+        "description": "Keeps the hours nobody asks her to keep, and a library to match."
       },
+      "week": {
+        "artist": "Grouper",
+        "plays": 41,
+        "stat": "41 PLAYS · UP 3 THIS WEEK"
+      },
+      "likedYou": true,
       "topArtists": [
         {
-          "name": "Vellum",
-          "rank": 12
-        },
-        {
-          "name": "Field Recordings Vol. 2",
+          "name": "Grouper",
           "rank": 8
         },
         {
-          "name": "Nightbloom",
-          "rank": 68
+          "name": "Duster",
+          "rank": 14
         },
         {
-          "name": "Velvet Recession",
-          "rank": 88
-        },
-        {
-          "name": "Dial Tone Choir",
-          "rank": 41
-        },
-        {
-          "name": "Salt Lung",
-          "rank": 38
-        },
-        {
-          "name": "Slow Static",
-          "rank": 15
-        }
-      ],
-      "topTracks": [
-        {
-          "title": "Thin Paper Walls",
-          "artist": "Vellum"
-        },
-        {
-          "title": "Salt Lung",
-          "artist": "Salt Lung"
-        },
-        {
-          "title": "Recession Waltz",
-          "artist": "Velvet Recession"
-        },
-        {
-          "title": "Dial Tone",
-          "artist": "Dial Tone Choir"
-        },
-        {
-          "title": "Low Orbit",
-          "artist": "Slow Static"
-        },
-        {
-          "title": "Field Recording No. 4",
-          "artist": "Field Recordings Vol. 2"
-        }
-      ],
-      "listeningHours": [
-        9,
-        10,
-        17,
-        15,
-        13,
-        12,
-        11,
-        11,
-        15,
-        9,
-        16,
-        30,
-        70,
-        100,
-        100,
-        100,
-        91,
-        52,
-        29,
-        15,
-        18,
-        17,
-        12,
-        14
-      ],
-      "tags": [
-        "dream pop",
-        "ambient",
-        "shoegaze",
-        "slowcore",
-        "euphoric"
-      ],
-      "energy": {
-        "night": 36,
-        "emotional": 46,
-        "highEnergy": 50,
-        "exploratory": 37
-      },
-      "match": {
-        "score": 97,
-        "reasons": [
-          "3 rare shared artists",
-          "both into melancholic"
-        ],
-        "sharedArtists": [
-          "Vellum",
-          "Field Recordings Vol. 2",
-          "Nightbloom",
-          "Dial Tone Choir",
-          "Slow Static"
-        ],
-        "sharedSong": {
-          "title": "Thin Paper Walls",
-          "artist": "Vellum"
-        }
-      },
-      "matched": true,
-      "opener": "You have Thin Paper Walls in your top tracks too \u2014 I thought that one was just mine.",
-      "chatThread": [
-        {
-          "id": "m1",
-          "sender": "them",
-          "text": "You have Thin Paper Walls in your top tracks too \u2014 I thought that one was just mine.",
-          "sentAt": "2026-07-10T02:14:00-04:00"
-        },
-        {
-          "id": "m2",
-          "sender": "me",
-          "text": "Wait, no way. Yeah, Vellum has been on loop over here too.",
-          "sentAt": "2026-07-10T02:16:00-04:00"
-        },
-        {
-          "id": "m3",
-          "sender": "them",
-          "text": "Okay so it's not just me. That's reassuring, honestly.",
-          "sentAt": "2026-07-10T02:19:00-04:00"
-        },
-        {
-          "id": "m4",
-          "sender": "me",
-          "text": "Never just you at 2am. That\u2019s kind of the whole point of this app.",
-          "sentAt": "2026-07-10T08:41:00-04:00"
-        }
-      ]
-    },
-    {
-      "id": "u2",
-      "name": "Marlowe",
-      "age": 25,
-      "campus": "NYU",
-      "avatarGradient": [
-        "#C67E6F",
-        "#9C7C4E"
-      ],
-      "archetype": {
-        "name": "The Crate Digger",
-        "description": "Finds the b-side before anyone else does. Taste as a treasure hunt \u2014 the deeper the cut, the better the story."
-      },
-      "topArtists": [
-        {
-          "name": "Vellum",
-          "rank": 12
-        },
-        {
-          "name": "Slow Static",
-          "rank": 15
-        },
-        {
-          "name": "Dial Tone Choir",
-          "rank": 41
-        },
-        {
-          "name": "The Understudies",
-          "rank": 29
-        },
-        {
-          "name": "Tender Static",
-          "rank": 33
-        },
-        {
-          "name": "The Quiet Ones",
-          "rank": 20
-        },
-        {
-          "name": "Cassette Fog",
+          "name": "Alex G",
           "rank": 22
         },
         {
-          "name": "Velvet Recession",
-          "rank": 88
-        }
-      ],
-      "topTracks": [
-        {
-          "title": "Thin Paper Walls",
-          "artist": "Vellum"
+          "name": "Slowdive",
+          "rank": 48
         },
         {
-          "title": "Static Bloom",
-          "artist": "Cassette Fog"
-        },
-        {
-          "title": "The Quiet Ones",
-          "artist": "The Quiet Ones"
-        },
-        {
-          "title": "Understudy's Lament",
-          "artist": "The Understudies"
-        },
-        {
-          "title": "Static Tenderness",
-          "artist": "Tender Static"
-        }
-      ],
-      "listeningHours": [
-        100,
-        100,
-        100,
-        67,
-        34,
-        14,
-        11,
-        16,
-        12,
-        16,
-        9,
-        15,
-        10,
-        9,
-        16,
-        10,
-        9,
-        15,
-        8,
-        14,
-        17,
-        36,
-        50,
-        82
-      ],
-      "tags": [
-        "dream pop",
-        "shoegaze",
-        "slowcore",
-        "drone",
-        "late-night"
-      ],
-      "energy": {
-        "night": 71,
-        "emotional": 44,
-        "highEnergy": 31,
-        "exploratory": 60
-      },
-      "match": {
-        "score": 93,
-        "reasons": [
-          "2 rare shared artists",
-          "both late-night listeners",
-          "both into melancholic"
-        ],
-        "sharedArtists": [
-          "Vellum",
-          "Slow Static",
-          "Dial Tone Choir"
-        ],
-        "sharedSong": {
-          "title": "Thin Paper Walls",
-          "artist": "Vellum"
-        }
-      },
-      "matched": true,
-      "opener": "You have Thin Paper Walls in your top tracks too \u2014 I thought that one was just mine.",
-      "chatThread": [
-        {
-          "id": "m1",
-          "sender": "them",
-          "text": "You have Thin Paper Walls in your top tracks too \u2014 I thought that one was just mine.",
-          "sentAt": "2026-07-10T02:14:00-04:00"
-        },
-        {
-          "id": "m2",
-          "sender": "me",
-          "text": "Wait, no way. Yeah, Vellum has been on loop over here too.",
-          "sentAt": "2026-07-10T02:16:00-04:00"
-        },
-        {
-          "id": "m3",
-          "sender": "them",
-          "text": "Okay so it's not just me. That's reassuring, honestly.",
-          "sentAt": "2026-07-10T02:19:00-04:00"
-        },
-        {
-          "id": "m4",
-          "sender": "me",
-          "text": "Never just you at 2am. That\u2019s kind of the whole point of this app.",
-          "sentAt": "2026-07-10T08:41:00-04:00"
-        }
-      ]
-    },
-    {
-      "id": "u5",
-      "name": "Callum",
-      "age": 25,
-      "campus": "NYU",
-      "avatarGradient": [
-        "#E6A99E",
-        "#1B1815"
-      ],
-      "archetype": {
-        "name": "The Quiet Storm",
-        "description": "Understated on the surface, feeling everything underneath. The kind of taste you only notice once you\u2019re paying attention."
-      },
-      "topArtists": [
-        {
-          "name": "Vellum",
-          "rank": 12
-        },
-        {
-          "name": "Nightbloom",
-          "rank": 68
-        },
-        {
-          "name": "Dial Tone Choir",
-          "rank": 41
-        },
-        {
-          "name": "Six Cent Sun",
-          "rank": 24
-        },
-        {
-          "name": "Field Recordings Vol. 2",
-          "rank": 8
-        },
-        {
-          "name": "Motel Radio",
-          "rank": 76
-        },
-        {
-          "name": "Gray Matinee",
-          "rank": 26
-        }
-      ],
-      "topTracks": [
-        {
-          "title": "Thin Paper Walls",
-          "artist": "Vellum"
-        },
-        {
-          "title": "2 A.M. In Reverse",
-          "artist": "Nightbloom"
-        },
-        {
-          "title": "Field Recording No. 4",
-          "artist": "Field Recordings Vol. 2"
-        },
-        {
-          "title": "Matinee",
-          "artist": "Gray Matinee"
-        },
-        {
-          "title": "Six Cent Sun",
-          "artist": "Six Cent Sun"
-        },
-        {
-          "title": "Dial Tone",
-          "artist": "Dial Tone Choir"
-        }
-      ],
-      "listeningHours": [
-        18,
-        8,
-        10,
-        9,
-        13,
-        36,
-        96,
-        100,
-        97,
-        39,
-        16,
-        14,
-        11,
-        12,
-        17,
-        17,
-        9,
-        16,
-        17,
-        17,
-        10,
-        16,
-        9,
-        10
-      ],
-      "tags": [
-        "dream pop",
-        "slowcore",
-        "ambient",
-        "shoegaze",
-        "restless"
-      ],
-      "energy": {
-        "night": 14,
-        "emotional": 48,
-        "highEnergy": 21,
-        "exploratory": 25
-      },
-      "match": {
-        "score": 90,
-        "reasons": [
-          "2 rare shared artists"
-        ],
-        "sharedArtists": [
-          "Vellum",
-          "Nightbloom",
-          "Dial Tone Choir",
-          "Field Recordings Vol. 2"
-        ],
-        "sharedSong": {
-          "title": "Thin Paper Walls",
-          "artist": "Vellum"
-        }
-      },
-      "matched": true,
-      "opener": "You have Thin Paper Walls in your top tracks too \u2014 I thought that one was just mine.",
-      "chatThread": [
-        {
-          "id": "m1",
-          "sender": "them",
-          "text": "You have Thin Paper Walls in your top tracks too \u2014 I thought that one was just mine.",
-          "sentAt": "2026-07-10T02:14:00-04:00"
-        },
-        {
-          "id": "m2",
-          "sender": "me",
-          "text": "Wait, no way. Yeah, Vellum has been on loop over here too.",
-          "sentAt": "2026-07-10T02:16:00-04:00"
-        },
-        {
-          "id": "m3",
-          "sender": "them",
-          "text": "Okay so it's not just me. That's reassuring, honestly.",
-          "sentAt": "2026-07-10T02:19:00-04:00"
-        },
-        {
-          "id": "m4",
-          "sender": "me",
-          "text": "Never just you at 2am. That\u2019s kind of the whole point of this app.",
-          "sentAt": "2026-07-10T08:41:00-04:00"
-        }
-      ]
-    },
-    {
-      "id": "u7",
-      "name": "Juno",
-      "age": 28,
-      "campus": "NYU",
-      "avatarGradient": [
-        "#C67E6F",
-        "#8B857A"
-      ],
-      "archetype": {
-        "name": "The Method Actor",
-        "description": "Taste that shape-shifts with the mood \u2014 genre-hopping, never quite pinned down, always a little unpredictable."
-      },
-      "topArtists": [
-        {
-          "name": "Dial Tone Choir",
-          "rank": 41
-        },
-        {
-          "name": "The Coastline",
-          "rank": 81
-        },
-        {
-          "name": "The Low Tide",
-          "rank": 71
-        },
-        {
-          "name": "Nightbloom",
-          "rank": 68
-        },
-        {
-          "name": "Sundial Youth",
-          "rank": 70
-        },
-        {
-          "name": "Kilo Honey",
-          "rank": 85
-        },
-        {
-          "name": "Field Recordings Vol. 2",
-          "rank": 8
-        }
-      ],
-      "topTracks": [
-        {
-          "title": "Salt & Neon",
-          "artist": "The Coastline"
-        },
-        {
-          "title": "Dial Tone",
-          "artist": "Dial Tone Choir"
-        },
-        {
-          "title": "2 A.M. In Reverse",
-          "artist": "Nightbloom"
-        },
-        {
-          "title": "Low Tide, Late Night",
-          "artist": "The Low Tide"
-        },
-        {
-          "title": "Honey Kilo",
-          "artist": "Kilo Honey"
-        }
-      ],
-      "listeningHours": [
-        100,
-        100,
-        100,
-        68,
-        30,
-        11,
-        8,
-        12,
-        17,
-        8,
-        9,
-        17,
-        10,
-        8,
-        9,
-        8,
-        8,
-        11,
-        18,
-        12,
-        16,
-        33,
-        55,
-        88
-      ],
-      "tags": [
-        "dream pop",
-        "surf",
-        "indie pop",
-        "ambient",
-        "late-night"
-      ],
-      "energy": {
-        "night": 76,
-        "emotional": 43,
-        "highEnergy": 28,
-        "exploratory": 50
-      },
-      "match": {
-        "score": 90,
-        "reasons": [
-          "1 rare shared artist",
-          "both late-night listeners"
-        ],
-        "sharedArtists": [
-          "Dial Tone Choir",
-          "The Coastline",
-          "Nightbloom",
-          "Field Recordings Vol. 2"
-        ],
-        "sharedSong": {
-          "title": "Dial Tone",
-          "artist": "Dial Tone Choir"
-        }
-      }
-    },
-    {
-      "id": "u13",
-      "name": "Vesper",
-      "age": 28,
-      "campus": "NYU",
-      "avatarGradient": [
-        "#1B1815",
-        "#C9B79C"
-      ],
-      "archetype": {
-        "name": "The Comeback Kid",
-        "description": "Replays the same fifteen songs like they owe rent. Nostalgia isn\u2019t a phase, it\u2019s a lifestyle \u2014 and a good one."
-      },
-      "topArtists": [
-        {
-          "name": "Faint Signal",
-          "rank": 18
-        },
-        {
-          "name": "Nightbloom",
-          "rank": 68
-        },
-        {
-          "name": "Milk Teeth",
-          "rank": 13
-        },
-        {
-          "name": "Kilo Honey",
-          "rank": 85
-        },
-        {
-          "name": "Orbit Debris",
-          "rank": 9
-        },
-        {
-          "name": "Motel Radio",
-          "rank": 76
-        },
-        {
-          "name": "Amber Radio",
-          "rank": 91
-        }
-      ],
-      "topTracks": [
-        {
-          "title": "2 A.M. In Reverse",
-          "artist": "Nightbloom"
-        },
-        {
-          "title": "Motel Radio",
-          "artist": "Motel Radio"
-        },
-        {
-          "title": "Milk Teeth",
-          "artist": "Milk Teeth"
-        },
-        {
-          "title": "Faint Signal",
-          "artist": "Faint Signal"
-        },
-        {
-          "title": "Debris Waltz",
-          "artist": "Orbit Debris"
-        }
-      ],
-      "listeningHours": [
-        10,
-        15,
-        17,
-        10,
-        10,
-        44,
-        93,
-        100,
-        100,
-        37,
-        10,
-        14,
-        12,
-        14,
-        18,
-        8,
-        9,
-        18,
-        8,
-        13,
-        11,
-        13,
-        14,
-        12
-      ],
-      "tags": [
-        "dream pop",
-        "ambient",
-        "drone",
-        "lo-fi",
-        "restless"
-      ],
-      "energy": {
-        "night": 9,
-        "emotional": 48,
-        "highEnergy": 35,
-        "exploratory": 16
-      },
-      "match": {
-        "score": 77,
-        "reasons": [
-          "1 rare shared artist",
-          "both into shoegaze"
-        ],
-        "sharedArtists": [
-          "Nightbloom",
-          "Orbit Debris"
-        ],
-        "sharedSong": {
-          "title": "2 A.M. In Reverse",
-          "artist": "Nightbloom"
-        }
-      }
-    },
-    {
-      "id": "u8",
-      "name": "Ezra",
-      "age": 25,
-      "campus": "NYU",
-      "avatarGradient": [
-        "#F3ECE1",
-        "#C67E6F"
-      ],
-      "archetype": {
-        "name": "The Slow Burn",
-        "description": "Patient, textural, in no rush. Likes a song that takes its time getting where it\u2019s going."
-      },
-      "topArtists": [
-        {
-          "name": "Field Recordings Vol. 2",
-          "rank": 8
-        },
-        {
-          "name": "Vellum",
-          "rank": 12
-        },
-        {
-          "name": "Amber Radio",
-          "rank": 91
-        },
-        {
-          "name": "The Backseat Choir",
+          "name": "Cocteau Twins",
           "rank": 44
         },
         {
-          "name": "The Low Tide",
-          "rank": 71
+          "name": "Mazzy Star",
+          "rank": 64
         },
         {
-          "name": "Late Checkout",
-          "rank": 78
+          "name": "Adrianne Lenker",
+          "rank": 27
         },
         {
-          "name": "The Quiet Ones",
-          "rank": 20
+          "name": "Burial",
+          "rank": 52
         }
       ],
       "topTracks": [
         {
-          "title": "Amber Radio Waves",
-          "artist": "Amber Radio"
+          "title": "Heavy Water / I’d Rather Be Sleeping",
+          "artist": "Grouper"
         },
         {
-          "title": "Backseat Choir",
-          "artist": "The Backseat Choir"
+          "title": "Cover the Windows and the Walls",
+          "artist": "Grouper"
         },
         {
-          "title": "Field Recording No. 4",
-          "artist": "Field Recordings Vol. 2"
+          "title": "Inside Out",
+          "artist": "Duster"
         },
         {
-          "title": "The Quiet Ones",
-          "artist": "The Quiet Ones"
+          "title": "Constellations",
+          "artist": "Duster"
         },
         {
-          "title": "Thin Paper Walls",
-          "artist": "Vellum"
+          "title": "Sandy",
+          "artist": "Alex G"
+        },
+        {
+          "title": "Gretel",
+          "artist": "Alex G"
+        },
+        {
+          "title": "Alison",
+          "artist": "Slowdive"
         }
       ],
       "listeningHours": [
-        15,
-        18,
-        18,
-        8,
+        70,
+        95,
+        100,
+        96,
+        78,
+        44,
         16,
-        15,
-        15,
         8,
-        15,
-        15,
-        12,
-        36,
-        64,
-        100,
-        100,
-        100,
-        81,
-        47,
-        28,
-        11,
-        17,
-        12,
-        9,
-        17
-      ],
-      "tags": [
-        "dream pop",
-        "ambient",
-        "drone",
-        "field recording",
-        "restless"
-      ],
-      "energy": {
-        "night": 36,
-        "emotional": 39,
-        "highEnergy": 14,
-        "exploratory": 37
-      },
-      "match": {
-        "score": 76,
-        "reasons": [
-          "2 rare shared artists",
-          "both into shoegaze"
-        ],
-        "sharedArtists": [
-          "Field Recordings Vol. 2",
-          "Vellum"
-        ],
-        "sharedSong": {
-          "title": "Field Recording No. 4",
-          "artist": "Field Recordings Vol. 2"
-        }
-      }
-    },
-    {
-      "id": "u16",
-      "name": "Bram",
-      "age": 21,
-      "campus": "NYU",
-      "avatarGradient": [
-        "#8B857A",
-        "#F3ECE1"
-      ],
-      "archetype": {
-        "name": "The Party Starter",
-        "description": "Shows up with the aux cord and a plan. High-energy, generous, allergic to a quiet room."
-      },
-      "topArtists": [
-        {
-          "name": "Field Recordings Vol. 2",
-          "rank": 8
-        },
-        {
-          "name": "The Longest Yellow",
-          "rank": 53
-        },
-        {
-          "name": "Motel Radio",
-          "rank": 76
-        },
-        {
-          "name": "Cassette Fog",
-          "rank": 22
-        },
-        {
-          "name": "Ivory Static",
-          "rank": 17
-        },
-        {
-          "name": "Vellum",
-          "rank": 12
-        },
-        {
-          "name": "Nightshift Honey",
-          "rank": 31
-        }
-      ],
-      "topTracks": [
-        {
-          "title": "Nightshift",
-          "artist": "Nightshift Honey"
-        },
-        {
-          "title": "The Longest Yellow",
-          "artist": "The Longest Yellow"
-        },
-        {
-          "title": "Thin Paper Walls",
-          "artist": "Vellum"
-        },
-        {
-          "title": "Field Recording No. 4",
-          "artist": "Field Recordings Vol. 2"
-        },
-        {
-          "title": "Static Bloom",
-          "artist": "Cassette Fog"
-        }
-      ],
-      "listeningHours": [
-        15,
-        11,
-        8,
-        14,
-        14,
-        17,
-        11,
-        16,
+        6,
+        7,
         10,
-        9,
-        10,
-        29,
-        71,
-        100,
-        100,
-        100,
-        82,
-        51,
+        14,
+        18,
+        22,
         26,
-        14,
-        14,
-        17,
-        8,
-        10
-      ],
-      "tags": [
-        "americana",
-        "ambient",
-        "dream pop",
-        "drone",
-        "euphoric"
-      ],
-      "energy": {
-        "night": 36,
-        "emotional": 36,
-        "highEnergy": 72,
-        "exploratory": 37
-      },
-      "match": {
-        "score": 76,
-        "reasons": [
-          "2 rare shared artists",
-          "both into shoegaze"
-        ],
-        "sharedArtists": [
-          "Field Recordings Vol. 2",
-          "Vellum"
-        ],
-        "sharedSong": {
-          "title": "Field Recording No. 4",
-          "artist": "Field Recordings Vol. 2"
-        }
-      }
-    },
-    {
-      "id": "u1",
-      "name": "Wren",
-      "age": 24,
-      "campus": "NYU",
-      "avatarGradient": [
-        "#E6A99E",
-        "#C9B79C"
-      ],
-      "archetype": {
-        "name": "The Midnight Romantic",
-        "description": "Everything hits harder after midnight. Moody, intense, a little too online at 2am \u2014 and completely unbothered about it."
-      },
-      "topArtists": [
-        {
-          "name": "Field Recordings Vol. 2",
-          "rank": 8
-        },
-        {
-          "name": "The Afterglow Set",
-          "rank": 55
-        },
-        {
-          "name": "Amber Radio",
-          "rank": 91
-        },
-        {
-          "name": "Coastal Static",
-          "rank": 47
-        },
-        {
-          "name": "Dial Tone Choir",
-          "rank": 41
-        },
-        {
-          "name": "Faint Signal",
-          "rank": 18
-        },
-        {
-          "name": "Copper Weather",
-          "rank": 34
-        }
-      ],
-      "topTracks": [
-        {
-          "title": "Amber Radio Waves",
-          "artist": "Amber Radio"
-        },
-        {
-          "title": "Dial Tone",
-          "artist": "Dial Tone Choir"
-        },
-        {
-          "title": "Faint Signal",
-          "artist": "Faint Signal"
-        },
-        {
-          "title": "Afterglow",
-          "artist": "The Afterglow Set"
-        },
-        {
-          "title": "Field Recording No. 4",
-          "artist": "Field Recordings Vol. 2"
-        }
-      ],
-      "listeningHours": [
-        100,
-        100,
-        100,
-        65,
-        33,
-        14,
-        10,
-        8,
-        11,
-        16,
-        13,
-        14,
-        12,
-        12,
-        14,
-        13,
-        18,
-        10,
-        18,
-        8,
-        17,
-        28,
+        30,
+        38,
+        46,
         54,
-        81
+        60,
+        68,
+        74,
+        82,
+        90
       ],
       "tags": [
-        "ambient",
-        "drone",
+        "shoegaze",
+        "slowcore",
+        "lo-fi",
         "dream pop",
-        "field recording",
+        "folk",
         "late-night"
       ],
       "energy": {
         "night": 92,
-        "emotional": 69,
-        "highEnergy": 30,
-        "exploratory": 33
-      },
-      "match": {
-        "score": 75,
-        "reasons": [
-          "1 rare shared artist",
-          "both late-night listeners",
-          "both into wistful"
-        ],
-        "sharedArtists": [
-          "Field Recordings Vol. 2",
-          "Dial Tone Choir"
-        ],
-        "sharedSong": {
-          "title": "Field Recording No. 4",
-          "artist": "Field Recordings Vol. 2"
-        }
-      }
-    },
-    {
-      "id": "u12",
-      "name": "Nico",
-      "age": 25,
-      "campus": "NYU",
-      "avatarGradient": [
-        "#9C7C4E",
-        "#E6A99E"
-      ],
-      "archetype": {
-        "name": "The Crate Digger",
-        "description": "Finds the b-side before anyone else does. Taste as a treasure hunt \u2014 the deeper the cut, the better the story."
-      },
-      "topArtists": [
-        {
-          "name": "Orbit Debris",
-          "rank": 9
-        },
-        {
-          "name": "The Low Tide",
-          "rank": 71
-        },
-        {
-          "name": "Vellum",
-          "rank": 12
-        },
-        {
-          "name": "Late Checkout",
-          "rank": 78
-        },
-        {
-          "name": "The Quiet Ones",
-          "rank": 20
-        },
-        {
-          "name": "Ivory Static",
-          "rank": 17
-        }
-      ],
-      "topTracks": [
-        {
-          "title": "Low Tide, Late Night",
-          "artist": "The Low Tide"
-        },
-        {
-          "title": "The Quiet Ones",
-          "artist": "The Quiet Ones"
-        },
-        {
-          "title": "Late Checkout",
-          "artist": "Late Checkout"
-        },
-        {
-          "title": "Debris Waltz",
-          "artist": "Orbit Debris"
-        },
-        {
-          "title": "Thin Paper Walls",
-          "artist": "Vellum"
-        }
-      ],
-      "listeningHours": [
-        14,
-        12,
-        17,
-        18,
-        11,
-        12,
-        9,
-        14,
-        13,
-        13,
-        17,
-        34,
-        67,
-        100,
-        100,
-        100,
-        82,
-        46,
-        34,
-        15,
-        10,
-        18,
-        16,
-        11
-      ],
-      "tags": [
-        "shoegaze",
-        "ambient",
-        "dream pop",
-        "drone",
-        "wistful"
-      ],
-      "energy": {
-        "night": 26,
-        "emotional": 27,
+        "emotional": 84,
         "highEnergy": 34,
-        "exploratory": 65
+        "exploratory": 68
       },
-      "match": {
-        "score": 75,
-        "reasons": [
-          "2 rare shared artists",
-          "both into dream pop"
-        ],
-        "sharedArtists": [
-          "Orbit Debris",
-          "Vellum"
-        ],
-        "sharedSong": {
-          "title": "Debris Waltz",
-          "artist": "Orbit Debris"
+      "reason": "3 RARE SHARED ARTISTS",
+      "reasonSoft": "Same artist of the week as you.",
+      "chips": [
+        {
+          "label": "Grouper",
+          "rare": true
+        },
+        {
+          "label": "Duster",
+          "rare": true
+        },
+        {
+          "label": "Alex G",
+          "rare": true
+        },
+        {
+          "label": "slowcore",
+          "rare": false
         }
-      }
+      ],
+      "line": "You both keep Grouper in your top ten, which almost nobody here does. Then you both stay up to play it.",
+      "flirt": "She was awake at two, playing your record.",
+      "song": {
+        "title": "Heavy Water / I’d Rather Be Sleeping",
+        "artist": "Grouper"
+      },
+      "hoursNote": "BOTH PEAK AT 2AM",
+      "rarityNote": "3 DEEP CUTS SHARED",
+      "quiz": {
+        "options": [
+          "Duster",
+          "Grouper",
+          "Alex G",
+          "Slowdive"
+        ],
+        "answer": "Grouper"
+      },
+      "swap": {
+        "track": "Cover the Windows and the Walls — Grouper",
+        "verdict": "You both reached for the same record. Neither of you is normal."
+      },
+      "takeAnswer": 78,
+      "thread": [
+        {
+          "sender": "them",
+          "text": "ok the Grouper thing is unfair. nobody has that in their top five."
+        }
+      ]
     },
     {
-      "id": "u15",
-      "name": "Thea",
-      "age": 22,
+      "id": "rune",
+      "name": "Rune",
+      "age": 24,
       "campus": "NYU",
-      "avatarGradient": [
-        "#C67E6F",
-        "#100F0D"
-      ],
       "archetype": {
-        "name": "The Quiet Storm",
-        "description": "Understated on the surface, feeling everything underneath. The kind of taste you only notice once you\u2019re paying attention."
+        "name": "The Long Drive",
+        "description": "Puts one record on and lets the whole night run out behind it."
       },
+      "week": {
+        "artist": "Duster",
+        "plays": 36,
+        "stat": "36 PLAYS · 4 WEEKS RUNNING"
+      },
+      "likedYou": true,
       "topArtists": [
         {
-          "name": "Wet Neon",
-          "rank": 52
+          "name": "Duster",
+          "rank": 14
         },
         {
-          "name": "Slow Static",
-          "rank": 15
-        },
-        {
-          "name": "The Quiet Ones",
-          "rank": 20
-        },
-        {
-          "name": "Gray Matinee",
-          "rank": 26
-        },
-        {
-          "name": "Salt Lung",
-          "rank": 38
-        },
-        {
-          "name": "Warm Static",
-          "rank": 60
-        },
-        {
-          "name": "Glass Orchard",
-          "rank": 27
-        }
-      ],
-      "topTracks": [
-        {
-          "title": "Low Orbit",
-          "artist": "Slow Static"
-        },
-        {
-          "title": "Salt Lung",
-          "artist": "Salt Lung"
-        },
-        {
-          "title": "Glass Orchard",
-          "artist": "Glass Orchard"
-        },
-        {
-          "title": "The Quiet Ones",
-          "artist": "The Quiet Ones"
-        },
-        {
-          "title": "Wet Neon Sign",
-          "artist": "Wet Neon"
-        },
-        {
-          "title": "Matinee",
-          "artist": "Gray Matinee"
-        }
-      ],
-      "listeningHours": [
-        100,
-        100,
-        100,
-        66,
-        30,
-        14,
-        14,
-        17,
-        18,
-        13,
-        15,
-        11,
-        9,
-        13,
-        15,
-        9,
-        17,
-        10,
-        10,
-        13,
-        13,
-        30,
-        52,
-        91
-      ],
-      "tags": [
-        "slowcore",
-        "shoegaze",
-        "synth pop",
-        "new wave",
-        "late-night"
-      ],
-      "energy": {
-        "night": 75,
-        "emotional": 63,
-        "highEnergy": 16,
-        "exploratory": 33
-      },
-      "match": {
-        "score": 71,
-        "reasons": [
-          "1 rare shared artist",
-          "both late-night listeners",
-          "both into melancholic"
-        ],
-        "sharedArtists": [
-          "Slow Static"
-        ],
-        "sharedSong": {
-          "title": "Low Orbit",
-          "artist": "Slow Static"
-        }
-      }
-    },
-    {
-      "id": "u11",
-      "name": "Sagan",
-      "age": 23,
-      "campus": "NYU",
-      "avatarGradient": [
-        "#8B857A",
-        "#C67E6F"
-      ],
-      "archetype": {
-        "name": "The Midnight Romantic",
-        "description": "Everything hits harder after midnight. Moody, intense, a little too online at 2am \u2014 and completely unbothered about it."
-      },
-      "topArtists": [
-        {
-          "name": "Marigold Youth",
-          "rank": 74
-        },
-        {
-          "name": "Halogen Hearts",
-          "rank": 58
-        },
-        {
-          "name": "Glass Orchard",
-          "rank": 27
-        },
-        {
-          "name": "The Afterglow Set",
-          "rank": 55
-        },
-        {
-          "name": "Field Recordings Vol. 2",
-          "rank": 8
-        },
-        {
-          "name": "Salt Lung",
-          "rank": 38
-        }
-      ],
-      "topTracks": [
-        {
-          "title": "Field Recording No. 4",
-          "artist": "Field Recordings Vol. 2"
-        },
-        {
-          "title": "Glass Orchard",
-          "artist": "Glass Orchard"
-        },
-        {
-          "title": "Halogen",
-          "artist": "Halogen Hearts"
-        },
-        {
-          "title": "Afterglow",
-          "artist": "The Afterglow Set"
-        },
-        {
-          "title": "Salt Lung",
-          "artist": "Salt Lung"
-        }
-      ],
-      "listeningHours": [
-        17,
-        10,
-        16,
-        8,
-        15,
-        11,
-        8,
-        11,
-        15,
-        10,
-        17,
-        8,
-        13,
-        12,
-        8,
-        12,
-        36,
-        63,
-        100,
-        100,
-        100,
-        86,
-        53,
-        32
-      ],
-      "tags": [
-        "synth pop",
-        "dream pop",
-        "indie pop",
-        "jangle pop",
-        "melancholic"
-      ],
-      "energy": {
-        "night": 45,
-        "emotional": 69,
-        "highEnergy": 42,
-        "exploratory": 35
-      },
-      "match": {
-        "score": 68,
-        "reasons": [
-          "1 rare shared artist",
-          "both into melancholic"
-        ],
-        "sharedArtists": [
-          "Halogen Hearts",
-          "Field Recordings Vol. 2"
-        ],
-        "sharedSong": {
-          "title": "Halogen",
-          "artist": "Halogen Hearts"
-        }
-      }
-    },
-    {
-      "id": "u3",
-      "name": "Sable",
-      "age": 27,
-      "campus": "NYU",
-      "avatarGradient": [
-        "#8B857A",
-        "#1B1815"
-      ],
-      "archetype": {
-        "name": "The Comeback Kid",
-        "description": "Replays the same fifteen songs like they owe rent. Nostalgia isn\u2019t a phase, it\u2019s a lifestyle \u2014 and a good one."
-      },
-      "topArtists": [
-        {
-          "name": "Dial Tone Choir",
-          "rank": 41
-        },
-        {
-          "name": "The Coastline",
-          "rank": 81
-        },
-        {
-          "name": "Field Recordings Vol. 2",
-          "rank": 8
-        },
-        {
-          "name": "Ivory Static",
-          "rank": 17
-        },
-        {
-          "name": "Motel Radio",
-          "rank": 76
-        },
-        {
-          "name": "The Quiet Ones",
-          "rank": 20
-        },
-        {
-          "name": "The Backseat Choir",
-          "rank": 44
-        }
-      ],
-      "topTracks": [
-        {
-          "title": "Motel Radio",
-          "artist": "Motel Radio"
-        },
-        {
-          "title": "Dial Tone",
-          "artist": "Dial Tone Choir"
-        },
-        {
-          "title": "Backseat Choir",
-          "artist": "The Backseat Choir"
-        },
-        {
-          "title": "Ivory Keys, Static",
-          "artist": "Ivory Static"
-        },
-        {
-          "title": "The Quiet Ones",
-          "artist": "The Quiet Ones"
-        }
-      ],
-      "listeningHours": [
-        10,
-        18,
-        10,
-        17,
-        14,
-        12,
-        18,
-        15,
-        15,
-        8,
-        10,
-        12,
-        15,
-        8,
-        9,
-        12,
-        27,
-        63,
-        100,
-        100,
-        100,
-        81,
-        52,
-        35
-      ],
-      "tags": [
-        "ambient",
-        "dream pop",
-        "indie pop",
-        "surf",
-        "melancholic"
-      ],
-      "energy": {
-        "night": 36,
-        "emotional": 52,
-        "highEnergy": 48,
-        "exploratory": 18
-      },
-      "match": {
-        "score": 67,
-        "reasons": [
-          "1 rare shared artist"
-        ],
-        "sharedArtists": [
-          "Dial Tone Choir",
-          "The Coastline",
-          "Field Recordings Vol. 2"
-        ],
-        "sharedSong": {
-          "title": "Dial Tone",
-          "artist": "Dial Tone Choir"
-        }
-      }
-    },
-    {
-      "id": "u6",
-      "name": "Rue",
-      "age": 28,
-      "campus": "NYU",
-      "avatarGradient": [
-        "#9C7C4E",
-        "#100F0D"
-      ],
-      "archetype": {
-        "name": "The Party Starter",
-        "description": "Shows up with the aux cord and a plan. High-energy, generous, allergic to a quiet room."
-      },
-      "topArtists": [
-        {
-          "name": "The Coastline",
-          "rank": 81
-        },
-        {
-          "name": "Ivory Static",
-          "rank": 17
-        },
-        {
-          "name": "Dial Tone Choir",
-          "rank": 41
-        },
-        {
-          "name": "The Afterglow Set",
-          "rank": 55
-        },
-        {
-          "name": "The Quiet Ones",
-          "rank": 20
-        },
-        {
-          "name": "Coastal Static",
-          "rank": 47
-        }
-      ],
-      "topTracks": [
-        {
-          "title": "Ivory Keys, Static",
-          "artist": "Ivory Static"
-        },
-        {
-          "title": "Afterglow",
-          "artist": "The Afterglow Set"
-        },
-        {
-          "title": "The Quiet Ones",
-          "artist": "The Quiet Ones"
-        },
-        {
-          "title": "Coastal Static",
-          "artist": "Coastal Static"
-        },
-        {
-          "title": "Salt & Neon",
-          "artist": "The Coastline"
-        }
-      ],
-      "listeningHours": [
-        17,
-        16,
-        14,
-        9,
-        16,
-        18,
-        10,
-        13,
-        18,
-        8,
-        18,
-        11,
-        13,
-        8,
-        11,
-        17,
-        32,
-        72,
-        100,
-        100,
-        100,
-        91,
-        55,
-        28
-      ],
-      "tags": [
-        "dream pop",
-        "ambient",
-        "surf",
-        "indie pop",
-        "euphoric"
-      ],
-      "energy": {
-        "night": 43,
-        "emotional": 37,
-        "highEnergy": 78,
-        "exploratory": 30
-      },
-      "match": {
-        "score": 63,
-        "reasons": [
-          "2 shared artists",
-          "both into melancholic"
-        ],
-        "sharedArtists": [
-          "The Coastline",
-          "Dial Tone Choir"
-        ],
-        "sharedSong": {
-          "title": "Salt & Neon",
-          "artist": "The Coastline"
-        }
-      }
-    },
-    {
-      "id": "u9",
-      "name": "Fable",
-      "age": 22,
-      "campus": "NYU",
-      "avatarGradient": [
-        "#C9B79C",
-        "#100F0D"
-      ],
-      "archetype": {
-        "name": "The Well-Read Ex",
-        "description": "Wordy lyrics, literary references, a slight superiority about liner notes. Insufferable, in a way you kind of like."
-      },
-      "topArtists": [
-        {
-          "name": "Roman Candle Youth",
-          "rank": 45
-        },
-        {
-          "name": "The Quiet Ones",
-          "rank": 20
-        },
-        {
-          "name": "Kilo Honey",
-          "rank": 85
-        },
-        {
-          "name": "Halogen Hearts",
-          "rank": 58
-        },
-        {
-          "name": "Gray Matinee",
-          "rank": 26
-        },
-        {
-          "name": "The Low Tide",
-          "rank": 71
-        }
-      ],
-      "topTracks": [
-        {
-          "title": "Halogen",
-          "artist": "Halogen Hearts"
-        },
-        {
-          "title": "Matinee",
-          "artist": "Gray Matinee"
-        },
-        {
-          "title": "Low Tide, Late Night",
-          "artist": "The Low Tide"
-        },
-        {
-          "title": "Roman Candle",
-          "artist": "Roman Candle Youth"
-        },
-        {
-          "title": "The Quiet Ones",
-          "artist": "The Quiet Ones"
-        },
-        {
-          "title": "Honey Kilo",
-          "artist": "Kilo Honey"
-        }
-      ],
-      "listeningHours": [
-        100,
-        100,
-        100,
-        64,
-        32,
-        11,
-        9,
-        13,
-        11,
-        15,
-        13,
-        9,
-        18,
-        9,
-        13,
-        15,
-        8,
-        10,
-        12,
-        9,
-        14,
-        27,
-        48,
-        84
-      ],
-      "tags": [
-        "indie rock",
-        "slowcore",
-        "jangle pop",
-        "indie folk",
-        "late-night"
-      ],
-      "energy": {
-        "night": 71,
-        "emotional": 61,
-        "highEnergy": 27,
-        "exploratory": 39
-      },
-      "match": {
-        "score": 61,
-        "reasons": [
-          "1 shared artist",
-          "both late-night listeners",
-          "both into shoegaze"
-        ],
-        "sharedArtists": [
-          "Halogen Hearts"
-        ],
-        "sharedSong": {
-          "title": "Halogen",
-          "artist": "Halogen Hearts"
-        }
-      }
-    },
-    {
-      "id": "u10",
-      "name": "Rowan",
-      "age": 29,
-      "campus": "NYU",
-      "avatarGradient": [
-        "#E6A99E",
-        "#726A5E"
-      ],
-      "archetype": {
-        "name": "The Late Bloomer",
-        "description": "Just found a whole new sound and won\u2019t stop talking about it. Exploratory, wide-eyed, refreshingly unjaded."
-      },
-      "topArtists": [
-        {
-          "name": "Kilo Honey",
-          "rank": 85
-        },
-        {
-          "name": "Faint Signal",
-          "rank": 18
-        },
-        {
-          "name": "Wet Neon",
-          "rank": 52
-        },
-        {
-          "name": "Loose Change Radio",
-          "rank": 36
-        },
-        {
-          "name": "Gray Matinee",
-          "rank": 26
-        }
-      ],
-      "topTracks": [
-        {
-          "title": "Honey Kilo",
-          "artist": "Kilo Honey"
-        },
-        {
-          "title": "Loose Change",
-          "artist": "Loose Change Radio"
-        },
-        {
-          "title": "Faint Signal",
-          "artist": "Faint Signal"
-        },
-        {
-          "title": "Wet Neon Sign",
-          "artist": "Wet Neon"
-        },
-        {
-          "title": "Matinee",
-          "artist": "Gray Matinee"
-        }
-      ],
-      "listeningHours": [
-        100,
-        100,
-        100,
-        72,
-        36,
-        17,
-        15,
-        18,
-        9,
-        11,
-        8,
-        13,
-        9,
-        12,
-        16,
-        15,
-        17,
-        16,
-        8,
-        9,
-        13,
-        33,
-        53,
-        85
-      ],
-      "tags": [
-        "lo-fi",
-        "pop",
-        "soul",
-        "ambient",
-        "late-night"
-      ],
-      "energy": {
-        "night": 79,
-        "emotional": 42,
-        "highEnergy": 24,
-        "exploratory": 71
-      },
-      "match": {
-        "score": 51,
-        "reasons": [
-          "both late-night listeners"
-        ],
-        "sharedArtists": [],
-        "sharedSong": null
-      }
-    },
-    {
-      "id": "u14",
-      "name": "Idris",
-      "age": 21,
-      "campus": "NYU",
-      "avatarGradient": [
-        "#726A5E",
-        "#E6A99E"
-      ],
-      "archetype": {
-        "name": "The Main Character",
-        "description": "Every walk to the train is a tracking shot. Big, cinematic, a little dramatic \u2014 exactly as intended."
-      },
-      "topArtists": [
-        {
-          "name": "Cassette Fog",
+          "name": "Alex G",
           "rank": 22
         },
         {
-          "name": "Ivory Static",
-          "rank": 17
+          "name": "Big Thief",
+          "rank": 58
         },
         {
-          "name": "Faux Fur Coast",
-          "rank": 63
+          "name": "Slowdive",
+          "rank": 48
         },
         {
-          "name": "Tender Static",
-          "rank": 33
+          "name": "Burial",
+          "rank": 52
         },
         {
-          "name": "Glass Orchard",
-          "rank": 27
+          "name": "My Bloody Valentine",
+          "rank": 55
         },
         {
-          "name": "Kilo Honey",
-          "rank": 85
+          "name": "Mazzy Star",
+          "rank": 64
         },
         {
-          "name": "Faint Signal",
-          "rank": 18
+          "name": "Beach House",
+          "rank": 46
         }
       ],
       "topTracks": [
         {
-          "title": "Glass Orchard",
-          "artist": "Glass Orchard"
+          "title": "Inside Out",
+          "artist": "Duster"
         },
         {
-          "title": "Faux Fur",
-          "artist": "Faux Fur Coast"
+          "title": "Constellations",
+          "artist": "Duster"
         },
         {
-          "title": "Honey Kilo",
-          "artist": "Kilo Honey"
+          "title": "Sandy",
+          "artist": "Alex G"
         },
         {
-          "title": "Faint Signal",
-          "artist": "Faint Signal"
+          "title": "Gretel",
+          "artist": "Alex G"
         },
         {
-          "title": "Static Bloom",
-          "artist": "Cassette Fog"
+          "title": "Not",
+          "artist": "Big Thief"
+        },
+        {
+          "title": "Paul",
+          "artist": "Big Thief"
+        },
+        {
+          "title": "Alison",
+          "artist": "Slowdive"
         }
       ],
       "listeningHours": [
+        58,
+        84,
+        96,
+        90,
+        66,
+        34,
         14,
-        8,
-        15,
-        9,
-        14,
-        11,
-        8,
-        8,
-        11,
-        18,
-        15,
-        18,
+        10,
         12,
         16,
-        10,
-        9,
-        27,
-        68,
-        100,
-        100,
-        100,
-        82,
-        51,
-        35
+        20,
+        26,
+        32,
+        38,
+        42,
+        46,
+        50,
+        56,
+        60,
+        66,
+        72,
+        78,
+        84,
+        90
+      ],
+      "tags": [
+        "shoegaze",
+        "lo-fi",
+        "folk",
+        "slowcore",
+        "dream pop",
+        "late-night"
+      ],
+      "energy": {
+        "night": 86,
+        "emotional": 71,
+        "highEnergy": 44,
+        "exploratory": 62
+      },
+      "reason": "SHARED: DUSTER, ALEX G",
+      "reasonSoft": "Four weeks on the same record.",
+      "chips": [
+        {
+          "label": "Duster",
+          "rare": true
+        },
+        {
+          "label": "Alex G",
+          "rare": true
+        },
+        {
+          "label": "slowcore",
+          "rare": false
+        }
+      ],
+      "line": "Four weeks on Duster is not a phase, it is a personality. Yours too, apparently.",
+      "flirt": "Four weeks on the same record. Somebody had to notice.",
+      "song": {
+        "title": "Inside Out",
+        "artist": "Duster"
+      },
+      "hoursNote": "OVERLAP 12AM–3AM",
+      "rarityNote": "2 DEEP CUTS SHARED",
+      "quiz": {
+        "options": [
+          "Duster",
+          "Burial",
+          "Fiona Apple",
+          "Grouper"
+        ],
+        "answer": "Duster"
+      },
+      "swap": {
+        "track": "Constellations — Duster",
+        "verdict": "Same band, different side of the record. That will do."
+      },
+      "takeAnswer": 41,
+      "thread": [
+        {
+          "sender": "them",
+          "text": "you have Duster at 14. i have them at 2. we should talk about this."
+        }
+      ]
+    },
+    {
+      "id": "marlowe",
+      "name": "Marlowe",
+      "age": 24,
+      "campus": "NYU",
+      "archetype": {
+        "name": "The Patient Romantic",
+        "description": "Quiet records, late hours, and no hurry about any of it."
+      },
+      "week": {
+        "artist": "Adrianne Lenker",
+        "plays": 29,
+        "stat": "29 PLAYS · NEW THIS WEEK"
+      },
+      "likedYou": false,
+      "topArtists": [
+        {
+          "name": "Adrianne Lenker",
+          "rank": 27
+        },
+        {
+          "name": "Big Thief",
+          "rank": 58
+        },
+        {
+          "name": "Mazzy Star",
+          "rank": 64
+        },
+        {
+          "name": "Alex G",
+          "rank": 22
+        },
+        {
+          "name": "Fiona Apple",
+          "rank": 61
+        },
+        {
+          "name": "Slowdive",
+          "rank": 48
+        },
+        {
+          "name": "Cocteau Twins",
+          "rank": 44
+        },
+        {
+          "name": "My Bloody Valentine",
+          "rank": 55
+        }
+      ],
+      "topTracks": [
+        {
+          "title": "Anything",
+          "artist": "Adrianne Lenker"
+        },
+        {
+          "title": "Half Return",
+          "artist": "Adrianne Lenker"
+        },
+        {
+          "title": "Not",
+          "artist": "Big Thief"
+        },
+        {
+          "title": "Paul",
+          "artist": "Big Thief"
+        },
+        {
+          "title": "Fade Into You",
+          "artist": "Mazzy Star"
+        },
+        {
+          "title": "Into Dust",
+          "artist": "Mazzy Star"
+        },
+        {
+          "title": "Sandy",
+          "artist": "Alex G"
+        }
+      ],
+      "listeningHours": [
+        55,
+        80,
+        92,
+        86,
+        60,
+        30,
+        14,
+        12,
+        14,
+        18,
+        24,
+        30,
+        36,
+        40,
+        44,
+        48,
+        52,
+        58,
+        62,
+        66,
+        70,
+        74,
+        78,
+        84
+      ],
+      "tags": [
+        "folk",
+        "indie folk",
+        "dream pop",
+        "shoegaze",
+        "indie rock",
+        "melancholic"
+      ],
+      "energy": {
+        "night": 81,
+        "emotional": 88,
+        "highEnergy": 30,
+        "exploratory": 55
+      },
+      "reason": "SAME 2AM WINDOW",
+      "reasonSoft": "Awake at the same hours as you.",
+      "chips": [
+        {
+          "label": "Adrianne Lenker",
+          "rare": true
+        },
+        {
+          "label": "Big Thief",
+          "rare": false
+        },
+        {
+          "label": "folk",
+          "rare": false
+        }
+      ],
+      "line": "Different records, same hour. You are both awake at two, playing something quiet.",
+      "flirt": "Different records. Identical hours.",
+      "song": {
+        "title": "Anything",
+        "artist": "Adrianne Lenker"
+      },
+      "hoursNote": "CURVES ALMOST IDENTICAL",
+      "rarityNote": "1 DEEP CUT SHARED",
+      "quiz": {
+        "options": [
+          "Big Thief",
+          "Adrianne Lenker",
+          "Alex G",
+          "Mazzy Star"
+        ],
+        "answer": "Adrianne Lenker"
+      },
+      "swap": {
+        "track": "Not — Big Thief",
+        "verdict": "One quiet, one loud. That is a whole evening."
+      },
+      "takeAnswer": 88,
+      "thread": [
+        {
+          "sender": "them",
+          "text": "we have the same 2am. that is either fate or insomnia."
+        }
+      ]
+    },
+    {
+      "id": "thea",
+      "name": "Thea",
+      "age": 22,
+      "campus": "NYU",
+      "archetype": {
+        "name": "The Shoegazer",
+        "description": "Everything through a wall of reverb, and better for it."
+      },
+      "week": {
+        "artist": "Slowdive",
+        "plays": 33,
+        "stat": "33 PLAYS · UP 11"
+      },
+      "likedYou": true,
+      "topArtists": [
+        {
+          "name": "Slowdive",
+          "rank": 48
+        },
+        {
+          "name": "Cocteau Twins",
+          "rank": 44
+        },
+        {
+          "name": "My Bloody Valentine",
+          "rank": 55
+        },
+        {
+          "name": "Beach House",
+          "rank": 46
+        },
+        {
+          "name": "Mazzy Star",
+          "rank": 64
+        },
+        {
+          "name": "Japanese Breakfast",
+          "rank": 66
+        },
+        {
+          "name": "Big Thief",
+          "rank": 58
+        },
+        {
+          "name": "Alex G",
+          "rank": 22
+        }
+      ],
+      "topTracks": [
+        {
+          "title": "Alison",
+          "artist": "Slowdive"
+        },
+        {
+          "title": "When the Sun Hits",
+          "artist": "Slowdive"
+        },
+        {
+          "title": "Cherry-coloured Funk",
+          "artist": "Cocteau Twins"
+        },
+        {
+          "title": "Heaven or Las Vegas",
+          "artist": "Cocteau Twins"
+        },
+        {
+          "title": "Only Shallow",
+          "artist": "My Bloody Valentine"
+        },
+        {
+          "title": "Sometimes",
+          "artist": "My Bloody Valentine"
+        },
+        {
+          "title": "Space Song",
+          "artist": "Beach House"
+        }
+      ],
+      "listeningHours": [
+        40,
+        60,
+        76,
+        70,
+        48,
+        26,
+        16,
+        18,
+        24,
+        30,
+        38,
+        44,
+        50,
+        56,
+        60,
+        66,
+        70,
+        74,
+        78,
+        72,
+        64,
+        56,
+        48,
+        44
       ],
       "tags": [
         "dream pop",
         "shoegaze",
-        "lo-fi",
-        "bedroom pop",
+        "folk",
+        "noise",
+        "indie pop",
+        "melancholic"
+      ],
+      "energy": {
+        "night": 64,
+        "emotional": 76,
+        "highEnergy": 52,
+        "exploratory": 58
+      },
+      "reason": "DREAM POP, BOTH OF YOU",
+      "reasonSoft": "Lives in the room next to yours.",
+      "chips": [
+        {
+          "label": "Slowdive",
+          "rare": false
+        },
+        {
+          "label": "Cocteau Twins",
+          "rare": false
+        },
+        {
+          "label": "shoegaze",
+          "rare": false
+        }
+      ],
+      "line": "Your Cocteau Twins sits right next to her Slowdive. Nobody has to compromise.",
+      "flirt": "She has been standing in the next room this whole time.",
+      "song": {
+        "title": "Cherry-coloured Funk",
+        "artist": "Cocteau Twins"
+      },
+      "hoursNote": "SHE FADES OUT BY 1AM",
+      "rarityNote": "ONE SHARED WORLD",
+      "quiz": {
+        "options": [
+          "Cocteau Twins",
+          "Slowdive",
+          "My Bloody Valentine",
+          "Grouper"
+        ],
+        "answer": "Slowdive"
+      },
+      "swap": {
+        "track": "Alison — Slowdive",
+        "verdict": "Two versions of the same feeling."
+      },
+      "takeAnswer": 62,
+      "thread": [
+        {
+          "sender": "them",
+          "text": "cocteau twins at 44? criminal. promote them."
+        }
+      ]
+    },
+    {
+      "id": "juno",
+      "name": "Juno",
+      "age": 21,
+      "campus": "NYU",
+      "archetype": {
+        "name": "The Maximalist",
+        "description": "Loud, restless, and entirely unembarrassed about any of it."
+      },
+      "week": {
+        "artist": "Yves Tumor",
+        "plays": 52,
+        "stat": "52 PLAYS · LOUDEST WEEK HERE"
+      },
+      "likedYou": false,
+      "topArtists": [
+        {
+          "name": "Yves Tumor",
+          "rank": 31
+        },
+        {
+          "name": "Arca",
+          "rank": 38
+        },
+        {
+          "name": "Dean Blunt",
+          "rank": 35
+        },
+        {
+          "name": "Fiona Apple",
+          "rank": 61
+        },
+        {
+          "name": "Alex G",
+          "rank": 22
+        },
+        {
+          "name": "Tirzah",
+          "rank": 42
+        },
+        {
+          "name": "Japanese Breakfast",
+          "rank": 66
+        },
+        {
+          "name": "Weyes Blood",
+          "rank": 59
+        }
+      ],
+      "topTracks": [
+        {
+          "title": "Kerosene!",
+          "artist": "Yves Tumor"
+        },
+        {
+          "title": "Gospel for a New Century",
+          "artist": "Yves Tumor"
+        },
+        {
+          "title": "Nonbinary",
+          "artist": "Arca"
+        },
+        {
+          "title": "Time",
+          "artist": "Arca"
+        },
+        {
+          "title": "The Pedigree",
+          "artist": "Dean Blunt"
+        },
+        {
+          "title": "Look What You’ve Done",
+          "artist": "Dean Blunt"
+        },
+        {
+          "title": "I Want You to Love Me",
+          "artist": "Fiona Apple"
+        }
+      ],
+      "listeningHours": [
+        30,
+        42,
+        50,
+        44,
+        26,
+        14,
+        10,
+        14,
+        26,
+        40,
+        52,
+        60,
+        68,
+        74,
+        80,
+        86,
+        92,
+        100,
+        96,
+        80,
+        64,
+        50,
+        40,
+        34
+      ],
+      "tags": [
+        "experimental",
+        "art rock",
+        "electronic",
+        "singer-songwriter",
+        "indie rock",
         "euphoric"
       ],
       "energy": {
-        "night": 27,
-        "emotional": 54,
-        "highEnergy": 55,
-        "exploratory": 34
+        "night": 38,
+        "emotional": 62,
+        "highEnergy": 91,
+        "exploratory": 84
       },
-      "match": {
-        "score": 45,
-        "reasons": [
-          "both into wistful"
+      "reason": "SHARED: YVES TUMOR",
+      "reasonSoft": "Your loud record, all week long.",
+      "chips": [
+        {
+          "label": "Yves Tumor",
+          "rare": true
+        },
+        {
+          "label": "Fiona Apple",
+          "rare": false
+        },
+        {
+          "label": "art rock",
+          "rare": false
+        }
+      ],
+      "line": "Your one loud record is her entire personality. That could go somewhere.",
+      "flirt": "Your loudest record is her whole personality.",
+      "song": {
+        "title": "Kerosene!",
+        "artist": "Yves Tumor"
+      },
+      "hoursNote": "SHE PEAKS AT 5PM",
+      "rarityNote": "1 DEEP CUT SHARED",
+      "quiz": {
+        "options": [
+          "Fiona Apple",
+          "Dean Blunt",
+          "Yves Tumor",
+          "Alex G"
         ],
-        "sharedArtists": [],
-        "sharedSong": null
-      }
+        "answer": "Yves Tumor"
+      },
+      "swap": {
+        "track": "Gospel for a New Century — Yves Tumor",
+        "verdict": "You sent quiet. She sent a riot. Balanced."
+      },
+      "takeAnswer": 22,
+      "thread": [
+        {
+          "sender": "them",
+          "text": "daylight listener. i know. i am working on it."
+        }
+      ]
+    },
+    {
+      "id": "vesper",
+      "name": "Vesper",
+      "age": 22,
+      "campus": "NYU",
+      "archetype": {
+        "name": "The Early Riser",
+        "description": "Does her best listening while the rest of you are still asleep."
+      },
+      "week": {
+        "artist": "Cocteau Twins",
+        "plays": 24,
+        "stat": "24 PLAYS · MOSTLY BEFORE 9AM"
+      },
+      "likedYou": false,
+      "topArtists": [
+        {
+          "name": "Cocteau Twins",
+          "rank": 44
+        },
+        {
+          "name": "Slowdive",
+          "rank": 48
+        },
+        {
+          "name": "Beach House",
+          "rank": 46
+        },
+        {
+          "name": "Weyes Blood",
+          "rank": 59
+        },
+        {
+          "name": "Sufjan Stevens",
+          "rank": 57
+        },
+        {
+          "name": "Mazzy Star",
+          "rank": 64
+        },
+        {
+          "name": "Japanese Breakfast",
+          "rank": 66
+        },
+        {
+          "name": "Big Thief",
+          "rank": 58
+        }
+      ],
+      "topTracks": [
+        {
+          "title": "Cherry-coloured Funk",
+          "artist": "Cocteau Twins"
+        },
+        {
+          "title": "Heaven or Las Vegas",
+          "artist": "Cocteau Twins"
+        },
+        {
+          "title": "Alison",
+          "artist": "Slowdive"
+        },
+        {
+          "title": "When the Sun Hits",
+          "artist": "Slowdive"
+        },
+        {
+          "title": "Space Song",
+          "artist": "Beach House"
+        },
+        {
+          "title": "Myth",
+          "artist": "Beach House"
+        },
+        {
+          "title": "Andromeda",
+          "artist": "Weyes Blood"
+        }
+      ],
+      "listeningHours": [
+        12,
+        8,
+        6,
+        6,
+        10,
+        30,
+        58,
+        80,
+        94,
+        100,
+        88,
+        70,
+        58,
+        52,
+        48,
+        50,
+        54,
+        58,
+        60,
+        56,
+        48,
+        36,
+        24,
+        16
+      ],
+      "tags": [
+        "dream pop",
+        "shoegaze",
+        "indie folk",
+        "folk",
+        "indie pop",
+        "melancholic"
+      ],
+      "energy": {
+        "night": 18,
+        "emotional": 66,
+        "highEnergy": 47,
+        "exploratory": 49
+      },
+      "reason": "TASTE WORLDS TOUCH",
+      "reasonSoft": "Same records, opposite hours.",
+      "chips": [
+        {
+          "label": "Cocteau Twins",
+          "rare": false
+        },
+        {
+          "label": "Slowdive",
+          "rare": false
+        },
+        {
+          "label": "ambient",
+          "rare": false
+        }
+      ],
+      "line": "You barely overlap — except in dream pop, and she gets up at six. Somebody would have to bend.",
+      "flirt": "She is asleep by the time you start.",
+      "song": null,
+      "hoursNote": "YOUR HOURS ARE INVERTED",
+      "rarityNote": "NO DEEP CUTS SHARED",
+      "quiz": {
+        "options": [
+          "Slowdive",
+          "Mazzy Star",
+          "Cocteau Twins",
+          "Duster"
+        ],
+        "answer": "Cocteau Twins"
+      },
+      "swap": {
+        "track": "Fade Into You — Mazzy Star",
+        "verdict": "Yours is for 2am. Hers is for 7. Same song, really."
+      },
+      "takeAnswer": 55,
+      "thread": [
+        {
+          "sender": "them",
+          "text": "i am asleep by eleven. this will never work. send the record anyway."
+        }
+      ]
     }
   ]
 }

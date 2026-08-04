@@ -10,13 +10,13 @@ import { Text } from '@/components/ui/text';
 import { Body, Display, Mono } from '@/components/ui/typography';
 import { Waveform } from '@/components/ui/waveform';
 import { getMe } from '@/lib/seed';
-import { useLikedIds } from '@/lib/store';
+import { usePersistedState } from '@/lib/store';
 import { buildWeeklyDrop, formatHour } from '@/lib/weekly';
 
 /** The week in sound — a Wrapped-style moment built only from real numbers. */
 export default function WeeklyDropScreen() {
   const me = getMe();
-  const likedIds = useLikedIds();
+  const { likedIds } = usePersistedState();
   const drop = React.useMemo(() => buildWeeklyDrop(me, likedIds), [me, likedIds]);
 
   return (

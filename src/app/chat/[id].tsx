@@ -8,14 +8,23 @@ import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
 import { Body, Mono } from '@/components/ui/typography';
 import { getIcebreakers } from '@/lib/ai';
-import { getMe, getUserById } from '@/lib/seed';
+import { getMe, getUserById, type ChatMessage } from '@/lib/seed';
 import { cn } from '@/lib/utils';
 
 export default function ChatByIdScreen() {
   const { id, opener } = useLocalSearchParams<{ id: string; opener?: string }>();
   const user = getUserById(id);
   const scrollRef = React.useRef<ScrollView>(null);
-  const [messages, setMessages] = React.useState(user?.chatThread ?? []);
+  // v2 seeds each thread with the line they opened on.
+  const [messages, setMessages] = React.useState<ChatMessage[]>(
+    () =>
+      (user?.thread ?? []).map((entry, i) => ({
+        id: `seed-${i}`,
+        sender: entry.sender,
+        text: entry.text,
+        sentAt: new Date().toISOString(),
+      }))
+  );
   const [draft, setDraft] = React.useState(opener ?? '');
   const [suggestions, setSuggestions] = React.useState<string[] | null>(null);
   const [suggesting, setSuggesting] = React.useState(false);
@@ -23,7 +32,7 @@ export default function ChatByIdScreen() {
   const handleSend = () => {
     const text = draft.trim();
     if (!text) return;
-    setMessages((prev) => [
+    setMessages((prev: ChatMessage[]) => [
       ...prev,
       { id: `local-${Date.now()}`, sender: 'me', text, sentAt: new Date().toISOString() },
     ]);
@@ -76,13 +85,12 @@ export default function ChatByIdScreen() {
           ref={scrollRef}
           contentContainerClassName="gap-3 px-4 py-4"
           onContentSizeChange={() => scrollRef.current?.scrollToEnd({ animated: false })}>
-          {user.opener ? (
-            <View className="items-center pb-1">
-              <View className="rounded-full bg-card px-4 py-2">
-                <Mono className="text-center">{user.opener}</Mono>
-              </View>
+          {/* Why this thread exists, stated once at the top. */}
+          <View className="items-center pb-1">
+            <View className="rounded-full bg-card px-4 py-2">
+              <Mono className="text-center">{user.reason} · Freq {user.match.score}</Mono>
             </View>
-          ) : null}
+          </View>
 
           {messages.map((message) => (
             <View
