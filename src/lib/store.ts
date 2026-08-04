@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as React from 'react';
 
+import { syncOnboardingComplete, syncProfile } from '@/lib/profile-sync';
 import { getUserById, updateMe, type DiscoverUser, type Me } from '@/lib/seed';
 
 /**
@@ -114,10 +115,16 @@ export function saveProfile(patch: Partial<ProfileDraft>): void {
   if (patch.age !== undefined) mePatch.age = patch.age;
   if (patch.campus !== undefined) mePatch.campus = patch.campus;
   if (Object.keys(mePatch).length > 0) updateMe(mePatch);
+
+  // Push the same answer upstream. Fire-and-forget and failure-tolerant: local
+  // state is already written, so onboarding never waits on the network and a
+  // dropped write costs nothing.
+  void syncProfile(patch).catch(() => {});
 }
 
 export function completeOnboarding(): void {
   setState({ ...state, onboarded: true });
+  void syncOnboardingComplete().catch(() => {});
 }
 
 export function setCardArtist(artist: string): void {

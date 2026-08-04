@@ -10,6 +10,7 @@ import { Platform } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import { useAppFonts } from '@/hooks/use-app-fonts';
+import { useAuth } from '@/lib/auth';
 import { hydrateStore } from '@/lib/store';
 import { NAV_THEME } from '@/lib/theme';
 
@@ -42,13 +43,18 @@ export default function RootLayout() {
     colorScheme.set('dark');
   }, []);
 
+  // Auth resolves to 'local' immediately when no project is configured, so this
+  // gate costs nothing while the backend is being wired.
+  const { mode } = useAuth();
+  const authReady = mode !== 'loading';
+
   React.useEffect(() => {
-    if ((fontsLoaded || fontError) && storeReady) {
+    if ((fontsLoaded || fontError) && storeReady && authReady) {
       SplashScreen.hideAsync();
     }
-  }, [fontsLoaded, fontError, storeReady]);
+  }, [fontsLoaded, fontError, storeReady, authReady]);
 
-  if ((!fontsLoaded && !fontError) || !storeReady) {
+  if ((!fontsLoaded && !fontError) || !storeReady || !authReady) {
     return null;
   }
 
