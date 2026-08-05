@@ -126,6 +126,18 @@ export function updateMe(patch: Partial<Me>): void {
   invalidateScores();
 }
 
+/**
+ * Swap the whole corpus for one loaded from Postgres — mock and real profiles
+ * together, whatever RLS lets this signed-in user see (own row + every mock +
+ * anyone matched). Score.ts is unchanged: it already takes `BaseProfile[]` and
+ * has never known where its input came from.
+ */
+export function setRemoteProfiles(me: Me, users: DiscoverUser[]): void {
+  seed.me = me;
+  seed.users = users;
+  invalidateScores();
+}
+
 /** Every user, best frequency first — scores computed live, never read from the seed. */
 export function getUsers(): DiscoverUser[] {
   return seed.users.map(withLiveMatch).sort((a, b) => b.match.score - a.match.score);

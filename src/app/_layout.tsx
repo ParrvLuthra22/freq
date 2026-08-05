@@ -11,7 +11,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import { useAppFonts } from '@/hooks/use-app-fonts';
 import { useAuth } from '@/lib/auth';
-import { hydrateStore } from '@/lib/store';
+import { hydrateStore, reconcileWithSupabase } from '@/lib/store';
 import { NAV_THEME } from '@/lib/theme';
 
 SplashScreen.preventAutoHideAsync();
@@ -45,8 +45,16 @@ export default function RootLayout() {
 
   // Auth resolves to 'local' immediately when no project is configured, so this
   // gate costs nothing while the backend is being wired.
-  const { mode } = useAuth();
+  const { mode, session } = useAuth();
   const authReady = mode !== 'loading';
+
+  // Step two of hydration, deliberately not part of the paint gate above: the
+  // cache already answered every screen's first read, so reconciling against
+  // Supabase happens in the background and the store's own subscribers pick up
+  // whatever changes once it lands.
+  React.useEffect(() => {
+    if (session) void reconcileWithSupabase(session);
+  }, [session]);
 
   React.useEffect(() => {
     if ((fontsLoaded || fontError) && storeReady && authReady) {
