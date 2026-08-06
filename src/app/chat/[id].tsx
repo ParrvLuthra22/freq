@@ -8,43 +8,125 @@ import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
 import { Body, Display, Mono } from '@/components/ui/typography';
 import { getIcebreakers } from '@/lib/ai';
-import { getMe, getUserById, type ChatMessage } from '@/lib/seed';
-import { cn } from '@/lib/utils';
+import {
+  fetchMessages,
+  getMatchId,
+  sendMessage,
+  subscribeToThread,
+  type SongBody,
+  type StoredMessage,
+} from '@/lib/chat';
+import { markRead } from '@/lib/store';
+import { getMe, getUserById } from '@/lib/seed';
+
+/**
+ * One rendered line in the thread — the DB's `StoredMessage` plus a locally
+ * generated one waiting on its round trip. `pending` is dropped the moment the
+ * real row for it lands, whether that arrives as the insert's own return value
+ * or, for anyone else's message, over realtime.
+ */
+type Line = {
+  id: string;
+  fromMe: boolean;
+  type: StoredMessage['type'];
+  body: Record<string, unknown>;
+  pending?: boolean;
+};
+
+function fromStored(message: StoredMessage, meSlug: string): Line {
+  return {
+    id: message.id,
+    fromMe: message.senderSlug === meSlug,
+    type: message.type,
+    body: message.body,
+  };
+}
 
 export default function ChatByIdScreen() {
   const { id, opener } = useLocalSearchParams<{ id: string; opener?: string }>();
   const user = getUserById(id);
+  const me = getMe();
   const scrollRef = React.useRef<ScrollView>(null);
-  // v2 seeds each thread with the line they opened on.
-  const [messages, setMessages] = React.useState<ChatMessage[]>(
+
+  // Seed the thread with the opening line until the real history (or the
+  // absence of one — no match row yet, or no project configured) resolves.
+  const [lines, setLines] = React.useState<Line[]>(
     () =>
       (user?.thread ?? []).map((entry, i) => ({
         id: `seed-${i}`,
-        sender: entry.sender,
-        text: entry.text,
-        sentAt: new Date().toISOString(),
+        fromMe: entry.sender === 'me',
+        type: 'text' as const,
+        body: { text: entry.text },
       }))
   );
+  const [matchId, setMatchId] = React.useState<string | null>(null);
   const [draft, setDraft] = React.useState(opener ?? '');
   const [suggestions, setSuggestions] = React.useState<string[] | null>(null);
   const [suggesting, setSuggesting] = React.useState(false);
 
+  // Opening a thread — from anywhere, not just the reveal screen — is what
+  // earns it being read.
+  React.useEffect(() => {
+    if (user) markRead(user.id);
+  }, [user]);
+
+  // Resolve the match, load its real history, and stay subscribed to it.
+  // Local mode (no project, or no match row yet) leaves the seeded thread as
+  // the whole conversation, exactly as it already behaved before Supabase.
+  React.useEffect(() => {
+    if (!user) return;
+    let cancelled = false;
+
+    getMatchId(user.id).then((mid) => {
+      if (cancelled || !mid) return;
+      setMatchId(mid);
+
+      fetchMessages(mid).then((history) => {
+        if (cancelled || history.length === 0) return;
+        setLines(history.map((m) => fromStored(m, me.id)));
+      });
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [user, me.id]);
+
+  React.useEffect(() => {
+    if (!matchId) return;
+
+    return subscribeToThread(matchId, (message) => {
+      // Our own message already exists locally via the optimistic insert —
+      // realtime would otherwise echo it back as a second line.
+      if (message.senderSlug === me.id) return;
+      setLines((prev) =>
+        prev.some((line) => line.id === message.id) ? prev : [...prev, fromStored(message, me.id)]
+      );
+    });
+  }, [matchId, me.id]);
+
   const handleSend = () => {
     const text = draft.trim();
-    if (!text) return;
-    setMessages((prev: ChatMessage[]) => [
-      ...prev,
-      { id: `local-${Date.now()}`, sender: 'me', text, sentAt: new Date().toISOString() },
-    ]);
+    if (!text || !user) return;
+
+    const tempId = `local-${Date.now()}`;
+    setLines((prev) => [...prev, { id: tempId, fromMe: true, type: 'text', body: { text }, pending: true }]);
     setDraft('');
     setSuggestions(null);
+
+    if (!matchId) return; // Local mode: the optimistic line above is the whole write.
+
+    sendMessage(matchId, 'text', { text }).then((saved) => {
+      setLines((prev) =>
+        prev.map((line) => (line.id === tempId ? (saved ? fromStored(saved, me.id) : { ...line, pending: false }) : line))
+      );
+    });
   };
 
   // §6.3 — refreshable icebreakers, in case the thread stalls.
   const handleSuggest = React.useCallback(async () => {
     if (!user) return;
     setSuggesting(true);
-    const me = getMe();
     const result = await getIcebreakers(
       `${me.id}:${user.id}`,
       {
@@ -58,7 +140,7 @@ export default function ChatByIdScreen() {
     );
     setSuggestions(result.openers);
     setSuggesting(false);
-  }, [user]);
+  }, [user, me]);
 
   if (!user) {
     return (
@@ -100,20 +182,37 @@ export default function ChatByIdScreen() {
             </View>
           </View>
 
-          {messages.map((message) => (
-            <View
-              key={message.id}
-              className={cn(
-                'max-w-[80%] rounded-2xl px-4 py-2.5',
-                message.sender === 'me' ? 'self-end bg-primary' : 'self-start bg-card'
-              )}>
-              <Body className={message.sender === 'me' ? 'text-primary-foreground' : 'text-card-foreground'}>
-                {message.text}
-              </Body>
-            </View>
-          ))}
+          {lines.map((line) =>
+            line.type === 'song' ? (
+              <View
+                key={line.id}
+                className={
+                  line.fromMe
+                    ? 'max-w-[80%] gap-0.5 self-end rounded-2xl border border-accent bg-accent/10 px-4 py-2.5'
+                    : 'max-w-[80%] gap-0.5 self-start rounded-2xl border border-border bg-card px-4 py-2.5'
+                }>
+                <Mono className="text-accent">Shared song</Mono>
+                <Body>
+                  {(line.body as SongBody).title} — {(line.body as SongBody).artist}
+                </Body>
+              </View>
+            ) : (
+              <View
+                key={line.id}
+                style={line.pending ? { opacity: 0.6 } : undefined}
+                className={
+                  line.fromMe
+                    ? 'max-w-[80%] self-end rounded-2xl bg-primary px-4 py-2.5'
+                    : 'max-w-[80%] self-start rounded-2xl bg-card px-4 py-2.5'
+                }>
+                <Body className={line.fromMe ? 'text-primary-foreground' : 'text-card-foreground'}>
+                  {String((line.body as { text?: string }).text ?? '')}
+                </Body>
+              </View>
+            )
+          )}
 
-          {messages.length === 0 ? (
+          {lines.length === 0 ? (
             <Body className="pt-2 text-center text-muted-foreground">
               No messages yet — say something.
             </Body>
