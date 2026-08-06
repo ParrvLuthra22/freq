@@ -105,6 +105,22 @@ export async function remoteConfirmMatch(targetSlug: string): Promise<void> {
   await remoteLike(targetSlug);
 }
 
+/**
+ * Ask the mock to "like back" after a believable delay, server-side.
+ *
+ * Only meaningful when `attempt_match` just reported the pair as not-yet-mutual
+ * for a mock candidate — calling this for anyone else is a harmless no-op the
+ * function itself refuses (see `schedule-match`). Fire-and-forget: the actual
+ * confirmation arrives later as a `notifications` row over realtime, which is
+ * what `subscribeToDelayedMatches` below is for.
+ */
+export async function scheduleMatch(targetSlug: string): Promise<void> {
+  const target = getProfileUuid(targetSlug);
+  if (!supabase || !target) return;
+
+  await supabase.functions.invoke('schedule-match', { body: { target_profile_id: target } });
+}
+
 export async function remoteMarkRead(targetSlug: string): Promise<void> {
   const me = getMyProfileId();
   const target = getProfileUuid(targetSlug);
@@ -123,6 +139,39 @@ export async function remoteSetCardArtist(artist: string): Promise<void> {
   if (!supabase || !me) return;
 
   await supabase.from('profiles').update({ card_artist: artist }).eq('id', me);
+}
+
+/**
+ * Live match confirmations, for whenever a delayed like-back actually lands.
+ *
+ * `attempt_match`'s instant path already inserts the same `match` notification
+ * the client also learns about immediately via its own optimistic update — the
+ * caller is expected to ignore rows for a slug it already has in `matchIds`,
+ * which is exactly what a delayed confirmation is: a slug the caller does not
+ * have yet.
+ */
+export function subscribeToDelayedMatches(onMatch: (targetSlug: string) => void): () => void {
+  const client = supabase;
+  const me = getMyProfileId();
+  if (!client || !me) return () => {};
+
+  const channel = client
+    .channel(`notifications:${me}`)
+    .on(
+      'postgres_changes',
+      { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${me}` },
+      (payload) => {
+        const row = payload.new as { type: string; payload: { other_id?: string } };
+        if (row.type !== 'match') return;
+        const slug = row.payload.other_id ? getSlugForUuid(row.payload.other_id) : undefined;
+        if (slug) onMatch(slug);
+      }
+    )
+    .subscribe();
+
+  return () => {
+    client.removeChannel(channel);
+  };
 }
 
 /** Re-exported so callers that already have a session don't need a second import. */

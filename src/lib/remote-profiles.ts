@@ -84,6 +84,7 @@ function mapCandidate(row: ProfileRow): DiscoverUser {
     // Overwritten by scorePair on every read — placeholder until then.
     match: { score: 0, reasons: [], sharedArtists: [], sharedSong: null },
     likedYou: row.liked_you,
+    isMock: row.is_mock,
     reason: row.reason ?? '',
     reasonSoft: row.reason_soft ?? '',
     chips: row.chips ?? [],

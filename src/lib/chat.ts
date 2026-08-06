@@ -97,6 +97,18 @@ export async function fetchMessages(matchId: string): Promise<StoredMessage[]> {
   return (data as MessageRow[]).map(mapRow).filter((m): m is StoredMessage => m !== null);
 }
 
+/**
+ * Ask the `mock-reply` Edge Function to write the next line as this mock
+ * candidate — fire-and-forget from the client's point of view. It calls the
+ * LLM and inserts the reply itself; the reply shows up here over the same
+ * realtime subscription as anyone else's message, never as an HTTP response
+ * body the caller has to do something with.
+ */
+export async function triggerMockReply(matchId: string): Promise<void> {
+  if (!supabase) return;
+  await supabase.functions.invoke('mock-reply', { body: { match_id: matchId } });
+}
+
 /** Insert and return the authoritative row — used to replace the optimistic local echo. */
 export async function sendMessage(
   matchId: string,

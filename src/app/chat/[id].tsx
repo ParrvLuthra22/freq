@@ -13,6 +13,7 @@ import {
   getMatchId,
   sendMessage,
   subscribeToThread,
+  triggerMockReply,
   type SongBody,
   type StoredMessage,
 } from '@/lib/chat';
@@ -120,6 +121,12 @@ export default function ChatByIdScreen() {
       setLines((prev) =>
         prev.map((line) => (line.id === tempId ? (saved ? fromStored(saved, me.id) : { ...line, pending: false }) : line))
       );
+
+      // Fire-and-forget — the reply itself arrives as an ordinary realtime
+      // INSERT a few seconds later, not as anything in this response. A real
+      // signed-in match never reaches this: the function checks is_mock itself
+      // and no-ops, but skipping the call here saves the round trip.
+      if (saved && user.isMock) void triggerMockReply(matchId).catch(() => {});
     });
   };
 

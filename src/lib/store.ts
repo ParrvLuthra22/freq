@@ -10,10 +10,13 @@ import {
   remoteMarkRead,
   remotePass,
   remoteSetCardArtist,
+  scheduleMatch,
+  subscribeToDelayedMatches,
 } from '@/lib/remote-store';
 import { syncOnboardingComplete, syncProfile } from '@/lib/profile-sync';
 import { getUserById, updateMe, type DiscoverUser, type Me } from '@/lib/seed';
 import { supabase } from '@/lib/supabase';
+import { showMatchToast } from '@/lib/toast';
 
 /**
  * Persistence for everything the user actually creates: their profile, who
@@ -66,6 +69,8 @@ let state: PersistedState = EMPTY;
 let hydrated = false;
 /** Set once a session's corpus + snapshot have been reconciled, so it only runs once per session. */
 let reconciledFor: string | null = null;
+/** Torn down and re-established alongside `reconciledFor`, not left running across sign-out. */
+let stopWatchingForDelayedMatches: (() => void) | null = null;
 
 const listeners = new Set<() => void>();
 
@@ -170,6 +175,17 @@ export async function reconcileWithSupabase(session: Session | null): Promise<vo
   if (snapshot.profile.age !== null) mePatch.age = snapshot.profile.age;
   if (snapshot.profile.campus) mePatch.campus = snapshot.profile.campus;
   if (Object.keys(mePatch).length > 0) updateMe(mePatch);
+
+  // A delayed like-back confirms on the server, not on a client timer, so the
+  // only way to learn it happened — on whatever screen the user is currently
+  // on — is to stay subscribed for it. Guards against a slug the snapshot
+  // above already knows about, which covers the instant-match case: that path
+  // inserts the same `match` notification this listens for, and it must not
+  // re-fire the toast for a match the optimistic update already showed.
+  stopWatchingForDelayedMatches?.();
+  stopWatchingForDelayedMatches = subscribeToDelayedMatches((slug) => {
+    if (!state.matchIds.includes(slug)) confirmMatch(slug);
+  });
 }
 
 /** Save one or more onboarding answers, and mirror them onto the live profile. */
@@ -217,6 +233,12 @@ export function pass(userId: string): void {
  * so the UI never pauses for the network. `attempt_match` runs in the
  * background afterward to make the same decision server-side and persist it;
  * for the current mock population the two cannot disagree.
+ *
+ * When the server comes back and says it is genuinely not mutual yet (as
+ * opposed to the call simply failing — those two cases are told apart by
+ * `false` vs `null`), that is the cue to ask `schedule-match` to make it so a
+ * few seconds later, server-side, rather than trusting a client-side timer to
+ * still be running when it should fire.
  */
 export function like(userId: string): boolean {
   const user = getUserById(userId);
@@ -228,12 +250,19 @@ export function like(userId: string): boolean {
     matchIds: mutual && !state.matchIds.includes(userId) ? [...state.matchIds, userId] : state.matchIds,
   });
 
-  void remoteLike(userId).catch(() => {});
+  void remoteLike(userId).then((matched) => {
+    if (matched === false) void scheduleMatch(userId).catch(() => {});
+  }).catch(() => {});
 
   return mutual;
 }
 
-/** A pending like came back mutual — used for the delayed match. */
+/**
+ * A pending like came back mutual — the single place a match transitions from
+ * "pending" to "real", whether that is the local setTimeout fallback (no
+ * project configured) or a delayed confirmation arriving over realtime. Both
+ * paths funnel through here, so the toast only has to be wired in one place.
+ */
 export function confirmMatch(userId: string): void {
   if (state.matchIds.includes(userId)) return;
   setState({
@@ -242,6 +271,7 @@ export function confirmMatch(userId: string): void {
     unreadIds: state.unreadIds.includes(userId) ? state.unreadIds : [...state.unreadIds, userId],
   });
   void remoteConfirmMatch(userId).catch(() => {});
+  showMatchToast(userId);
 }
 
 export function markRead(userId: string): void {
@@ -253,6 +283,8 @@ export function markRead(userId: string): void {
 /** Wipe everything — used by the "start over" affordance. */
 export function resetStore(): void {
   reconciledFor = null;
+  stopWatchingForDelayedMatches?.();
+  stopWatchingForDelayedMatches = null;
   setState({ ...EMPTY });
 }
 

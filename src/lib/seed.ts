@@ -47,6 +47,8 @@ export type DiscoverUser = BaseProfile & {
   match: Match;
   /** They already swiped right on you, so liking back matches instantly. */
   likedYou: boolean;
+  /** A scripted candidate, not a real signed-in person — the only kind that gets an AI-voiced reply. */
+  isMock: boolean;
   /** Editorial copy authored per person — the algorithm supplies the numbers, not the voice. */
   reason: string;
   reasonSoft: string;
@@ -65,6 +67,9 @@ export type DiscoverUser = BaseProfile & {
 type SeedData = { me: Me; users: DiscoverUser[] };
 
 const seed = rawSeed as unknown as SeedData;
+// The bundled JSON has no is_mock column — everything in it is the mock pool by
+// construction, unlike the DB corpus where mock/real profiles sit side by side.
+seed.users = seed.users.map((user) => ({ ...user, isMock: true }));
 
 /**
  * Rarity is only meaningful against a population, so the corpus is built once

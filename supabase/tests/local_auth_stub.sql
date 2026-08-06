@@ -34,5 +34,18 @@ begin
   if not exists (select 1 from pg_roles where rolname = 'authenticated') then
     create role authenticated nologin;
   end if;
+  if not exists (select 1 from pg_roles where rolname = 'service_role') then
+    create role service_role nologin bypassrls;
+  end if;
 end
 $$;
+
+-- On a real project service_role already has full access to every table in
+-- public, on top of the RLS bypass above — that is what lets Edge Functions do
+-- privileged writes. Granted explicitly here only because a fresh local
+-- Postgres has nothing configuring that by default; this line has no
+-- equivalent to apply against an actual Supabase project.
+grant usage on schema public to service_role;
+grant all on all tables in schema public to service_role;
+grant all on all sequences in schema public to service_role;
+alter default privileges in schema public grant all on tables to service_role;
