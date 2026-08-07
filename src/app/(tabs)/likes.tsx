@@ -16,19 +16,20 @@ import { cn } from '@/lib/utils';
 type Tab = 'in' | 'out';
 
 export default function LikesScreen() {
-  const { likedIds, matchIds, passedIds } = usePersistedState();
+  const { likedIds, matchIds, passedIds, admirerIds } = usePersistedState();
   const { colorScheme } = useColorScheme();
   const theme = THEME[colorScheme ?? 'dark'];
   const [tab, setTab] = React.useState<Tab>('in');
 
-  // Inbound: they swiped right on you and you have not decided yet.
-  const inbound = React.useMemo(
-    () =>
-      getAdmirers().filter(
-        (user) => !likedIds.includes(user.id) && !passedIds.includes(user.id)
-      ),
-    [likedIds, passedIds]
-  );
+  // Inbound: they swiped right on you and you have not decided yet. Prefers
+  // the real `likes` rows synced from Supabase; falls back to the seed's
+  // static `likedYou` pretence only when nothing has synced yet — local mode,
+  // or a signed-in account before its first reconcile has landed.
+  const inbound = React.useMemo(() => {
+    const admirers = admirerIds.map(getUserById).filter((user): user is DiscoverUser => user !== undefined);
+    const source = admirers.length > 0 ? admirers : getAdmirers();
+    return source.filter((user) => !likedIds.includes(user.id) && !passedIds.includes(user.id));
+  }, [admirerIds, likedIds, passedIds]);
 
   // Outbound: you swiped right, and it has not come back mutual yet.
   const outbound = React.useMemo(

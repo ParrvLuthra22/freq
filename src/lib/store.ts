@@ -10,13 +10,15 @@ import {
   remoteMarkRead,
   remotePass,
   remoteSetCardArtist,
+  scheduleAdmirerLike,
   scheduleMatch,
+  subscribeToAdmirerLikes,
   subscribeToDelayedMatches,
 } from '@/lib/remote-store';
 import { syncOnboardingComplete, syncProfile } from '@/lib/profile-sync';
 import { getUserById, updateMe, type DiscoverUser, type Me } from '@/lib/seed';
 import { supabase } from '@/lib/supabase';
-import { showMatchToast } from '@/lib/toast';
+import { showLikeToast, showMatchToast } from '@/lib/toast';
 
 /**
  * Persistence for everything the user actually creates: their profile, who
@@ -51,6 +53,8 @@ export type PersistedState = {
   matchIds: string[];
   /** Threads with something in them you have not opened. */
   unreadIds: string[];
+  /** Who has liked you and you have not yet decided on — the Likes tab's inbound side. */
+  admirerIds: string[];
   /** Which artist you chose to meet people through. Null falls back to your top. */
   cardArtist: string | null;
 };
@@ -62,6 +66,7 @@ const EMPTY: PersistedState = {
   passedIds: [],
   matchIds: [],
   unreadIds: [],
+  admirerIds: [],
   cardArtist: null,
 };
 
@@ -71,6 +76,7 @@ let hydrated = false;
 let reconciledFor: string | null = null;
 /** Torn down and re-established alongside `reconciledFor`, not left running across sign-out. */
 let stopWatchingForDelayedMatches: (() => void) | null = null;
+let stopWatchingForAdmirerLikes: (() => void) | null = null;
 
 const listeners = new Set<() => void>();
 
@@ -114,6 +120,7 @@ export async function hydrateStore(): Promise<void> {
       passedIds: arr(parsed.passedIds),
       matchIds: arr(parsed.matchIds),
       unreadIds: arr(parsed.unreadIds),
+      admirerIds: arr(parsed.admirerIds),
       cardArtist: parsed.cardArtist ?? null,
     };
 
@@ -167,6 +174,7 @@ export async function reconcileWithSupabase(session: Session | null): Promise<vo
     passedIds: snapshot.passedSlugs,
     matchIds: snapshot.matchedSlugs,
     unreadIds: snapshot.unreadSlugs,
+    admirerIds: snapshot.admirerSlugs,
     cardArtist: snapshot.cardArtist ?? state.cardArtist,
   });
 
@@ -186,6 +194,14 @@ export async function reconcileWithSupabase(session: Session | null): Promise<vo
   stopWatchingForDelayedMatches = subscribeToDelayedMatches((slug) => {
     if (!state.matchIds.includes(slug)) confirmMatch(slug);
   });
+
+  // Same idea for a fresh admirer landing live, plus the nudge that can
+  // produce one — fire-and-forget, once per reconciled session. The Edge
+  // Function itself decides whether anything actually happens (see
+  // schedule-like's own comment).
+  stopWatchingForAdmirerLikes?.();
+  stopWatchingForAdmirerLikes = subscribeToAdmirerLikes((slug) => receiveAdmirerLike(slug));
+  void scheduleAdmirerLike().catch(() => {});
 }
 
 /** Save one or more onboarding answers, and mirror them onto the live profile. */
@@ -274,6 +290,18 @@ export function confirmMatch(userId: string): void {
   showMatchToast(userId);
 }
 
+/**
+ * A mock sent a fresh like, landing live over realtime — the Likes-tab
+ * counterpart to `confirmMatch`. Unlike a match, this never unseals a face or
+ * opens a thread; it only adds them to the inbound list and surfaces a toast,
+ * since liking back is still a decision the user has to make.
+ */
+export function receiveAdmirerLike(userId: string): void {
+  if (state.admirerIds.includes(userId)) return;
+  setState({ ...state, admirerIds: [...state.admirerIds, userId] });
+  showLikeToast(userId);
+}
+
 export function markRead(userId: string): void {
   if (!state.unreadIds.includes(userId)) return;
   setState({ ...state, unreadIds: state.unreadIds.filter((id) => id !== userId) });
@@ -285,6 +313,8 @@ export function resetStore(): void {
   reconciledFor = null;
   stopWatchingForDelayedMatches?.();
   stopWatchingForDelayedMatches = null;
+  stopWatchingForAdmirerLikes?.();
+  stopWatchingForAdmirerLikes = null;
   setState({ ...EMPTY });
 }
 

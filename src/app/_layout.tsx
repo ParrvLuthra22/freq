@@ -9,7 +9,7 @@ import * as React from 'react';
 import { Platform } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
-import { MatchToast } from '@/components/ui/match-toast';
+import { NotificationToast } from '@/components/ui/notification-toast';
 import { useAppFonts } from '@/hooks/use-app-fonts';
 import { useAuth } from '@/lib/auth';
 import { hydrateStore, reconcileWithSupabase } from '@/lib/store';
@@ -78,9 +78,10 @@ export default function RootLayout() {
           <Stack.Screen name="onboarding" options={{ presentation: 'modal' }} />
           <Stack.Screen name="share" options={{ presentation: 'modal' }} />
         </Stack>
-        {/* Mounted once, here — a delayed match can land on any screen, and this
-            is the one place guaranteed to be rendered regardless of route. */}
-        <MatchToast />
+        {/* Mounted once, here — a delayed match or a fresh like can land on any
+            screen, and this is the one place guaranteed to be rendered
+            regardless of route. */}
+        <NotificationToast />
         <PortalHost />
       </GestureHandlerRootView>
     </ThemeProvider>

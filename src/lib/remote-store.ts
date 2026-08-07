@@ -20,6 +20,8 @@ export type RemoteSnapshot = {
   passedSlugs: string[];
   matchedSlugs: string[];
   unreadSlugs: string[];
+  /** Who has liked this account — from real `likes` rows, via the controlled RPC. */
+  admirerSlugs: string[];
   cardArtist: string | null;
   profile: { name: string | null; age: number | null; campus: string | null; lookingFor: string | null };
 };
@@ -39,7 +41,7 @@ export async function fetchRemoteSnapshot(): Promise<RemoteSnapshot | null> {
   const me = getMyProfileId();
   if (!supabase || !me) return null;
 
-  const [likes, passes, matches, notifications, profile] = await Promise.all([
+  const [likes, passes, matches, notifications, admirers, profile] = await Promise.all([
     supabase.from('likes').select('to_id').eq('from_id', me),
     supabase.from('passes').select('to_id').eq('from_id', me),
     supabase.from('matches').select('a, b'),
@@ -49,10 +51,13 @@ export async function fetchRemoteSnapshot(): Promise<RemoteSnapshot | null> {
       .eq('user_id', me)
       .eq('type', 'match')
       .eq('read', false),
+    // likes_select_own only lets a client see rows it sent — this is the one
+    // controlled exception, a SECURITY DEFINER RPC rather than a table read.
+    supabase.rpc('get_admirer_ids'),
     supabase.from('profiles').select('name, age, campus, looking_for, card_artist').eq('id', me).single(),
   ]);
 
-  if (likes.error || passes.error || matches.error || notifications.error || profile.error) {
+  if (likes.error || passes.error || matches.error || notifications.error || admirers.error || profile.error) {
     return null;
   }
 
@@ -62,6 +67,9 @@ export async function fetchRemoteSnapshot(): Promise<RemoteSnapshot | null> {
     matchedSlugs: toSlugs(matches.data.flatMap((row) => [row.a, row.b]).filter((id) => id !== me)),
     unreadSlugs: toSlugs(
       notifications.data.map((row) => (row.payload as { other_id?: string }).other_id)
+    ),
+    admirerSlugs: toSlugs(
+      (admirers.data as { from_id: string }[]).map((row) => row.from_id)
     ),
     cardArtist: profile.data.card_artist,
     profile: {
@@ -165,6 +173,49 @@ export function subscribeToDelayedMatches(onMatch: (targetSlug: string) => void)
         if (row.type !== 'match') return;
         const slug = row.payload.other_id ? getSlugForUuid(row.payload.other_id) : undefined;
         if (slug) onMatch(slug);
+      }
+    )
+    .subscribe();
+
+  return () => {
+    client.removeChannel(channel);
+  };
+}
+
+/**
+ * Ask a mock to send a fresh like sometime this session — maybe. The Edge
+ * Function decides whether anything happens at all and to whom; this is a
+ * fire-and-forget nudge, not a request for a specific outcome. The actual
+ * like, if any, arrives later as a `notifications` row over realtime, same as
+ * a delayed match.
+ */
+export async function scheduleAdmirerLike(): Promise<void> {
+  if (!supabase) return;
+  await supabase.functions.invoke('schedule-like', { body: {} });
+}
+
+/**
+ * Live admirer arrivals — the Likes-tab counterpart to
+ * `subscribeToDelayedMatches`. A separate channel rather than folding into
+ * that one: the two notification types drive different UI (a toast that opens
+ * a still-sealed inbound card here, one that unseals a face there), so each
+ * subscription's callback stays doing one thing.
+ */
+export function subscribeToAdmirerLikes(onLike: (fromSlug: string) => void): () => void {
+  const client = supabase;
+  const me = getMyProfileId();
+  if (!client || !me) return () => {};
+
+  const channel = client
+    .channel(`notifications:likes:${me}`)
+    .on(
+      'postgres_changes',
+      { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${me}` },
+      (payload) => {
+        const row = payload.new as { type: string; payload: { from_id?: string } };
+        if (row.type !== 'like') return;
+        const slug = row.payload.from_id ? getSlugForUuid(row.payload.from_id) : undefined;
+        if (slug) onLike(slug);
       }
     )
     .subscribe();

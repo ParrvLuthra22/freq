@@ -1,20 +1,22 @@
 import * as React from 'react';
 
 /**
- * The "IT'S MUTUAL" toast — a global signal, not a screen's local state.
- *
- * A delayed match can land while the user is anywhere in the app: mid-swipe on
- * Discover, reading a different thread, editing their profile. `confirmMatch`
- * in `store.ts` is the single place a match transitions from "pending" to
- * "real" — both for the local setTimeout fallback and for a realtime
- * notification arriving from Supabase — so it is also the single place that
- * calls `showMatchToast`. One trigger point, shown from one component mounted
- * once at the root layout so it renders over whatever screen is active.
+ * The floating notification toast — a global signal, not a screen's local
+ * state. Two things can land while the user is anywhere in the app: a match
+ * confirming (mutual, face unseals) or a mock sending a fresh like (not yet
+ * mutual, face stays sealed). `confirmMatch` and `receiveAdmirerLike` in
+ * store.ts are the only two places either kind actually arrives — both for
+ * the local setTimeout fallback and for a realtime notification — so they are
+ * also the only two places that call into here. One trigger point per kind,
+ * shown from one component mounted once at the root layout.
  */
+
+export type ToastKind = 'match' | 'like';
+type Toast = { userId: string; kind: ToastKind };
 
 const AUTO_DISMISS_MS = 6000;
 
-let userId: string | null = null;
+let toast: Toast | null = null;
 let dismissTimer: ReturnType<typeof setTimeout> | null = null;
 const listeners = new Set<() => void>();
 
@@ -22,17 +24,25 @@ function emit(): void {
   for (const listener of listeners) listener();
 }
 
-export function showMatchToast(targetUserId: string): void {
+function show(targetUserId: string, kind: ToastKind): void {
   if (dismissTimer) clearTimeout(dismissTimer);
-  userId = targetUserId;
+  toast = { userId: targetUserId, kind };
   emit();
-  dismissTimer = setTimeout(dismissMatchToast, AUTO_DISMISS_MS);
+  dismissTimer = setTimeout(dismissToast, AUTO_DISMISS_MS);
 }
 
-export function dismissMatchToast(): void {
+export function showMatchToast(targetUserId: string): void {
+  show(targetUserId, 'match');
+}
+
+export function showLikeToast(targetUserId: string): void {
+  show(targetUserId, 'like');
+}
+
+export function dismissToast(): void {
   if (dismissTimer) clearTimeout(dismissTimer);
   dismissTimer = null;
-  userId = null;
+  toast = null;
   emit();
 }
 
@@ -41,11 +51,11 @@ function subscribe(listener: () => void): () => void {
   return () => listeners.delete(listener);
 }
 
-function getSnapshot(): string | null {
-  return userId;
+function getSnapshot(): Toast | null {
+  return toast;
 }
 
-/** The slug of whoever just matched, or null when there is nothing to show. */
-export function useMatchToast(): string | null {
+/** Whoever just matched or liked you, or null when there is nothing to show. */
+export function useToast(): Toast | null {
   return React.useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
 }
