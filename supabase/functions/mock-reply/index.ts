@@ -5,6 +5,13 @@
 // that mock — never as a fabricated "assistant" — so the thread reads as a
 // person, not a bot bolted onto the UI.
 //
+// Also doubles as where a mock "plays" an in-thread game: when the triggering
+// message is a `quiz`/`take` game-start rather than text, this makes the
+// mock's move in `game_sessions` instead of generating a reply — no LLM call,
+// no new message, just the same session row the human is already looking at
+// picking up a second field. The client calls this function either way; which
+// path runs is decided entirely by the trigger's type.
+//
 // ANTHROPIC_API_KEY lives only in this function's secrets (`supabase secrets
 // set ANTHROPIC_API_KEY=...`), never in the app: the client has no path to it,
 // and nothing here ever echoes it back in a response.
@@ -33,6 +40,12 @@ const GLOBAL_HOURLY_LIMIT = 200;
 const MIN_TYPING_MS = 1100;
 const MAX_TYPING_MS = 3200;
 
+// A game move needs no LLM call, so there is no reason for it to take as long
+// as composing a reply — just enough of a pause that it still reads as
+// "thinking it over" rather than an instant, mechanical response.
+const MIN_MOVE_MS = 900;
+const MAX_MOVE_MS = 2200;
+
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
@@ -47,6 +60,22 @@ type Profile = {
   song: { title?: string; artist?: string } | null;
   line: string | null;
   flirt: string | null;
+  take_answer: number | null;
+};
+
+type QuizState = {
+  mockOptions: string[];
+  mockAnswer: string;
+  userGuess: string | null;
+  userOptions: string[];
+  userAnswer: string;
+  mockGuess: string | null;
+};
+
+type TakeState = {
+  prompt: string;
+  userValue: number | null;
+  mockValue: number | null;
 };
 
 type MessageRow = {
@@ -133,6 +162,52 @@ async function generateReply(mock: Profile, meName: string, messages: MessageRow
   return typeof text === 'string' && text.trim().length > 0 ? text.trim() : null;
 }
 
+/**
+ * The mock's move in a game session — a guess for `quiz`, a locked-in slider
+ * value for `take`. No LLM call: a `quiz` guess is picked uniformly at random
+ * from the same options the human sees (real guessing, not a scripted
+ * correct/incorrect), and a `take` value is the mock's own authored
+ * `take_answer`, already seeded per profile.
+ */
+async function makeGameMove(
+  serviceClient: ReturnType<typeof createClient>,
+  mock: Profile,
+  sessionId: string
+): Promise<{ moved: boolean; reason?: string }> {
+  const { data: session, error } = await serviceClient
+    .from('game_sessions')
+    .select('id, game, state')
+    .eq('id', sessionId)
+    .single();
+  if (error || !session) return { moved: false, reason: 'session not found' };
+
+  const game = session.game as 'quiz' | 'take';
+  let patch: Record<string, unknown>;
+
+  if (game === 'quiz') {
+    const quiz = session.state as QuizState;
+    if (quiz.mockGuess !== null) return { moved: false, reason: 'already moved' };
+    const options = quiz.userOptions;
+    patch = { mockGuess: options[Math.floor(Math.random() * options.length)] };
+  } else {
+    const take = session.state as TakeState;
+    if (take.mockValue !== null) return { moved: false, reason: 'already moved' };
+    patch = { mockValue: mock.take_answer ?? 50 };
+  }
+
+  await sleep(MIN_MOVE_MS + Math.random() * (MAX_MOVE_MS - MIN_MOVE_MS));
+
+  const { error: patchError } = await serviceClient.rpc('patch_game_state', {
+    session_id: sessionId,
+    patch,
+  });
+  if (patchError) {
+    console.error('patch_game_state failed', patchError);
+    return { moved: false, reason: 'patch failed' };
+  }
+  return { moved: true };
+}
+
 Deno.serve(async (req: Request) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
 
@@ -171,7 +246,7 @@ Deno.serve(async (req: Request) => {
   const mockProfileId = match.a === me.id ? match.b : match.a;
   const { data: mock } = await userClient
     .from('profiles')
-    .select('id, name, is_mock, archetype, tags, top_artists, song, line, flirt')
+    .select('id, name, is_mock, archetype, tags, top_artists, song, line, flirt, take_answer')
     .eq('id', mockProfileId)
     .single();
   if (!mock) return jsonResponse({ error: 'Other profile not found' }, 404);
@@ -196,6 +271,29 @@ Deno.serve(async (req: Request) => {
   // a duplicate invoke racing the first one. Either way, do not generate again.
   if (!trigger || trigger.sender_id !== me.id) {
     return jsonResponse({ skipped: true, reason: 'no new human message to reply to' }, 200);
+  }
+
+  // A game-start message needs a move, not a reply — no LLM, no new message,
+  // no usage ledger, just the mock's field in the same session row the human
+  // is already looking at.
+  if (trigger.type === 'quiz' || trigger.type === 'take') {
+    const sessionId = (trigger.body as { session_id?: string }).session_id;
+    if (!sessionId) {
+      return jsonResponse({ skipped: true, reason: 'game message missing session_id' }, 200);
+    }
+
+    const gameServiceClient = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
+    const later = makeGameMove(gameServiceClient, mock as Profile, sessionId);
+
+    // @ts-ignore — EdgeRuntime is a Supabase Edge Functions / Deno Deploy global.
+    if (typeof EdgeRuntime !== 'undefined') {
+      // @ts-ignore — see above.
+      EdgeRuntime.waitUntil(later);
+    } else {
+      await later;
+    }
+
+    return jsonResponse({ accepted: true, kind: 'game_move' });
   }
 
   // Everything past this point touches usage accounting and does privileged
