@@ -3,16 +3,17 @@ import { sendMessage, type StoredMessage } from '@/lib/chat';
 import { supabase } from '@/lib/supabase';
 
 /**
- * The in-thread games: structured messages (`messages.type = 'quiz' | 'take'`)
- * whose live state lives in `game_sessions`, not in the message body. A game
- * message only ever carries `{ session_id }` — the card that renders it reads
- * and subscribes to the session row for everything that actually changes.
+ * The in-thread games: structured messages (`messages.type` = one of the four
+ * game kinds) whose live state lives in `game_sessions`, not in the message
+ * body. A game message only ever carries `{ session_id }` — the card that
+ * renders it reads and subscribes to the session row for everything that
+ * actually changes.
  *
  * One session per (match, game) — `game_sessions` has `unique(match_id, game)`
  * on purpose, so each game gets played once per match, same as the real thing.
  */
 
-export type GameKind = 'quiz' | 'take';
+export type GameKind = 'quiz' | 'take' | 'swap' | 'flirt';
 
 /** Guess Their #1 — two independent one-question rounds, one per direction. */
 export type QuizState = {
@@ -32,11 +33,79 @@ export type TakeState = {
   mockValue: number | null;
 };
 
+/**
+ * Blind Swap — each side sends one track from their own `swapPicks`/`swap`
+ * pool. Both fields start null; neither is meant to be shown until both are
+ * set, same reveal gate as Hot Take, just on two strings instead of two
+ * numbers.
+ */
+export type SwapState = {
+  userTrack: string | null;
+  mockTrack: string | null;
+};
+
+/**
+ * Flirt or Dare — asymmetric, unlike the other three: the human draws and
+ * sends a prompt (drafting happens client-side in the picker sheet, before
+ * anything is written), then only the mock ever fills `response`. There is no
+ * scenario where the human responds to their own card.
+ */
+export type FlirtDareState = {
+  kind: 'flirt' | 'dare';
+  prompt: string;
+  response: string | null;
+};
+
 export type GameSession =
   | { id: string; matchId: string; game: 'quiz'; state: QuizState }
-  | { id: string; matchId: string; game: 'take'; state: TakeState };
+  | { id: string; matchId: string; game: 'take'; state: TakeState }
+  | { id: string; matchId: string; game: 'swap'; state: SwapState }
+  | { id: string; matchId: string; game: 'flirt'; state: FlirtDareState };
 
 const HOT_TAKE_PROMPT = 'First instinct — how much of a match are we, really?';
+
+/** A small authored deck — Flirt or Dare has no seed-data field of its own to draw from. */
+const PROMPT_DECK: { kind: 'flirt' | 'dare'; prompt: string }[] = [
+  {
+    kind: 'flirt',
+    prompt: 'Tell them the song you would play if they walked in right now.',
+  },
+  {
+    kind: 'flirt',
+    prompt: 'Confess the artist you are embarrassingly loyal to.',
+  },
+  {
+    kind: 'flirt',
+    prompt: 'Describe your ideal 2am with them, using only song titles.',
+  },
+  {
+    kind: 'flirt',
+    prompt: 'Name the lyric that would make you fall for someone a little.',
+  },
+  {
+    kind: 'dare',
+    prompt:
+      'Send the last song that made you feel something you did not expect.',
+  },
+  {
+    kind: 'dare',
+    prompt: 'Admit your most indefensible music opinion — no walking it back.',
+  },
+  {
+    kind: 'dare',
+    prompt: 'Argue for the worst artist in your own top five, and mean it.',
+  },
+  {
+    kind: 'dare',
+    prompt:
+      'Defend the genre you talk the most trash about, seriously this time.',
+  },
+];
+
+/** One random prompt — used both for the initial draw and every redraw after it. */
+export function drawPrompt(): { kind: 'flirt' | 'dare'; prompt: string } {
+  return PROMPT_DECK[Math.floor(Math.random() * PROMPT_DECK.length)];
+}
 
 function shuffled<T>(items: T[]): T[] {
   const arr = items.slice();
@@ -95,6 +164,10 @@ function buildTakeState(): TakeState {
   return { prompt: HOT_TAKE_PROMPT, userValue: null, mockValue: null };
 }
 
+function buildSwapState(): SwapState {
+  return { userTrack: null, mockTrack: null };
+}
+
 type SessionRow = {
   id: string;
   match_id: string;
@@ -139,21 +212,36 @@ export async function fetchGameSession(
   return mapSession(data as SessionRow);
 }
 
+/** The three games with no drafting step — self-contained state, built the moment they start. */
+export type AutoGameKind = 'quiz' | 'take' | 'swap';
+
+function buildAutoState(
+  kind: AutoGameKind,
+  mock: DiscoverUser,
+): QuizState | TakeState | SwapState {
+  if (kind === 'quiz') return buildQuizState(mock);
+  if (kind === 'take') return buildTakeState();
+  return buildSwapState();
+}
+
 /**
  * Starts a game: creates its session row, then a `game`-typed message
  * referencing it. Two calls, not one transaction — same tolerance the rest of
  * this client already has for a two-step write (see `profile-sync.ts`), and a
  * failed second step only orphans an unreferenced session row, never a
  * message with nothing behind it.
+ *
+ * Only for the three self-contained games — Flirt or Dare has a drafting step
+ * before anything is written, so it goes through `startFlirtDare` instead.
  */
 export async function startGame(
   matchId: string,
-  kind: GameKind,
+  kind: AutoGameKind,
   mock: DiscoverUser,
 ): Promise<{ session: GameSession; message: StoredMessage } | null> {
   if (!supabase) return null;
 
-  const state = kind === 'quiz' ? buildQuizState(mock) : buildTakeState();
+  const state = buildAutoState(kind, mock);
 
   const { data, error } = await supabase
     .from('game_sessions')
@@ -164,6 +252,39 @@ export async function startGame(
 
   const session = mapSession(data as SessionRow);
   const message = await sendMessage(matchId, kind, { session_id: session.id });
+  if (!message) return null;
+
+  return { session, message };
+}
+
+/**
+ * Starts Flirt or Dare with a prompt already drawn client-side (see
+ * `drawPrompt` — the sheet lets the human redraw as many times as they like
+ * before this ever runs, so only the final choice reaches the database).
+ */
+export async function startFlirtDare(
+  matchId: string,
+  draw: { kind: 'flirt' | 'dare'; prompt: string },
+): Promise<{ session: GameSession; message: StoredMessage } | null> {
+  if (!supabase) return null;
+
+  const state: FlirtDareState = {
+    kind: draw.kind,
+    prompt: draw.prompt,
+    response: null,
+  };
+
+  const { data, error } = await supabase
+    .from('game_sessions')
+    .insert({ match_id: matchId, game: 'flirt', state })
+    .select(SESSION_COLUMNS)
+    .single();
+  if (error || !data) return null;
+
+  const session = mapSession(data as SessionRow);
+  const message = await sendMessage(matchId, 'flirt', {
+    session_id: session.id,
+  });
   if (!message) return null;
 
   return { session, message };
@@ -209,6 +330,16 @@ export async function submitTakeValue(
   return state as TakeState | null;
 }
 
+export async function submitSwapTrack(
+  sessionId: string,
+  track: string,
+): Promise<SwapState | null> {
+  const state = await patchGameState(sessionId, { userTrack: track });
+  return state as SwapState | null;
+}
+
+type AnyGameState = QuizState | TakeState | SwapState | FlirtDareState;
+
 /**
  * Live state changes for one session — both an opponent's move landing and
  * the echo of the caller's own write. Requires `public.game_sessions` in the
@@ -216,7 +347,7 @@ export async function submitTakeValue(
  */
 export function subscribeToGameSession(
   sessionId: string,
-  onUpdate: (state: QuizState | TakeState) => void,
+  onUpdate: (state: AnyGameState) => void,
 ): () => void {
   const client = supabase;
   if (!client) return () => {};
@@ -232,7 +363,7 @@ export function subscribeToGameSession(
         filter: `id=eq.${sessionId}`,
       },
       (payload) => {
-        const row = payload.new as { state: QuizState | TakeState };
+        const row = payload.new as { state: AnyGameState };
         onUpdate(row.state);
       },
     )

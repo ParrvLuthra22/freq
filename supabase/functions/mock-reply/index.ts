@@ -6,11 +6,15 @@
 // person, not a bot bolted onto the UI.
 //
 // Also doubles as where a mock "plays" an in-thread game: when the triggering
-// message is a `quiz`/`take` game-start rather than text, this makes the
-// mock's move in `game_sessions` instead of generating a reply — no LLM call,
-// no new message, just the same session row the human is already looking at
-// picking up a second field. The client calls this function either way; which
-// path runs is decided entirely by the trigger's type.
+// message is a game-start rather than text, this makes the mock's move in
+// `game_sessions` instead of generating a reply. `quiz`/`take`/`swap` are
+// mechanical — a random pick or an already-seeded field, no LLM, no new
+// message, just the mock's field landing in the same session row the human
+// is already looking at. `flirt` is the exception: responding well to a
+// drawn prompt actually benefits from the LLM, so it reuses the same
+// cache/rate-limit-guarded path a text reply does, just patching the session
+// instead of inserting a message. The client calls this function the same
+// way regardless; which path runs is decided entirely by the trigger's type.
 //
 // ANTHROPIC_API_KEY lives only in this function's secrets (`supabase secrets
 // set ANTHROPIC_API_KEY=...`), never in the app: the client has no path to it,
@@ -61,6 +65,7 @@ type Profile = {
   line: string | null;
   flirt: string | null;
   take_answer: number | null;
+  swap: { track?: string; verdict?: string } | null;
 };
 
 type QuizState = {
@@ -76,6 +81,17 @@ type TakeState = {
   prompt: string;
   userValue: number | null;
   mockValue: number | null;
+};
+
+type SwapState = {
+  userTrack: string | null;
+  mockTrack: string | null;
+};
+
+type FlirtDareState = {
+  kind: 'flirt' | 'dare';
+  prompt: string;
+  response: string | null;
 };
 
 type MessageRow = {
@@ -129,7 +145,8 @@ function threadToTranscript(messages: MessageRow[], meId: string, meName: string
     .join('\n');
 }
 
-async function generateReply(mock: Profile, meName: string, messages: MessageRow[], meId: string): Promise<string | null> {
+/** The one place that actually calls Anthropic — text replies and flirt-card responses both go through this. */
+async function callAnthropic(mock: Profile, meName: string, userContent: string): Promise<string | null> {
   if (!ANTHROPIC_API_KEY) return null;
 
   const res = await fetch('https://api.anthropic.com/v1/messages', {
@@ -143,12 +160,7 @@ async function generateReply(mock: Profile, meName: string, messages: MessageRow
       model: MODEL,
       max_tokens: MAX_REPLY_TOKENS,
       system: buildSystemPrompt(mock, meName),
-      messages: [
-        {
-          role: 'user',
-          content: `The conversation so far:\n${threadToTranscript(messages, meId, meName, mock.name)}\n\nSend your next message.`,
-        },
-      ],
+      messages: [{ role: 'user', content: userContent }],
     }),
   });
 
@@ -162,12 +174,30 @@ async function generateReply(mock: Profile, meName: string, messages: MessageRow
   return typeof text === 'string' && text.trim().length > 0 ? text.trim() : null;
 }
 
+function generateReply(mock: Profile, meName: string, messages: MessageRow[], meId: string): Promise<string | null> {
+  return callAnthropic(
+    mock,
+    meName,
+    `The conversation so far:\n${threadToTranscript(messages, meId, meName, mock.name)}\n\nSend your next message.`
+  );
+}
+
+/** A response to a drawn Flirt or Dare prompt — actually answer or rise to it, not just acknowledge it. */
+function generateFlirtResponse(mock: Profile, meName: string, draw: { kind: 'flirt' | 'dare'; prompt: string }): Promise<string | null> {
+  return callAnthropic(
+    mock,
+    meName,
+    `${meName} just sent you a ${draw.kind} card from a game called Flirt or Dare: "${draw.prompt}"\n\n` +
+      `Respond to it in character — actually answer or rise to it, one to two sentences.`
+  );
+}
+
 /**
- * The mock's move in a game session — a guess for `quiz`, a locked-in slider
- * value for `take`. No LLM call: a `quiz` guess is picked uniformly at random
- * from the same options the human sees (real guessing, not a scripted
- * correct/incorrect), and a `take` value is the mock's own authored
- * `take_answer`, already seeded per profile.
+ * The mock's mechanical move in a game session — a guess for `quiz`, a
+ * locked-in slider value for `take`, a track for `swap`. No LLM call: a
+ * `quiz` guess is picked uniformly at random from the same options the human
+ * sees (real guessing, not a scripted correct/incorrect), and `take`/`swap`
+ * both just surface a field already seeded on the mock's own profile.
  */
 async function makeGameMove(
   serviceClient: ReturnType<typeof createClient>,
@@ -181,7 +211,7 @@ async function makeGameMove(
     .single();
   if (error || !session) return { moved: false, reason: 'session not found' };
 
-  const game = session.game as 'quiz' | 'take';
+  const game = session.game as 'quiz' | 'take' | 'swap';
   let patch: Record<string, unknown>;
 
   if (game === 'quiz') {
@@ -189,10 +219,14 @@ async function makeGameMove(
     if (quiz.mockGuess !== null) return { moved: false, reason: 'already moved' };
     const options = quiz.userOptions;
     patch = { mockGuess: options[Math.floor(Math.random() * options.length)] };
-  } else {
+  } else if (game === 'take') {
     const take = session.state as TakeState;
     if (take.mockValue !== null) return { moved: false, reason: 'already moved' };
     patch = { mockValue: mock.take_answer ?? 50 };
+  } else {
+    const swap = session.state as SwapState;
+    if (swap.mockTrack !== null) return { moved: false, reason: 'already moved' };
+    patch = { mockTrack: mock.swap?.track ?? mock.name + ' — a record they never named' };
   }
 
   await sleep(MIN_MOVE_MS + Math.random() * (MAX_MOVE_MS - MIN_MOVE_MS));
@@ -206,6 +240,45 @@ async function makeGameMove(
     return { moved: false, reason: 'patch failed' };
   }
   return { moved: true };
+}
+
+/**
+ * The mock's move in Flirt or Dare — an LLM-generated in-character response
+ * to whatever the human drew and sent, written into `state.response`. Unlike
+ * `makeGameMove`, this costs a completion, so it is only ever called from
+ * inside the same cache/rate-limit-guarded section a text reply goes
+ * through, never from the cheap mechanical branch.
+ */
+async function makeFlirtDareMove(
+  serviceClient: ReturnType<typeof createClient>,
+  mock: Profile,
+  meName: string,
+  sessionId: string
+): Promise<string | null> {
+  const { data: session, error } = await serviceClient
+    .from('game_sessions')
+    .select('id, game, state')
+    .eq('id', sessionId)
+    .single();
+  if (error || !session || session.game !== 'flirt') return null;
+
+  const state = session.state as FlirtDareState;
+  if (state.response !== null) return null; // Already answered — a duplicate invoke racing the first.
+
+  const response = await generateFlirtResponse(mock, meName, { kind: state.kind, prompt: state.prompt });
+  if (!response) return null;
+
+  await sleep(MIN_TYPING_MS + Math.random() * (MAX_TYPING_MS - MIN_TYPING_MS));
+
+  const { error: patchError } = await serviceClient.rpc('patch_game_state', {
+    session_id: sessionId,
+    patch: { response },
+  });
+  if (patchError) {
+    console.error('patch_game_state failed', patchError);
+    return null;
+  }
+  return response;
 }
 
 Deno.serve(async (req: Request) => {
@@ -246,7 +319,7 @@ Deno.serve(async (req: Request) => {
   const mockProfileId = match.a === me.id ? match.b : match.a;
   const { data: mock } = await userClient
     .from('profiles')
-    .select('id, name, is_mock, archetype, tags, top_artists, song, line, flirt, take_answer')
+    .select('id, name, is_mock, archetype, tags, top_artists, song, line, flirt, take_answer, swap')
     .eq('id', mockProfileId)
     .single();
   if (!mock) return jsonResponse({ error: 'Other profile not found' }, 404);
@@ -273,10 +346,10 @@ Deno.serve(async (req: Request) => {
     return jsonResponse({ skipped: true, reason: 'no new human message to reply to' }, 200);
   }
 
-  // A game-start message needs a move, not a reply — no LLM, no new message,
-  // no usage ledger, just the mock's field in the same session row the human
-  // is already looking at.
-  if (trigger.type === 'quiz' || trigger.type === 'take') {
+  // A mechanical game-start message needs a move, not a reply — no LLM, no
+  // new message, no usage ledger, just the mock's field in the same session
+  // row the human is already looking at.
+  if (trigger.type === 'quiz' || trigger.type === 'take' || trigger.type === 'swap') {
     const sessionId = (trigger.body as { session_id?: string }).session_id;
     if (!sessionId) {
       return jsonResponse({ skipped: true, reason: 'game message missing session_id' }, 200);
@@ -330,6 +403,24 @@ Deno.serve(async (req: Request) => {
   }
 
   const later = (async () => {
+    // A Flirt or Dare response patches the session's `response` field —
+    // otherwise the same LLM/cache/rate-limit machinery, just no new message.
+    if (trigger.type === 'flirt') {
+      const sessionId = (trigger.body as { session_id?: string }).session_id;
+      if (!sessionId) return;
+
+      const response = await makeFlirtDareMove(serviceClient, mock as Profile, me.name, sessionId);
+      if (!response) return;
+
+      await serviceClient.from('mock_reply_usage').insert({
+        profile_id: me.id,
+        match_id: matchId,
+        in_reply_to: trigger.id,
+        reply_message_id: null,
+      });
+      return;
+    }
+
     const reply = await generateReply(mock as Profile, me.name, messages as MessageRow[], me.id);
     if (!reply) return; // Anthropic unreachable or empty completion — say nothing rather than something wrong.
 

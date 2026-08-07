@@ -11,8 +11,10 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { FlirtDareCard } from '@/components/flirt-dare-card';
 import { GameSheet, type GameSheetHandle } from '@/components/game-sheet';
 import { QuizCard } from '@/components/quiz-card';
+import { SwapCard } from '@/components/swap-card';
 import { TakeCard } from '@/components/take-card';
 import { Avatar } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -161,7 +163,8 @@ export default function ChatByIdScreen() {
   // asks it for a reply.
   const handleGameStarted = (message: StoredMessage) => {
     setLines((prev) => [...prev, fromStored(message, me.id)]);
-    if (user && user.isMock && matchId) void triggerMockReply(matchId).catch(() => {});
+    if (user && user.isMock && matchId)
+      void triggerMockReply(matchId).catch(() => {});
   };
 
   // §6.3 — refreshable icebreakers, in case the thread stalls.
@@ -249,6 +252,22 @@ export default function ChatByIdScreen() {
                 />
               ) : line.type === 'take' ? (
                 <TakeCard
+                  key={line.id}
+                  sessionId={String(
+                    (line.body as { session_id?: string }).session_id ?? '',
+                  )}
+                  mockName={user.name}
+                />
+              ) : line.type === 'swap' ? (
+                <SwapCard
+                  key={line.id}
+                  sessionId={String(
+                    (line.body as { session_id?: string }).session_id ?? '',
+                  )}
+                  mock={user}
+                />
+              ) : line.type === 'flirt' ? (
+                <FlirtDareCard
                   key={line.id}
                   sessionId={String(
                     (line.body as { session_id?: string }).session_id ?? '',
