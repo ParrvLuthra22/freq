@@ -42,7 +42,12 @@ type ProfileRow = {
   top_tracks: { title: string; artist: string }[] | null;
   listening_hours: number[] | null;
   tags: string[] | null;
-  energy: { night: number; emotional: number; highEnergy: number; exploratory: number } | null;
+  energy: {
+    night: number;
+    emotional: number;
+    highEnergy: number;
+    exploratory: number;
+  } | null;
   reason: string | null;
   reason_soft: string | null;
   chips: { label: string; rare: boolean }[] | null;
@@ -59,13 +64,14 @@ type ProfileRow = {
   card_artist: string | null;
   is_mock: boolean;
   liked_you: boolean;
+  lastfm_username: string | null;
 };
 
 const PROFILE_COLUMNS =
   'id, auth_id, slug, name, age, campus, archetype, week, top_artists, top_tracks, ' +
   'listening_hours, tags, energy, reason, reason_soft, chips, line, flirt, song, notes, ' +
   'quiz, swap, take_answer, opening_thread, current_frequency, swap_picks, card_artist, ' +
-  'is_mock, liked_you';
+  'is_mock, liked_you, lastfm_username';
 
 /** A row shaped for someone else's card — the fields `me` does not carry. */
 function mapCandidate(row: ProfileRow): DiscoverUser {
@@ -80,7 +86,12 @@ function mapCandidate(row: ProfileRow): DiscoverUser {
     topTracks: row.top_tracks ?? [],
     listeningHours: row.listening_hours ?? [],
     tags: row.tags ?? [],
-    energy: row.energy ?? { night: 0, emotional: 0, highEnergy: 0, exploratory: 0 },
+    energy: row.energy ?? {
+      night: 0,
+      emotional: 0,
+      highEnergy: 0,
+      exploratory: 0,
+    },
     // Overwritten by scorePair on every read — placeholder until then.
     match: { score: 0, reasons: [], sharedArtists: [], sharedSong: null },
     likedYou: row.liked_you,
@@ -112,9 +123,15 @@ function mapMe(row: ProfileRow): Me {
     topTracks: row.top_tracks ?? [],
     listeningHours: row.listening_hours ?? [],
     tags: row.tags ?? [],
-    energy: row.energy ?? { night: 0, emotional: 0, highEnergy: 0, exploratory: 0 },
+    energy: row.energy ?? {
+      night: 0,
+      emotional: 0,
+      highEnergy: 0,
+      exploratory: 0,
+    },
     currentFrequency: row.current_frequency ?? '',
     swapPicks: row.swap_picks ?? [],
+    lastfmUsername: row.lastfm_username,
   };
 }
 
@@ -130,7 +147,9 @@ function mapMe(row: ProfileRow): Me {
 export async function loadRemoteCorpus(session: Session): Promise<boolean> {
   if (!supabase) return false;
 
-  const { data, error } = await supabase.from('profiles').select(PROFILE_COLUMNS);
+  const { data, error } = await supabase
+    .from('profiles')
+    .select(PROFILE_COLUMNS);
   if (error || !data) return false;
 
   const rows = data as unknown as ProfileRow[];

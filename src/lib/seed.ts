@@ -1,11 +1,21 @@
 import rawSeed from '@/seed/users.json';
 
-import { buildCorpus, scorePair, type Corpus, type PairScore } from '@/lib/score';
+import {
+  buildCorpus,
+  scorePair,
+  type Corpus,
+  type PairScore,
+} from '@/lib/score';
 
 export type Artist = { name: string; rank: number };
 export type Track = { title: string; artist: string };
 export type Archetype = { name: string; description: string };
-export type Energy = { night: number; emotional: number; highEnergy: number; exploratory: number };
+export type Energy = {
+  night: number;
+  emotional: number;
+  highEnergy: number;
+  exploratory: number;
+};
 
 /** The artist someone is meeting people through this week — the face of their card. */
 export type WeekPick = { artist: string; plays: number; stat: string };
@@ -29,6 +39,8 @@ export type Me = BaseProfile & {
   currentFrequency: string;
   /** Tracks you can offer in a Blind Swap. */
   swapPicks: string[];
+  /** Set once `lastfm-profile` has rebuilt this profile from real listening data. */
+  lastfmUsername: string | null;
 };
 
 export type Match = {
@@ -38,7 +50,12 @@ export type Match = {
   sharedSong: Track | null;
 };
 
-export type ChatMessage = { id: string; sender: 'me' | 'them'; text: string; sentAt: string };
+export type ChatMessage = {
+  id: string;
+  sender: 'me' | 'them';
+  text: string;
+  sentAt: string;
+};
 
 /** A chip on the overlap face of a card — an artist or a genre, flagged when rare. */
 export type Chip = { label: string; rare: boolean };
@@ -70,6 +87,8 @@ const seed = rawSeed as unknown as SeedData;
 // The bundled JSON has no is_mock column — everything in it is the mock pool by
 // construction, unlike the DB corpus where mock/real profiles sit side by side.
 seed.users = seed.users.map((user) => ({ ...user, isMock: true }));
+// Local mode has no Last.fm connection to have happened yet.
+seed.me = { ...seed.me, lastfmUsername: null };
 
 /**
  * Rarity is only meaningful against a population, so the corpus is built once
@@ -145,7 +164,9 @@ export function setRemoteProfiles(me: Me, users: DiscoverUser[]): void {
 
 /** Every user, best frequency first — scores computed live, never read from the seed. */
 export function getUsers(): DiscoverUser[] {
-  return seed.users.map(withLiveMatch).sort((a, b) => b.match.score - a.match.score);
+  return seed.users
+    .map(withLiveMatch)
+    .sort((a, b) => b.match.score - a.match.score);
 }
 
 /**

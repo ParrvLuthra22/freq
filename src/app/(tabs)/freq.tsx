@@ -12,6 +12,7 @@ import {
   EditProfileSheet,
   type EditProfileSheetHandle,
 } from '@/components/edit-profile-sheet';
+import { LastfmSheet, type LastfmSheetHandle } from '@/components/lastfm-sheet';
 import { Avatar } from '@/components/ui/avatar';
 import { EnergyBars } from '@/components/ui/energy-bars';
 import { RhythmChart } from '@/components/ui/rhythm-chart';
@@ -40,6 +41,7 @@ export default function FreqScreen() {
   );
   const editSheetRef = React.useRef<EditProfileSheetHandle>(null);
   const artistSheetRef = React.useRef<CardArtistSheetHandle>(null);
+  const lastfmSheetRef = React.useRef<LastfmSheetHandle>(null);
 
   const currentCardArtist =
     cardArtist ?? me.topArtists[0]?.name ?? me.week.artist;
@@ -111,6 +113,23 @@ export default function FreqScreen() {
             <Mono className="text-accent">Change →</Mono>
           </Pressable>
 
+          <Pressable
+            onPress={() => lastfmSheetRef.current?.present()}
+            className="flex-row items-center justify-between rounded-2xl border border-border bg-card px-4 py-4 active:opacity-70"
+          >
+            <View className="flex-1 gap-0.5 pr-3">
+              <Mono>Last.fm</Mono>
+              <Body>
+                {me.lastfmUsername
+                  ? `Connected as ${me.lastfmUsername}`
+                  : 'Not connected'}
+              </Body>
+            </View>
+            <Mono className="text-accent">
+              {me.lastfmUsername ? 'Re-sync →' : 'Connect →'}
+            </Mono>
+          </Pressable>
+
           <View className="gap-2">
             <Mono>Current frequency</Mono>
             <View className="rounded-2xl border border-border bg-card px-4 py-3">
@@ -179,6 +198,7 @@ export default function FreqScreen() {
 
         <EditProfileSheet ref={editSheetRef} />
         <CardArtistSheet ref={artistSheetRef} />
+        <LastfmSheet ref={lastfmSheetRef} />
       </SafeAreaView>
     </BottomSheetModalProvider>
   );
