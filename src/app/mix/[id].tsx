@@ -1,0 +1,191 @@
+import { router, useLocalSearchParams } from 'expo-router';
+import * as Sharing from 'expo-sharing';
+import * as React from 'react';
+import { Pressable, ScrollView, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { captureRef } from 'react-native-view-shot';
+
+import { MixShareCard } from '@/components/mix-share-card';
+import { AlbumArt } from '@/components/ui/album-art';
+import { Avatar } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
+import { Text } from '@/components/ui/text';
+import { Body, Display, Mono } from '@/components/ui/typography';
+import { getMatchId } from '@/lib/chat';
+import { fetchMixTracks, subscribeToMixTracks, type MixTrack } from '@/lib/mix';
+import { getMe, getUserById } from '@/lib/seed';
+
+/**
+ * The FREQ Mix — a growing shared playlist for one match. Read-only here: the
+ * only way tracks get added is the "add to FREQ Mix" action on a song message
+ * in chat, so this screen is purely the view + the share affordance.
+ */
+export default function MixScreen() {
+  const { id } = useLocalSearchParams<{ id: string }>();
+  const user = getUserById(id);
+  const me = getMe();
+
+  const [matchId, setMatchId] = React.useState<string | null>(null);
+  const [tracks, setTracks] = React.useState<MixTrack[]>([]);
+  const [loaded, setLoaded] = React.useState(false);
+  const [busy, setBusy] = React.useState(false);
+  const shareCardRef = React.useRef<View>(null);
+
+  React.useEffect(() => {
+    if (!user) return;
+    let cancelled = false;
+
+    getMatchId(user.id).then((mid) => {
+      if (cancelled || !mid) return;
+      setMatchId(mid);
+      fetchMixTracks(mid).then((rows) => {
+        if (!cancelled) {
+          setTracks(rows);
+          setLoaded(true);
+        }
+      });
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [user]);
+
+  React.useEffect(() => {
+    if (!matchId) return;
+    return subscribeToMixTracks(matchId, (track) => {
+      setTracks((prev) =>
+        prev.some((t) => t.id === track.id) ? prev : [...prev, track],
+      );
+    });
+  }, [matchId]);
+
+  const contributorName = React.useCallback(
+    (slug: string) =>
+      slug === me.id ? me.name : (getUserById(slug)?.name ?? 'Someone'),
+    [me.id, me.name],
+  );
+
+  const handleShare = async () => {
+    if (busy) return;
+    setBusy(true);
+    try {
+      const uri = await captureRef(shareCardRef, { format: 'png', quality: 1 });
+      const available = await Sharing.isAvailableAsync();
+      if (available) {
+        await Sharing.shareAsync(uri, {
+          mimeType: 'image/png',
+          dialogTitle: 'Share the Mix',
+        });
+      }
+    } catch (error) {
+      // Sharing can be cancelled or unavailable (no share target, web's stricter
+      // Web Share API) — fail quietly rather than leaving the screen broken.
+      console.warn('Share failed', error);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  if (!user) {
+    return (
+      <SafeAreaView className="flex-1 items-center justify-center bg-background px-6">
+        <Body className="text-center text-muted-foreground">
+          That thread wandered off.
+        </Body>
+      </SafeAreaView>
+    );
+  }
+
+  return (
+    <SafeAreaView className="flex-1 bg-background">
+      <View className="flex-row items-center gap-3 border-b border-border px-4 py-3">
+        <Pressable
+          onPress={() => router.back()}
+          className="px-2 py-1 active:opacity-60"
+        >
+          <Mono>Back</Mono>
+        </Pressable>
+        <View className="flex-1">
+          <Body>The Mix</Body>
+          <Mono>
+            {me.name} × {user.name}
+          </Mono>
+        </View>
+        <Mono className="text-accent">{tracks.length} tracks</Mono>
+      </View>
+
+      <ScrollView contentContainerClassName="gap-4 px-4 py-4">
+        {!loaded ? (
+          <Body className="pt-8 text-center text-muted-foreground">
+            Loading…
+          </Body>
+        ) : tracks.length === 0 ? (
+          <View className="items-center gap-2 px-6 pt-16">
+            <Display className="text-center text-2xl leading-tight">
+              Nothing here yet.
+            </Display>
+            <Body className="text-center text-muted-foreground">
+              Add a song from your thread with {user.name} — it lands here for
+              both of you.
+            </Body>
+          </View>
+        ) : (
+          <View className="flex-row flex-wrap gap-3">
+            {tracks
+              .slice()
+              .reverse()
+              .map((t) => (
+                <View
+                  key={t.id}
+                  className="gap-2 overflow-hidden rounded-2xl border border-border bg-card p-2.5"
+                  style={{ width: '48%' }}
+                >
+                  <AlbumArt
+                    seed={`${t.track.title}-${t.track.artist}`}
+                    shape="square"
+                    fill
+                  />
+                  <Body className="text-sm" numberOfLines={1}>
+                    {t.track.title}
+                  </Body>
+                  <Mono numberOfLines={1}>{t.track.artist}</Mono>
+                  <View className="flex-row items-center gap-1.5">
+                    <Avatar
+                      seed={t.addedBySlug}
+                      name={contributorName(t.addedBySlug)}
+                      size={18}
+                    />
+                    <Mono>{contributorName(t.addedBySlug)}</Mono>
+                  </View>
+                </View>
+              ))}
+          </View>
+        )}
+      </ScrollView>
+
+      <View className="border-t border-border px-4 py-3">
+        <Button
+          size="lg"
+          onPress={handleShare}
+          disabled={busy || tracks.length === 0}
+        >
+          <Text>{busy ? 'Preparing…' : 'Share this Mix'}</Text>
+        </Button>
+      </View>
+
+      {/* Off-screen — exists only so `captureRef` has something to snapshot. */}
+      <View
+        style={{ position: 'absolute', top: -9999, left: -9999 }}
+        pointerEvents="none"
+      >
+        <MixShareCard
+          ref={shareCardRef}
+          meName={me.name}
+          matchName={user.name}
+          tracks={tracks}
+        />
+      </View>
+    </SafeAreaView>
+  );
+}

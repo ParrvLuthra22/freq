@@ -14,6 +14,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { FlirtDareCard } from '@/components/flirt-dare-card';
 import { GameSheet, type GameSheetHandle } from '@/components/game-sheet';
 import { QuizCard } from '@/components/quiz-card';
+import { SongSheet, type SongSheetHandle } from '@/components/song-sheet';
 import { SwapCard } from '@/components/swap-card';
 import { TakeCard } from '@/components/take-card';
 import { Avatar } from '@/components/ui/avatar';
@@ -30,6 +31,7 @@ import {
   type SongBody,
   type StoredMessage,
 } from '@/lib/chat';
+import { addMixTrack, triggerMockMixAdd } from '@/lib/mix';
 import { markRead } from '@/lib/store';
 import { getMe, getUserById } from '@/lib/seed';
 
@@ -79,7 +81,9 @@ export default function ChatByIdScreen() {
   const [draft, setDraft] = React.useState(opener ?? '');
   const [suggestions, setSuggestions] = React.useState<string[] | null>(null);
   const [suggesting, setSuggesting] = React.useState(false);
+  const [addedToMix, setAddedToMix] = React.useState<Set<string>>(new Set());
   const gameSheetRef = React.useRef<GameSheetHandle>(null);
+  const songSheetRef = React.useRef<SongSheetHandle>(null);
 
   // Opening a thread — from anywhere, not just the reveal screen — is what
   // earns it being read.
@@ -167,6 +171,38 @@ export default function ChatByIdScreen() {
       void triggerMockReply(matchId).catch(() => {});
   };
 
+  const handleSongSent = (message: StoredMessage) => {
+    setLines((prev) => [...prev, fromStored(message, me.id)]);
+    if (user && user.isMock && matchId)
+      void triggerMockReply(matchId).catch(() => {});
+  };
+
+  // Adds one song message's track to the shared FREQ Mix. Optimistic: the
+  // button flips to "Added" the moment the tap registers, and rolls back only
+  // if the write itself failed — the Mix screen's own realtime subscription
+  // is what actually keeps the mix's contents authoritative, not this flag.
+  const handleAddToMix = async (line: Line) => {
+    if (!matchId || !user || addedToMix.has(line.id)) return;
+    const body = line.body as { title?: string; artist?: string };
+    if (!body.title || !body.artist) return;
+
+    setAddedToMix((prev) => new Set(prev).add(line.id));
+    const added = await addMixTrack(matchId, {
+      title: body.title,
+      artist: body.artist,
+    });
+    if (!added) {
+      setAddedToMix((prev) => {
+        const next = new Set(prev);
+        next.delete(line.id);
+        return next;
+      });
+      return;
+    }
+
+    if (user.isMock) void triggerMockMixAdd(matchId).catch(() => {});
+  };
+
   // §6.3 — refreshable icebreakers, in case the thread stalls.
   const handleSuggest = React.useCallback(async () => {
     if (!user) return;
@@ -208,6 +244,16 @@ export default function ChatByIdScreen() {
           </Pressable>
           <Avatar seed={user.id} name={user.name} size={36} />
           <Body className="flex-1">{user.name}</Body>
+          {/* The Mix needs a real match to sync through — nothing to link to in local mode. */}
+          {matchId ? (
+            <Pressable
+              onPress={() => router.push(`/mix/${user.id}`)}
+              hitSlop={8}
+              className="items-end px-1 active:opacity-60"
+            >
+              <Mono className="text-accent">Mix →</Mono>
+            </Pressable>
+          ) : null}
           {/* The score in the header doubles as the way into how it was computed. */}
           <Pressable
             onPress={() => router.push(`/breakdown/${user.id}`)}
@@ -279,8 +325,8 @@ export default function ChatByIdScreen() {
                   key={line.id}
                   className={
                     line.fromMe
-                      ? 'max-w-[80%] gap-0.5 self-end rounded-2xl border border-accent bg-accent/10 px-4 py-2.5'
-                      : 'max-w-[80%] gap-0.5 self-start rounded-2xl border border-border bg-card px-4 py-2.5'
+                      ? 'max-w-[80%] gap-1.5 self-end rounded-2xl border border-accent bg-accent/10 px-4 py-2.5'
+                      : 'max-w-[80%] gap-1.5 self-start rounded-2xl border border-border bg-card px-4 py-2.5'
                   }
                 >
                   <Mono className="text-accent">Shared song</Mono>
@@ -288,6 +334,19 @@ export default function ChatByIdScreen() {
                     {(line.body as SongBody).title} —{' '}
                     {(line.body as SongBody).artist}
                   </Body>
+                  {matchId ? (
+                    <Pressable
+                      onPress={() => handleAddToMix(line)}
+                      disabled={addedToMix.has(line.id)}
+                      className="self-start active:opacity-60"
+                    >
+                      <Mono className="text-accent">
+                        {addedToMix.has(line.id)
+                          ? 'Added to the Mix ✓'
+                          : '+ Add to FREQ Mix'}
+                      </Mono>
+                    </Pressable>
+                  ) : null}
                 </View>
               ) : (
                 <View
@@ -361,6 +420,15 @@ export default function ChatByIdScreen() {
                   <Body className="text-lg text-accent">◇</Body>
                 </Pressable>
               ) : null}
+              {matchId ? (
+                <Pressable
+                  onPress={() => songSheetRef.current?.present()}
+                  hitSlop={8}
+                  className="h-10 w-10 items-center justify-center rounded-full border border-border active:opacity-70"
+                >
+                  <Body className="text-base">🎵</Body>
+                </Pressable>
+              ) : null}
               <TextInput
                 value={draft}
                 onChangeText={setDraft}
@@ -382,6 +450,11 @@ export default function ChatByIdScreen() {
           matchId={matchId}
           mock={user}
           onStarted={handleGameStarted}
+        />
+        <SongSheet
+          ref={songSheetRef}
+          matchId={matchId}
+          onSent={handleSongSent}
         />
       </SafeAreaView>
     </BottomSheetModalProvider>
