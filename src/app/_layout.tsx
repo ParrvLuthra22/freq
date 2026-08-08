@@ -72,11 +72,12 @@ export default function RootLayout() {
   return (
     <ThemeProvider value={theme}>
       <StatusBar style={scheme === 'light' ? 'dark' : 'light'} />
-      <GestureHandlerRootView style={{ flex: 1, backgroundColor: theme.colors.background }}>
+      <GestureHandlerRootView
+        style={{ flex: 1, backgroundColor: theme.colors.background }}
+      >
         <Stack screenOptions={{ headerShown: false }}>
           <Stack.Screen name="(tabs)" />
           <Stack.Screen name="onboarding" options={{ presentation: 'modal' }} />
-          <Stack.Screen name="share" options={{ presentation: 'modal' }} />
         </Stack>
         {/* Mounted once, here — a delayed match or a fresh like can land on any
             screen, and this is the one place guaranteed to be rendered

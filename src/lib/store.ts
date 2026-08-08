@@ -16,7 +16,13 @@ import {
   subscribeToDelayedMatches,
 } from '@/lib/remote-store';
 import { syncOnboardingComplete, syncProfile } from '@/lib/profile-sync';
-import { getUserById, updateMe, type DiscoverUser, type Me } from '@/lib/seed';
+import {
+  getMe,
+  getUserById,
+  updateMe,
+  type DiscoverUser,
+  type Me,
+} from '@/lib/seed';
 import { supabase } from '@/lib/supabase';
 import { showLikeToast, showMatchToast } from '@/lib/toast';
 
@@ -98,6 +104,23 @@ function setState(next: PersistedState): void {
 const arr = (value: unknown): string[] => (Array.isArray(value) ? value : []);
 
 /**
+ * Keeps `me.week` — "the artist someone is meeting people through this week,
+ * the face of their card" (see seed.ts) — in sync with the chosen card
+ * artist. A null `cardArtist` falls back to the top artist, same as the
+ * store's own `cardArtist` field documents. This is the one place a picked
+ * artist actually becomes what a candidate's deck would show for you; the
+ * picker itself only ever sets the string.
+ */
+function applyCardArtist(artist: string | null): void {
+  const me = getMe();
+  const displayArtist = artist ?? me.topArtists[0]?.name ?? me.week.artist;
+  if (displayArtist === me.week.artist) return;
+  updateMe({
+    week: { ...me.week, artist: displayArtist, stat: 'Chosen this week' },
+  });
+}
+
+/**
  * Load the cache and re-apply the saved profile onto the seed.
  *
  * Called once at app start, before the first paint that depends on it. This is
@@ -132,6 +155,7 @@ export async function hydrateStore(): Promise<void> {
     if (typeof age === 'number') patch.age = age;
     if (campus) patch.campus = campus;
     if (Object.keys(patch).length > 0) updateMe(patch);
+    applyCardArtist(state.cardArtist);
 
     emit();
   } catch {
@@ -149,7 +173,9 @@ export async function hydrateStore(): Promise<void> {
  * corpus/snapshot fetch that fails, since the cache is already a complete,
  * correct answer on its own.
  */
-export async function reconcileWithSupabase(session: Session | null): Promise<void> {
+export async function reconcileWithSupabase(
+  session: Session | null,
+): Promise<void> {
   if (!supabase || !session) return;
   if (reconciledFor === session.user.id) return;
 
@@ -165,7 +191,8 @@ export async function reconcileWithSupabase(session: Session | null): Promise<vo
   if (snapshot.profile.name) profile.name = snapshot.profile.name;
   if (snapshot.profile.age !== null) profile.age = snapshot.profile.age;
   if (snapshot.profile.campus) profile.campus = snapshot.profile.campus;
-  if (snapshot.profile.lookingFor !== null) profile.lookingFor = snapshot.profile.lookingFor;
+  if (snapshot.profile.lookingFor !== null)
+    profile.lookingFor = snapshot.profile.lookingFor;
 
   setState({
     ...state,
@@ -183,6 +210,7 @@ export async function reconcileWithSupabase(session: Session | null): Promise<vo
   if (snapshot.profile.age !== null) mePatch.age = snapshot.profile.age;
   if (snapshot.profile.campus) mePatch.campus = snapshot.profile.campus;
   if (Object.keys(mePatch).length > 0) updateMe(mePatch);
+  applyCardArtist(snapshot.cardArtist ?? state.cardArtist);
 
   // A delayed like-back confirms on the server, not on a client timer, so the
   // only way to learn it happened — on whatever screen the user is currently
@@ -200,7 +228,9 @@ export async function reconcileWithSupabase(session: Session | null): Promise<vo
   // Function itself decides whether anything actually happens (see
   // schedule-like's own comment).
   stopWatchingForAdmirerLikes?.();
-  stopWatchingForAdmirerLikes = subscribeToAdmirerLikes((slug) => receiveAdmirerLike(slug));
+  stopWatchingForAdmirerLikes = subscribeToAdmirerLikes((slug) =>
+    receiveAdmirerLike(slug),
+  );
   void scheduleAdmirerLike().catch(() => {});
 }
 
@@ -227,6 +257,7 @@ export function completeOnboarding(): void {
 
 export function setCardArtist(artist: string): void {
   setState({ ...state, cardArtist: artist });
+  applyCardArtist(artist);
   void remoteSetCardArtist(artist).catch(() => {});
 }
 
@@ -262,13 +293,20 @@ export function like(userId: string): boolean {
 
   setState({
     ...state,
-    likedIds: state.likedIds.includes(userId) ? state.likedIds : [...state.likedIds, userId],
-    matchIds: mutual && !state.matchIds.includes(userId) ? [...state.matchIds, userId] : state.matchIds,
+    likedIds: state.likedIds.includes(userId)
+      ? state.likedIds
+      : [...state.likedIds, userId],
+    matchIds:
+      mutual && !state.matchIds.includes(userId)
+        ? [...state.matchIds, userId]
+        : state.matchIds,
   });
 
-  void remoteLike(userId).then((matched) => {
-    if (matched === false) void scheduleMatch(userId).catch(() => {});
-  }).catch(() => {});
+  void remoteLike(userId)
+    .then((matched) => {
+      if (matched === false) void scheduleMatch(userId).catch(() => {});
+    })
+    .catch(() => {});
 
   return mutual;
 }
@@ -284,7 +322,9 @@ export function confirmMatch(userId: string): void {
   setState({
     ...state,
     matchIds: [...state.matchIds, userId],
-    unreadIds: state.unreadIds.includes(userId) ? state.unreadIds : [...state.unreadIds, userId],
+    unreadIds: state.unreadIds.includes(userId)
+      ? state.unreadIds
+      : [...state.unreadIds, userId],
   });
   void remoteConfirmMatch(userId).catch(() => {});
   showMatchToast(userId);
@@ -304,7 +344,10 @@ export function receiveAdmirerLike(userId: string): void {
 
 export function markRead(userId: string): void {
   if (!state.unreadIds.includes(userId)) return;
-  setState({ ...state, unreadIds: state.unreadIds.filter((id) => id !== userId) });
+  setState({
+    ...state,
+    unreadIds: state.unreadIds.filter((id) => id !== userId),
+  });
   void remoteMarkRead(userId).catch(() => {});
 }
 
@@ -341,7 +384,7 @@ export function useMatches(): DiscoverUser[] {
         .map((id) => getUserById(id))
         .filter((user): user is DiscoverUser => user !== undefined)
         .sort((a, b) => b.match.score - a.match.score),
-    [matchIds]
+    [matchIds],
   );
 }
 
