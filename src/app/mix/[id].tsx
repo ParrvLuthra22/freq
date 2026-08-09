@@ -9,6 +9,7 @@ import { MixShareCard } from '@/components/mix-share-card';
 import { AlbumArt } from '@/components/ui/album-art';
 import { Avatar } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Text } from '@/components/ui/text';
 import { Body, Display, Mono } from '@/components/ui/typography';
 import { getMatchId } from '@/lib/chat';
@@ -36,7 +37,13 @@ export default function MixScreen() {
     let cancelled = false;
 
     getMatchId(user.id).then((mid) => {
-      if (cancelled || !mid) return;
+      if (cancelled) return;
+      if (!mid) {
+        // No match to sync through (local mode, or no match row yet) —
+        // nothing left to wait on, so this counts as "loaded" too.
+        setLoaded(true);
+        return;
+      }
       setMatchId(mid);
       fetchMixTracks(mid).then((rows) => {
         if (!cancelled) {
@@ -117,9 +124,19 @@ export default function MixScreen() {
 
       <ScrollView contentContainerClassName="gap-4 px-4 py-4">
         {!loaded ? (
-          <Body className="pt-8 text-center text-muted-foreground">
-            Loading…
-          </Body>
+          <View className="flex-row flex-wrap gap-3">
+            {[0, 1, 2, 3].map((i) => (
+              <View
+                key={i}
+                className="gap-2 overflow-hidden rounded-2xl border border-border bg-card p-2.5"
+                style={{ width: '48%' }}
+              >
+                <Skeleton className="aspect-square w-full rounded-xl" />
+                <Skeleton className="h-4 w-4/5 rounded" />
+                <Skeleton className="h-3 w-3/5 rounded" />
+              </View>
+            ))}
+          </View>
         ) : tracks.length === 0 ? (
           <View className="items-center gap-2 px-6 pt-16">
             <Display className="text-center text-2xl leading-tight">

@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { Pressable, View } from 'react-native';
 
+import { Skeleton } from '@/components/ui/skeleton';
 import { Body, Mono } from '@/components/ui/typography';
 import {
   fetchGameSession,
@@ -23,12 +24,15 @@ type SwapCardProps = {
 
 function SwapCard({ sessionId, mock }: SwapCardProps) {
   const [state, setState] = React.useState<SwapState | null>(null);
+  const [loading, setLoading] = React.useState(true);
   const [submitting, setSubmitting] = React.useState(false);
 
   React.useEffect(() => {
     let cancelled = false;
     fetchGameSession(sessionId).then((session) => {
-      if (!cancelled && session?.game === 'swap') setState(session.state);
+      if (cancelled) return;
+      if (session?.game === 'swap') setState(session.state);
+      setLoading(false);
     });
     return () => {
       cancelled = true;
@@ -49,11 +53,27 @@ function SwapCard({ sessionId, mock }: SwapCardProps) {
     if (next) setState(next);
   };
 
+  if (loading) {
+    return (
+      <View className="max-w-[90%] gap-3 self-center rounded-2xl border border-border bg-card px-4 py-3.5">
+        <Mono className="text-accent">Blind swap</Mono>
+        <Skeleton className="h-4 w-4/5 rounded" />
+        <View className="gap-2">
+          {[0, 1, 2].map((i) => (
+            <Skeleton key={i} className="h-10 w-full rounded-xl" />
+          ))}
+        </View>
+      </View>
+    );
+  }
+
   if (!state) {
     return (
       <View className="max-w-[90%] gap-2 self-center rounded-2xl border border-border bg-card px-4 py-3">
         <Mono className="text-accent">Blind swap</Mono>
-        <Body className="text-sm text-muted-foreground">Loading…</Body>
+        <Body className="text-sm text-muted-foreground">
+          Couldn&apos;t load this one — try reopening the thread.
+        </Body>
       </View>
     );
   }

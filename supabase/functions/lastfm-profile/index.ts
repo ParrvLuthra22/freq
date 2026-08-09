@@ -39,6 +39,11 @@ const CORPUS_TAG_LIMIT = 6;
 const MIN_LISTENERS = 100;
 const MAX_LISTENERS = 5_000_000;
 
+// Last.fm's own rule: 2-15 characters, starts with a letter, then
+// letters/digits/underscores/hyphens. Mirrored client-side in lib/lastfm.ts
+// for fast feedback — that copy is a courtesy, this one is the boundary.
+const LASTFM_USERNAME_PATTERN = /^[A-Za-z][A-Za-z0-9_-]{1,14}$/;
+
 type LastfmArtistEntry = { name: string; playcount: string; listeners: string };
 type LastfmTrackEntry = { name: string; artist: { name: string } };
 type LastfmRecentTrack = { date?: { uts: string }; '@attr'?: { nowplaying?: string } };
@@ -172,6 +177,12 @@ Deno.serve(async (req: Request) => {
     const body = await req.json();
     username = typeof body.username === 'string' ? body.username.trim() : '';
     if (!username) return jsonResponse({ error: 'A Last.fm username is required' }, 400);
+    // Same rule the client checks before ever calling this — that check is a
+    // courtesy, this one is the boundary. Catches malformed input before it
+    // ever reaches Last.fm's API, not just an empty string.
+    if (!LASTFM_USERNAME_PATTERN.test(username)) {
+      return jsonResponse({ error: `"${username}" isn't a valid Last.fm username.` }, 400);
+    }
   } catch {
     return jsonResponse({ error: 'Invalid JSON body' }, 400);
   }

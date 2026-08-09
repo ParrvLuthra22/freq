@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
 import * as React from 'react';
-import { ActivityIndicator, Pressable, View } from 'react-native';
+import { Pressable, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/ui/button';
@@ -85,8 +85,6 @@ export default function OnboardingWelcomeScreen() {
               className="h-12 flex-row items-center justify-center rounded-xl border border-border opacity-40">
               <Body>Email me a link</Body>
             </Pressable>
-
-            {busy ? <ActivityIndicator className="pt-1" /> : null}
 
             {error ? (
               <Body className="text-center text-xs text-accent">{error}</Body>

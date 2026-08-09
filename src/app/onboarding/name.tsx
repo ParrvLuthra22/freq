@@ -25,6 +25,7 @@ export default function OnboardingNameScreen() {
         placeholderClassName="text-muted-foreground"
         autoFocus
         autoCapitalize="words"
+        maxLength={30}
         className="rounded-2xl border border-border bg-card px-4 py-3 font-body text-lg text-foreground"
       />
     </OnboardingStep>

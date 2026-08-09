@@ -10,6 +10,7 @@ import { Platform } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import { NotificationToast } from '@/components/ui/notification-toast';
+import { OfflineBanner } from '@/components/ui/offline-banner';
 import { useAppFonts } from '@/hooks/use-app-fonts';
 import { useAuth } from '@/lib/auth';
 import { hydrateStore, reconcileWithSupabase } from '@/lib/store';
@@ -83,6 +84,7 @@ export default function RootLayout() {
             screen, and this is the one place guaranteed to be rendered
             regardless of route. */}
         <NotificationToast />
+        <OfflineBanner />
         <PortalHost />
       </GestureHandlerRootView>
     </ThemeProvider>

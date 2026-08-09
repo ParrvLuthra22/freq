@@ -12,6 +12,18 @@ import { supabase } from '@/lib/supabase';
 
 export type ConnectLastfmResult = { ok: true } | { ok: false; error: string };
 
+/**
+ * Last.fm's own username rule: 2-15 characters, starts with a letter, then
+ * letters/digits/underscores/hyphens. Checked here for fast feedback before
+ * ever making a request, and again inside the Edge Function itself — the
+ * client check is a courtesy, not the boundary that actually matters.
+ */
+const LASTFM_USERNAME_PATTERN = /^[A-Za-z][A-Za-z0-9_-]{1,14}$/;
+
+export function isValidLastfmUsername(username: string): boolean {
+  return LASTFM_USERNAME_PATTERN.test(username.trim());
+}
+
 async function readEdgeFunctionError(error: unknown): Promise<string> {
   const context = (error as { context?: Response })?.context;
   if (context && typeof context.json === 'function') {
@@ -36,6 +48,12 @@ export async function connectLastfm(
 
   const trimmed = username.trim();
   if (!trimmed) return { ok: false, error: 'Enter a Last.fm username.' };
+  if (!isValidLastfmUsername(trimmed)) {
+    return {
+      ok: false,
+      error: 'That doesn’t look like a Last.fm username — 2–15 characters, starting with a letter.',
+    };
+  }
 
   const { data, error } = await supabase.functions.invoke('lastfm-profile', {
     body: { username: trimmed },

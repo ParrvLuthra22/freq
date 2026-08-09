@@ -26,6 +26,7 @@ export default function OnboardingCampusScreen() {
         placeholderClassName="text-muted-foreground"
         autoFocus
         autoCapitalize="words"
+        maxLength={40}
         className="rounded-2xl border border-border bg-card px-4 py-3 font-body text-lg text-foreground"
       />
       <Body className="text-sm text-muted-foreground">

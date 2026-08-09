@@ -2,6 +2,7 @@ import * as React from 'react';
 import { View } from 'react-native';
 
 import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Slider } from '@/components/ui/slider';
 import { Text } from '@/components/ui/text';
 import { Body, Display, Mono } from '@/components/ui/typography';
@@ -27,13 +28,16 @@ function gapLine(gap: number): string {
 
 function TakeCard({ sessionId, mockName }: TakeCardProps) {
   const [state, setState] = React.useState<TakeState | null>(null);
+  const [loading, setLoading] = React.useState(true);
   const [draft, setDraft] = React.useState(50);
   const [submitting, setSubmitting] = React.useState(false);
 
   React.useEffect(() => {
     let cancelled = false;
     fetchGameSession(sessionId).then((session) => {
-      if (!cancelled && session?.game === 'take') setState(session.state);
+      if (cancelled) return;
+      if (session?.game === 'take') setState(session.state);
+      setLoading(false);
     });
     return () => {
       cancelled = true;
@@ -54,11 +58,24 @@ function TakeCard({ sessionId, mockName }: TakeCardProps) {
     if (next) setState(next);
   };
 
+  if (loading) {
+    return (
+      <View className="max-w-[90%] gap-3 self-center rounded-2xl border border-border bg-card px-4 py-3.5">
+        <Mono className="text-accent">Hot take</Mono>
+        <Skeleton className="h-4 w-4/5 rounded" />
+        <Skeleton className="h-2 w-full rounded-full" />
+        <Skeleton className="h-9 w-24 rounded-xl" />
+      </View>
+    );
+  }
+
   if (!state) {
     return (
       <View className="max-w-[90%] gap-2 self-center rounded-2xl border border-border bg-card px-4 py-3">
         <Mono className="text-accent">Hot take</Mono>
-        <Body className="text-sm text-muted-foreground">Loading…</Body>
+        <Body className="text-sm text-muted-foreground">
+          Couldn&apos;t load this one — try reopening the thread.
+        </Body>
       </View>
     );
   }

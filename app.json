@@ -8,12 +8,11 @@
     "scheme": "freq",
     "userInterfaceStyle": "dark",
     "ios": {
-      "icon": "./assets/expo.icon",
       "bundleIdentifier": "com.parrv.freq"
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
+        "backgroundColor": "#100F0D",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
@@ -29,9 +28,9 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#208AEF",
+          "backgroundColor": "#100F0D",
           "image": "./assets/images/splash-icon.png",
-          "imageWidth": 76
+          "imageWidth": 240
         }
       ],
       "expo-image",
