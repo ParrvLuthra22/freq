@@ -371,7 +371,7 @@ function findBridges(
  * spreads the range people actually occupy across the dial. The honest
  * per-component values stay untouched and are what the breakdown screen shows.
  */
-function calibrate(composite: number): number {
+export function calibrate(composite: number): number {
   return clamp01(Math.pow(clamp01(composite), 0.62));
 }
 
