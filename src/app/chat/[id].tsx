@@ -22,6 +22,7 @@ import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
 import { Body, Display, Mono } from '@/components/ui/typography';
 import { getIcebreakers } from '@/lib/ai';
+import { useAuth } from '@/lib/auth';
 import {
   fetchMessages,
   getMatchId,
@@ -32,7 +33,7 @@ import {
   type StoredMessage,
 } from '@/lib/chat';
 import { addMixTrack, triggerMockMixAdd } from '@/lib/mix';
-import { markRead } from '@/lib/store';
+import { markRead, useReconciled } from '@/lib/store';
 import { getMe, getUserById } from '@/lib/seed';
 
 /**
@@ -66,6 +67,8 @@ export default function ChatByIdScreen() {
   const user = getUserById(id);
   const me = getMe();
   const scrollRef = React.useRef<ScrollView>(null);
+  const { mode } = useAuth();
+  const reconciled = useReconciled();
 
   // Seed the thread with the opening line until the real history (or the
   // absence of one — no match row yet, or no project configured) resolves.
@@ -96,6 +99,13 @@ export default function ChatByIdScreen() {
   // the whole conversation, exactly as it already behaved before Supabase.
   React.useEffect(() => {
     if (!user) return;
+    // A signed-in session's profile id isn't populated until reconciliation
+    // finishes (deliberately not part of the paint gate — see _layout.tsx).
+    // Reading it too early — a hard reload or a direct deep link both make
+    // this easy to hit — would wrongly conclude "no match, fall back to
+    // local mode" for a match that genuinely exists. Wait for reconciled to
+    // flip true, then retry, rather than giving up permanently.
+    if (mode === 'signed-in' && !reconciled) return;
     let cancelled = false;
 
     getMatchId(user.id).then((mid) => {
@@ -111,7 +121,7 @@ export default function ChatByIdScreen() {
     return () => {
       cancelled = true;
     };
-  }, [user, me.id]);
+  }, [user, me.id, mode, reconciled]);
 
   React.useEffect(() => {
     if (!matchId) return;

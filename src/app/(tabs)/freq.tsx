@@ -19,8 +19,9 @@ import { RhythmChart } from '@/components/ui/rhythm-chart';
 import { FreqDial } from '@/components/ui/freq-dial';
 import { Body, Display, Mono } from '@/components/ui/typography';
 import { Waveform } from '@/components/ui/waveform';
+import { useAuth } from '@/lib/auth';
 import { getMe } from '@/lib/seed';
-import { usePersistedState } from '@/lib/store';
+import { resetStore, usePersistedState } from '@/lib/store';
 
 /** Same obscurity threshold the deck's "Rare" chip and the score breakdown use. */
 const RARE_RANK = 35;
@@ -34,6 +35,7 @@ function splitArchetype(name: string) {
 export default function FreqScreen() {
   const me = getMe();
   const { cardArtist } = usePersistedState();
+  const { mode, leave } = useAuth();
   const { lead, accent } = splitArchetype(me.archetype.name);
   const energyValues = Object.values(me.energy);
   const signature = Math.round(
@@ -42,6 +44,15 @@ export default function FreqScreen() {
   const editSheetRef = React.useRef<EditProfileSheetHandle>(null);
   const artistSheetRef = React.useRef<CardArtistSheetHandle>(null);
   const lastfmSheetRef = React.useRef<LastfmSheetHandle>(null);
+
+  // Wipes the local cache too — otherwise the next sign-in on this device
+  // would flash the previous session's swipes and profile before Supabase's
+  // reconciled version overwrites them.
+  const handleLogOut = React.useCallback(async () => {
+    await leave();
+    resetStore();
+    router.replace('/');
+  }, [leave]);
 
   const currentCardArtist =
     cardArtist ?? me.topArtists[0]?.name ?? me.week.artist;
@@ -194,6 +205,15 @@ export default function FreqScreen() {
               </View>
             ))}
           </View>
+
+          {mode === 'signed-in' ? (
+            <Pressable
+              onPress={handleLogOut}
+              className="items-center rounded-2xl border border-border py-4 active:opacity-70"
+            >
+              <Mono className="text-muted-foreground">Log out</Mono>
+            </Pressable>
+          ) : null}
         </ScrollView>
 
         <EditProfileSheet ref={editSheetRef} />

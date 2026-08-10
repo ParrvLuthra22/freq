@@ -375,6 +375,24 @@ export function usePersistedState(): PersistedState {
   return React.useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
 }
 
+function getReconciledSnapshot(): boolean {
+  return reconciledFor !== null;
+}
+
+/**
+ * True once the live session's corpus + snapshot have finished reconciling —
+ * `getMyProfileId()`/`getMatchId()` are only safe to trust after this flips
+ * true, since reconciliation deliberately runs outside `_layout.tsx`'s paint
+ * gate. A screen that resolves a match on mount (chat, mix) needs to depend on
+ * this and retry rather than concluding "no match" from a `getMyProfileId()`
+ * read that landed before reconciliation finished — which a hard reload or a
+ * direct deep link both make easy to hit. Stays false forever in local mode
+ * or while signed out, which is correct: there is nothing to reconcile.
+ */
+export function useReconciled(): boolean {
+  return React.useSyncExternalStore(subscribe, getReconciledSnapshot, getReconciledSnapshot);
+}
+
 /** Everyone you have matched with, strongest frequency first. */
 export function useMatches(): DiscoverUser[] {
   const { matchIds } = usePersistedState();

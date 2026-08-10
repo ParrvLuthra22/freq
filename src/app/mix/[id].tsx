@@ -12,9 +12,11 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Text } from '@/components/ui/text';
 import { Body, Display, Mono } from '@/components/ui/typography';
+import { useAuth } from '@/lib/auth';
 import { getMatchId } from '@/lib/chat';
 import { fetchMixTracks, subscribeToMixTracks, type MixTrack } from '@/lib/mix';
 import { getMe, getUserById } from '@/lib/seed';
+import { useReconciled } from '@/lib/store';
 
 /**
  * The FREQ Mix — a growing shared playlist for one match. Read-only here: the
@@ -25,6 +27,8 @@ export default function MixScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const user = getUserById(id);
   const me = getMe();
+  const { mode } = useAuth();
+  const reconciled = useReconciled();
 
   const [matchId, setMatchId] = React.useState<string | null>(null);
   const [tracks, setTracks] = React.useState<MixTrack[]>([]);
@@ -34,6 +38,10 @@ export default function MixScreen() {
 
   React.useEffect(() => {
     if (!user) return;
+    // See chat/[id].tsx's identical guard: a signed-in session's profile id
+    // isn't populated until reconciliation finishes, so reading it too early
+    // (a hard reload, a direct deep link) would wrongly conclude "no match."
+    if (mode === 'signed-in' && !reconciled) return;
     let cancelled = false;
 
     getMatchId(user.id).then((mid) => {
@@ -56,7 +64,7 @@ export default function MixScreen() {
     return () => {
       cancelled = true;
     };
-  }, [user]);
+  }, [user, mode, reconciled]);
 
   React.useEffect(() => {
     if (!matchId) return;

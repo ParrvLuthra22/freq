@@ -130,6 +130,34 @@ const HIGH_ENERGY_KEYWORDS = [
   'punk', 'metal', 'electronic', 'dance', 'techno', 'house', 'hardcore',
   'drum and bass', 'hip hop', 'hip-hop', 'rap', 'edm', 'industrial',
 ];
+/** 12-hour label for an hour index, matching how the You tab's clock reads. */
+function hourLabel(hour: number): string {
+  if (hour === 0) return 'midnight';
+  if (hour === 12) return 'noon';
+  const suffix = hour < 12 ? 'am' : 'pm';
+  return `${hour % 12 === 0 ? 12 : hour % 12}${suffix}`;
+}
+
+/**
+ * The one-line "current frequency" blurb on the You tab.
+ *
+ * Derived here rather than left alone: a fresh profile row ships with template
+ * copy naming a seeded artist, and leaving that in place would have the line
+ * contradict the real top-artist list rendered directly beneath it — the exact
+ * "why isn't this my data" tell we're trying to remove.
+ */
+function describeFrequency(artist: string, plays: number, listeningHours: number[]): string {
+  const opener = `${artist} on heavy rotation — ${plays.toLocaleString('en-US')} plays`;
+  const peak = listeningHours.reduce(
+    (best, value, i) => (value > listeningHours[best] ? i : best),
+    0
+  );
+  // An all-zero histogram means there were no recent scrobbles to read an hour
+  // off of — better to say nothing than to invent a midnight habit.
+  if (listeningHours[peak] === 0) return `${opener}.`;
+  return `${opener}, mostly around ${hourLabel(peak)}.`;
+}
+
 const MOOD_TAG: Record<keyof Energy, string> = {
   night: 'late-night',
   emotional: 'melancholic',
@@ -301,6 +329,15 @@ Deno.serve(async (req: Request) => {
       tags,
       energy,
       ...(week ? { week } : {}),
+      ...(topArtist
+        ? {
+            current_frequency: describeFrequency(
+              topArtist.name,
+              Number(topArtist.playcount) || 0,
+              listeningHours
+            ),
+          }
+        : {}),
       lastfm_username: username,
       lastfm_synced_at: new Date().toISOString(),
     })
