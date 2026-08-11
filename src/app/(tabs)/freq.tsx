@@ -141,12 +141,16 @@ export default function FreqScreen() {
             </Mono>
           </Pressable>
 
-          <View className="gap-2">
-            <Mono>Current frequency</Mono>
-            <View className="rounded-2xl border border-border bg-card px-4 py-3">
-              <Body className="text-sm">{me.currentFrequency}</Body>
+          {/* Only the Last.fm sync writes this now, so it is genuinely absent
+              until someone connects — an empty card would read as broken. */}
+          {me.currentFrequency ? (
+            <View className="gap-2">
+              <Mono>Current frequency</Mono>
+              <View className="rounded-2xl border border-border bg-card px-4 py-3">
+                <Body className="text-sm">{me.currentFrequency}</Body>
+              </View>
             </View>
-          </View>
+          ) : null}
 
           <Pressable
             onPress={() => router.push('/week')}

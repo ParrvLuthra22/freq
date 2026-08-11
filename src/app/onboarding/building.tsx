@@ -61,6 +61,7 @@ export default function BuildingFreqScreen() {
       topArtists: me.topArtists.map((a) => a.name),
       tags: me.tags,
       listeningHours: me.listeningHours,
+      energy: me.energy,
     }).then((result) => {
       if (cancelled) return;
       const resolved: Archetype = { name: result.archetype, description: result.description };
@@ -70,7 +71,7 @@ export default function BuildingFreqScreen() {
     return () => {
       cancelled = true;
     };
-  }, [me.name, me.topArtists, me.tags, me.listeningHours]);
+  }, [me.name, me.topArtists, me.tags, me.listeningHours, me.energy]);
 
   const handleLinesDone = React.useCallback(() => setPhase('reveal'), []);
   const currentLine = useStatusLines(phase === 'lines', handleLinesDone);

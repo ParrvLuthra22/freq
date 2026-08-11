@@ -1,9 +1,20 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+import { deriveArchetype } from '@/lib/archetype';
+import type { Energy } from '@/lib/seed';
 import { formatList } from '@/lib/utils';
 
-/** Base URL for the freq-ai Vercel proxy — never call Anthropic directly from the app. */
-const AI_PROXY_URL = process.env.EXPO_PUBLIC_AI_PROXY_URL ?? 'http://localhost:3000';
+/**
+ * Base URL for the freq-ai Vercel proxy — never call Anthropic directly from
+ * the app.
+ *
+ * Unset is a supported configuration, not a broken one: every feature here
+ * already has a fallback derived from real listening data, and the proxy only
+ * makes the wording better. This used to default to `http://localhost:3000`,
+ * which meant a deployed build fired a request that could only ever fail —
+ * one guaranteed connection error per profile build, per card, per thread.
+ */
+const AI_PROXY_URL = process.env.EXPO_PUBLIC_AI_PROXY_URL?.trim() || null;
 const REQUEST_TIMEOUT_MS = 8000;
 
 type SharedSong = { title: string; artist: string } | null;
@@ -13,6 +24,8 @@ type PersonalityInput = {
   topArtists: string[];
   tags: string[];
   listeningHours: number[];
+  /** Powers the derived fallback when no proxy is configured or reachable. */
+  energy: Energy;
 };
 type PersonalityResult = { archetype: string; description: string };
 
@@ -27,6 +40,10 @@ type ExplanationResult = { text: string };
 type IcebreakersResult = { openers: string[] };
 
 async function callProxy<T>(type: string, payload: Record<string, unknown>): Promise<T> {
+  // Callers all catch and fall back, so throwing here routes "no proxy
+  // configured" down the exact path "proxy unreachable" already takes.
+  if (!AI_PROXY_URL) throw new Error('No AI proxy configured');
+
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
   try {
@@ -71,11 +88,16 @@ export async function getPersonality(input: PersonalityInput): Promise<Personali
     await writeCache(cacheKey, result);
     return result;
   } catch {
-    // Proxy unreachable — never block the reveal moment on a network call.
-    return {
-      archetype: 'The Midnight Romantic',
-      description: "Still getting a read on your taste — check back after a few more late-night plays.",
-    };
+    // No proxy, or it's unreachable — never block the reveal moment on a
+    // network call, and never hand back someone else's archetype. Derived
+    // from this person's own listening, so it stays true either way.
+    const derived = deriveArchetype({
+      topArtists: input.topArtists,
+      tags: input.tags,
+      energy: input.energy,
+      listeningHours: input.listeningHours,
+    });
+    return { archetype: derived.name, description: derived.description };
   }
 }
 

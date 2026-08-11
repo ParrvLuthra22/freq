@@ -1,56 +1,155 @@
-# Welcome to your Expo app 👋
+# FREQ
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Music-taste dating app. You discover people by what they actually play — not a
+photo, not a bio.
 
-## Get started
+**Live demo → [freq-sand.vercel.app](https://freq-sand.vercel.app)** (no account
+needed; "Try the demo" signs you in anonymously)
 
-1. Install dependencies
+The signature mechanic: **faces stay sealed.** Before a mutual match you see a
+name, their artist of the week, and your musical overlap. Their avatar is their
+own album sleeve, blurred, with a "?". Only a mutual swipe unseals the face.
 
-   ```bash
-   npm install
-   ```
+---
 
-2. Start the app
+## The algorithm
 
-   ```bash
-   npx expo start
-   ```
+`src/lib/score.ts` is the point of the project. Five weighted components produce
+a 0–100 compatibility score plus a ranked, machine-readable reason list:
 
-In the output, you'll find options to open the app in a
+| Component | Weight | What it measures |
+|---|---|---|
+| Rarity-weighted artist overlap | ×0.30 | Shared artists, weighted by how obscure they are both globally and in this user base |
+| Shared tracks | ×0.25 | Same, at track level |
+| Taste worlds | ×0.20 | Cosine similarity over genre tags |
+| Adjacent taste | ×0.15 | Item-item CF — your artist sits next to theirs in the corpus |
+| Listening rhythm | ×0.10 | Pearson over a 24-bin hour histogram |
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+Design decisions worth naming:
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+- **Rarity is the whole point.** Sharing a megastar is worth almost nothing;
+  sharing someone with 200 listeners is the signal. Every overlap is weighted by
+  a blend of global obscurity and inverse document frequency.
+- **Jaccard and overlap coefficient are blended**, because each fails alone.
+  Jaccard punishes people who simply listen to more than you; overlap
+  coefficient over-rewards a thin profile.
+- **Rhythm uses Pearson, not raw cosine.** Raw cosine on all-positive histograms
+  scores ~0.9 for everyone, which makes the component useless. Mean-centring
+  measures *shape* — do you both spike at 2am.
+- **Adjacent taste is framed as connection**, `directShare + (1 - directShare) ×
+  adjacency`. Measuring adjacency alone inverted the component: the more two
+  people genuinely shared, the less non-overlapping taste was left to bridge, so
+  the strongest matches scored zero and lost to weaker ones. There is a
+  regression test pinning this.
+- **The displayed score is `raw^0.62`.** Presentation only — strictly monotonic,
+  so it reorders nothing. Real set-overlap lands around 0.35 even for an
+  excellent match, which would render as "35%" and read as a rejection.
+  `/breakdown/[id]` shows the honest, untouched per-component values.
 
-## Get a fresh project
+Verified by `npm test`: self-match scores **100**, fully-disjoint profiles score
+**11** (not 0 — a faint rhythm correlation survives), and the seeded deck holds
+its documented order: Odessa 89 > Rune 74 > Marlowe 61 > Thea 45 > Juno 37 >
+Vesper 35.
 
-When you're ready, run:
+---
+
+## Stack
+
+- **Expo SDK 57**, React Native 0.86, React 19.2, Expo Router (file-based)
+- **Reanimated v4.5** — required; RN 0.86 removed a shim v3 depends on
+- **NativeWind v4**, react-native-svg, gesture-handler, AsyncStorage
+- **Supabase** — Postgres, Auth, Realtime, Edge Functions
+- Scoring stays **client-side** and pure; it reads its corpus from the DB
+- Deploys as an **Expo web export → Vercel**
+
+## Running it
 
 ```bash
-npm run reset-project
+npm install
+cp .env.example .env    # fill in the Supabase values
+npx expo start
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+The app runs fully without a backend. With no Supabase project configured,
+`isSupabaseConfigured` is false and everything reads from `seed/users.json` —
+discovery, matching, scoring and chat all work against the mock corpus.
 
-### Other setup steps
+```bash
+npm test        # Jest — the scoring algorithm and archetype derivation
+npm run lint
+npx tsc --noEmit
+```
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+## Environment
 
-## Learn more
+| Variable | Required | Notes |
+|---|---|---|
+| `EXPO_PUBLIC_SUPABASE_URL` | for the backend | Public by design |
+| `EXPO_PUBLIC_SUPABASE_ANON_KEY` | for the backend | Public by design — only useful alongside RLS. **Never** put the service-role key in an `EXPO_PUBLIC_` var |
+| `EXPO_PUBLIC_AI_PROXY_URL` | no | Optional. Unset means every AI feature uses its derived fallback |
 
-To learn more about developing your project with Expo, look at the following resources:
+Edge-function secrets (set with `supabase secrets set`, never in the app
+bundle):
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+| Secret | Required | Notes |
+|---|---|---|
+| `LASTFM_API_KEY` | for Last.fm connect | Without it, `lastfm-profile` refuses every request |
+| `ANTHROPIC_API_KEY` | no | Only used by `mock-reply`; absent means mock matches stay silent rather than failing |
 
-## Join the community
+## Backend
 
-Join our community of developers creating universal apps.
+```bash
+supabase link --project-ref <ref>
+supabase db push
+supabase functions deploy <name>
+```
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+Migrations live in `supabase/migrations/`. The mock-seed migration is
+**generated** from `seed/users.json` by `scripts/gen_seed_migration.py` — edit
+the seed and regenerate rather than hand-editing the SQL, or the two drift.
+
+Anonymous sign-ins must be enabled for the demo login to work.
+
+## Deploying
+
+Vercel builds from `vercel.json` (`expo export -p web` → `dist`, with an SPA
+rewrite so dynamic routes like `/chat/[id]` resolve client-side).
+
+Two GitHub Actions workflows:
+
+- **Test** — runs `npm ci && npm test` on every push and PR
+- **Supabase keep-alive** — every 3 days, queries `artists_corpus` with only the
+  anon key so the free project never auto-pauses
+
+## What's real and what isn't
+
+Honest inventory, since this is a portfolio piece as much as a product:
+
+**Real** — the scoring algorithm, rarity weighting and corpus stats; Last.fm
+connect (rebuilds your profile from actual scrobbles); Supabase auth, matching,
+realtime chat, the shared Mix, and the in-thread games; offline caching.
+
+**Mock** — the Spotify button proceeds without any OAuth; candidate profiles are
+seeded rather than real users; mock matches reply via an Edge Function, and only
+when `ANTHROPIC_API_KEY` is set.
+
+**Optional** — the AI proxy (`../freq-ai`) improves archetype, explanation and
+icebreaker copy. Every one of those has a fallback derived from real listening
+data, so an unset proxy costs polish, not correctness.
+
+## Layout
+
+```
+src/
+  app/            Expo Router routes — tabs, onboarding, chat, mix, reveal
+  components/     Owned UI primitives, themed to the brand tokens
+  lib/
+    score.ts      The algorithm
+    archetype.ts  Archetype derived from listening data
+    store.ts      useSyncExternalStore over AsyncStorage
+    chat.ts       Messages + realtime
+supabase/
+  migrations/     Schema, RLS, generated seed
+  functions/      Edge Functions
+seed/users.json   Mock corpus
+```

@@ -1,5 +1,6 @@
 import type { Session } from '@supabase/supabase-js';
 
+import { deriveArchetype } from '@/lib/archetype';
 import { getMe } from '@/lib/seed';
 import { supabase } from '@/lib/supabase';
 
@@ -37,6 +38,14 @@ function slugFor(session: Session): string {
  * Seeds the musical fields from the local profile so a brand-new account still
  * scores against the corpus — an empty top-artists list would make every
  * component zero and the deck meaningless.
+ *
+ * The editorial fields are pointedly NOT copied that way. `archetype` and
+ * `current_frequency` are prose about a specific person, and taking them from
+ * the mock handed every new account the same line about slowcore and ambient
+ * regardless of what they listen to. The archetype is derived from the taste
+ * data instead, so it at least agrees with the artists on the same screen, and
+ * `current_frequency` is left unset for the Last.fm sync to fill — an absent
+ * line reads better than a confidently wrong one.
  */
 export async function ensureProfile(session: Session): Promise<string | null> {
   if (!supabase) return null;
@@ -59,14 +68,18 @@ export async function ensureProfile(session: Session): Promise<string | null> {
       name: me.name,
       age: me.age,
       campus: me.campus,
-      archetype: me.archetype,
+      archetype: deriveArchetype({
+        topArtists: me.topArtists.map((a) => a.name),
+        tags: me.tags,
+        energy: me.energy,
+        listeningHours: me.listeningHours,
+      }),
       week: me.week,
       top_artists: me.topArtists,
       top_tracks: me.topTracks,
       listening_hours: me.listeningHours,
       tags: me.tags,
       energy: me.energy,
-      current_frequency: me.currentFrequency,
       swap_picks: me.swapPicks,
       is_mock: false,
     })

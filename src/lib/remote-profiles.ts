@@ -1,5 +1,6 @@
 import type { Session } from '@supabase/supabase-js';
 
+import { deriveArchetype, isEmptyArchetype } from '@/lib/archetype';
 import { setRemoteProfiles, type DiscoverUser, type Me } from '@/lib/seed';
 import { supabase } from '@/lib/supabase';
 
@@ -112,23 +113,39 @@ function mapCandidate(row: ProfileRow): DiscoverUser {
 }
 
 function mapMe(row: ProfileRow): Me {
+  const topArtists = row.top_artists ?? [];
+  const tags = row.tags ?? [];
+  const listeningHours = row.listening_hours ?? [];
+  const energy = row.energy ?? {
+    night: 0,
+    emotional: 0,
+    highEnergy: 0,
+    exploratory: 0,
+  };
+
   return {
     id: row.slug,
     name: row.name,
     age: row.age ?? 0,
     campus: row.campus ?? '',
-    archetype: row.archetype ?? { name: '', description: '' },
+    // A cleared archetype means the taste data underneath it changed — the
+    // Last.fm sync clears it precisely because the old prose described a
+    // different library. Deriving here rather than storing keeps it honest
+    // without a second write, and an AI-written one is left alone.
+    archetype: isEmptyArchetype(row.archetype)
+      ? deriveArchetype({
+          topArtists: topArtists.map((a) => a.name),
+          tags,
+          energy,
+          listeningHours,
+        })
+      : row.archetype!,
     week: row.week ?? { artist: '', plays: 0, stat: '' },
-    topArtists: row.top_artists ?? [],
+    topArtists,
     topTracks: row.top_tracks ?? [],
-    listeningHours: row.listening_hours ?? [],
-    tags: row.tags ?? [],
-    energy: row.energy ?? {
-      night: 0,
-      emotional: 0,
-      highEnergy: 0,
-      exploratory: 0,
-    },
+    listeningHours,
+    tags,
+    energy,
     currentFrequency: row.current_frequency ?? '',
     swapPicks: row.swap_picks ?? [],
     lastfmUsername: row.lastfm_username,

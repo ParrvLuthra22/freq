@@ -329,6 +329,11 @@ Deno.serve(async (req: Request) => {
       tags,
       energy,
       ...(week ? { week } : {}),
+      // Cleared, not rewritten: whatever prose was here described the library
+      // this sync just replaced. The client re-derives from the new data on
+      // read (see mapMe), so the archetype can't outlive the taste it was
+      // written about. `{}` rather than null — the column is not-null.
+      archetype: {},
       ...(topArtist
         ? {
             current_frequency: describeFrequency(
