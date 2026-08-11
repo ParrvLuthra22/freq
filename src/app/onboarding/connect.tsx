@@ -8,25 +8,15 @@ import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
 import { Body, Display, Mono } from '@/components/ui/typography';
 import { connectLastfm } from '@/lib/lastfm';
-import { getMe } from '@/lib/seed';
 
-type Service = 'spotify' | 'lastfm';
+/** Only Last.fm can actually connect today — see the Spotify card below. */
+type Service = 'lastfm';
 
 export default function ConnectMusicScreen() {
   const [connecting, setConnecting] = React.useState<Service | null>(null);
   const [showLastfmForm, setShowLastfmForm] = React.useState(false);
   const [username, setUsername] = React.useState('');
   const [error, setError] = React.useState<string | null>(null);
-
-  const handleConnectSpotify = () => {
-    if (connecting) return;
-    setConnecting('spotify');
-    // Mock: no real OAuth yet — load the seed profile as "me" and move on.
-    getMe();
-    setTimeout(() => {
-      router.replace('/onboarding/building');
-    }, 650);
-  };
 
   const handleConnectLastfm = async () => {
     if (connecting) return;
@@ -54,17 +44,23 @@ export default function ConnectMusicScreen() {
           </Display>
         </View>
         <Body className="text-muted-foreground">
-          Spotify primary, Last.fm secondary — pick one to start. We only need
-          one.
+          Last.fm reads every scrobble you already have. Spotify is next — we
+          only need one either way.
         </Body>
 
         <View className="gap-4 pt-2">
+          {/* Labelled, not faked. This card used to call `getMe()` and
+              continue, presenting the seeded mock profile as though it had
+              come from the user's own account — the one place in the app that
+              actively told them something untrue. Real support needs a
+              Spotify app, a PKCE flow, and server-side token exchange and
+              refresh, none of which exist yet. */}
           <ConnectCard
             title="Spotify"
             reassurance="Top artists, top tracks, recent plays — not the playlist names you're pretending are ironic."
-            connecting={connecting === 'spotify'}
-            disabled={connecting !== null && connecting !== 'spotify'}
-            onPress={handleConnectSpotify}
+            connecting={false}
+            comingSoon
+            onPress={() => {}}
           />
           <ConnectCard
             title="Last.fm"

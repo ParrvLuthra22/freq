@@ -12,11 +12,24 @@ type ConnectCardProps = {
   reassurance: string;
   connecting: boolean;
   disabled?: boolean;
+  /**
+   * Not built yet, and says so. Distinct from `disabled`, which means "not
+   * right now" — this one is inert by design and must never look like a
+   * button that failed.
+   */
+  comingSoon?: boolean;
   onPress: () => void;
 };
 
 /** Tapping fills the card with Signal rose — the mock "connect" moment. */
-function ConnectCard({ title, reassurance, connecting, disabled, onPress }: ConnectCardProps) {
+function ConnectCard({
+  title,
+  reassurance,
+  connecting,
+  disabled,
+  comingSoon,
+  onPress,
+}: ConnectCardProps) {
   const { colorScheme } = useColorScheme();
   const theme = THEME[colorScheme ?? 'dark'];
   const fill = useSharedValue(0);
@@ -30,10 +43,14 @@ function ConnectCard({ title, reassurance, connecting, disabled, onPress }: Conn
   return (
     <Pressable
       onPress={onPress}
-      disabled={disabled}
+      disabled={disabled || comingSoon}
       className={cn(
-        'relative overflow-hidden rounded-2xl border border-border bg-card active:opacity-90',
-        disabled && !connecting && 'opacity-40'
+        'relative overflow-hidden rounded-2xl border border-border bg-card',
+        !comingSoon && 'active:opacity-90',
+        // Dimmed, but not as far as a disabled card — this one is legible on
+        // purpose, since the label is the whole point of showing it.
+        comingSoon && 'opacity-60',
+        disabled && !connecting && !comingSoon && 'opacity-40'
       )}>
       <Animated.View
         pointerEvents="none"
@@ -43,7 +60,10 @@ function ConnectCard({ title, reassurance, connecting, disabled, onPress }: Conn
         ]}
       />
       <View className="gap-2 p-5">
-        <Body className={connecting ? 'text-primary-foreground' : 'text-foreground'}>{title}</Body>
+        <View className="flex-row items-center justify-between gap-3">
+          <Body className={connecting ? 'text-primary-foreground' : 'text-foreground'}>{title}</Body>
+          {comingSoon ? <Mono>Coming soon</Mono> : null}
+        </View>
         <Body className={cn('text-sm', connecting ? 'text-primary-foreground/80' : 'text-muted-foreground')}>
           {reassurance}
         </Body>
