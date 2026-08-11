@@ -1,4 +1,6 @@
 const { chromium } = require('playwright');
+const crypto = require('crypto');
+const fs = require('fs');
 const path = require('path');
 
 const URL = 'https://freq-sand.vercel.app';
@@ -26,9 +28,30 @@ async function fillVisible(page, placeholder, value) {
   await input.fill(value);
 }
 
+const hashes = new Map();
+
+/**
+ * Screenshot, and refuse to produce two identical frames.
+ *
+ * A tap that silently does nothing — the wrong node, an animation that hasn't
+ * settled — produces a byte-identical duplicate of the previous shot rather
+ * than an error, which is exactly how a "sealed deck" image once shipped in
+ * the README's "your overlap" column. Comparing digests turns that class of
+ * failure into a loud one.
+ */
 async function shot(page, name) {
   const file = path.join(OUT, `${name}.png`);
   await page.screenshot({ path: file });
+
+  const digest = crypto.createHash('md5').update(fs.readFileSync(file)).digest('hex');
+  const clash = [...hashes.entries()].find(([, d]) => d === digest);
+  if (clash) {
+    throw new Error(
+      `${name}.png is byte-identical to ${clash[0]}.png — the interaction before it did nothing.`
+    );
+  }
+  hashes.set(name, digest);
+
   console.log('  saved', file);
 }
 
@@ -85,8 +108,12 @@ async function shot(page, name) {
   await shot(page, '04-deck-sealed');
 
   console.log('overlap face…');
-  await tapText(page, 'FLIP');
-  await wait(1500);
+  // Tap the card itself rather than the FLIP button — that is the affordance
+  // the card advertises ("tap to flip"), and the button's label is a text node
+  // that does not always carry the press. Aim above the action row so the tap
+  // cannot land on like/pass.
+  await page.mouse.click(W / 2, H * 0.42);
+  await wait(2500);
   await shot(page, '05-deck-overlap');
 
   console.log('like → mutual reveal…');
