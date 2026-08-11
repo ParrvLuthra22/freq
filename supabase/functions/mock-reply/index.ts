@@ -16,9 +16,16 @@
 // instead of inserting a message. The client calls this function the same
 // way regardless; which path runs is decided entirely by the trigger's type.
 //
-// ANTHROPIC_API_KEY lives only in this function's secrets (`supabase secrets
-// set ANTHROPIC_API_KEY=...`), never in the app: the client has no path to it,
-// and nothing here ever echoes it back in a response.
+// LLM_API_KEY lives only in this function's secrets (`supabase secrets set
+// LLM_API_KEY=...`), never in the app: the client has no path to it, and
+// nothing here ever echoes it back in a response.
+//
+// The endpoint is the OpenAI chat-completions shape, which Groq, OpenRouter,
+// Cerebras, Together and Anthropic's own compatibility layer all speak — so
+// swapping providers is two env vars, not a code change. Defaults to Groq,
+// whose free tier is the most generous one that needs no card. With no key
+// set at all the mock simply stays quiet, which is a supported state rather
+// than an error (see `generateReply`'s caller).
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { corsHeaders, jsonResponse } from '../_shared/cors.ts';
@@ -26,9 +33,10 @@ import { corsHeaders, jsonResponse } from '../_shared/cors.ts';
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY')!;
 const SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-const ANTHROPIC_API_KEY = Deno.env.get('ANTHROPIC_API_KEY');
+const LLM_API_KEY = Deno.env.get('LLM_API_KEY');
+const LLM_BASE_URL = Deno.env.get('LLM_BASE_URL') ?? 'https://api.groq.com/openai/v1';
 
-const MODEL = 'claude-haiku-4-5-20251001';
+const MODEL = Deno.env.get('LLM_MODEL') ?? 'llama-3.3-70b-versatile';
 const MAX_REPLY_TOKENS = 120;
 const THREAD_HISTORY_LIMIT = 12;
 
@@ -145,37 +153,46 @@ function threadToTranscript(messages: MessageRow[], meId: string, meName: string
     .join('\n');
 }
 
-/** The one place that actually calls Anthropic — text replies and flirt-card responses both go through this. */
-async function callAnthropic(mock: Profile, meName: string, userContent: string): Promise<string | null> {
-  if (!ANTHROPIC_API_KEY) return null;
+/** The one place that actually calls a model — text replies and flirt-card responses both go through this. */
+async function callLLM(mock: Profile, meName: string, userContent: string): Promise<string | null> {
+  // No key configured is a deployment choice, not a failure — returning null
+  // makes the mock stay silent, which reads as someone who hasn't replied yet
+  // rather than as something broken.
+  if (!LLM_API_KEY) return null;
 
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
+  const res = await fetch(`${LLM_BASE_URL}/chat/completions`, {
     method: 'POST',
     headers: {
       'content-type': 'application/json',
-      'x-api-key': ANTHROPIC_API_KEY,
-      'anthropic-version': '2023-06-01',
+      authorization: `Bearer ${LLM_API_KEY}`,
     },
     body: JSON.stringify({
       model: MODEL,
       max_tokens: MAX_REPLY_TOKENS,
-      system: buildSystemPrompt(mock, meName),
-      messages: [{ role: 'user', content: userContent }],
+      // The brand voice lives in the system role, same as before; only the
+      // envelope changed from Anthropic's `system` field to a system message.
+      messages: [
+        { role: 'system', content: buildSystemPrompt(mock, meName) },
+        { role: 'user', content: userContent },
+      ],
     }),
   });
 
   if (!res.ok) {
-    console.error('Anthropic API error', res.status, await res.text());
+    // Free tiers rate-limit rather than fail permanently, and a 429 here just
+    // means this one reply doesn't land — never worth failing the request the
+    // user actually made.
+    console.error('LLM API error', res.status, await res.text());
     return null;
   }
 
   const data = await res.json();
-  const text = data?.content?.[0]?.text;
+  const text = data?.choices?.[0]?.message?.content;
   return typeof text === 'string' && text.trim().length > 0 ? text.trim() : null;
 }
 
 function generateReply(mock: Profile, meName: string, messages: MessageRow[], meId: string): Promise<string | null> {
-  return callAnthropic(
+  return callLLM(
     mock,
     meName,
     `The conversation so far:\n${threadToTranscript(messages, meId, meName, mock.name)}\n\nSend your next message.`
@@ -184,7 +201,7 @@ function generateReply(mock: Profile, meName: string, messages: MessageRow[], me
 
 /** A response to a drawn Flirt or Dare prompt — actually answer or rise to it, not just acknowledge it. */
 function generateFlirtResponse(mock: Profile, meName: string, draw: { kind: 'flirt' | 'dare'; prompt: string }): Promise<string | null> {
-  return callAnthropic(
+  return callLLM(
     mock,
     meName,
     `${meName} just sent you a ${draw.kind} card from a game called Flirt or Dare: "${draw.prompt}"\n\n` +

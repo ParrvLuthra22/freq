@@ -94,7 +94,21 @@ bundle):
 | Secret | Required | Notes |
 |---|---|---|
 | `LASTFM_API_KEY` | for Last.fm connect | Without it, `lastfm-profile` refuses every request |
-| `ANTHROPIC_API_KEY` | no | Only used by `mock-reply`; absent means mock matches stay silent rather than failing |
+| `LLM_API_KEY` | for mock replies | Absent means mock matches stay silent rather than failing |
+| `LLM_BASE_URL` | no | Defaults to Groq. Any OpenAI-compatible endpoint works |
+| `LLM_MODEL` | no | Defaults to `llama-3.3-70b-versatile` |
+
+`mock-reply` speaks the OpenAI chat-completions shape, so the provider is a
+config choice rather than a code one:
+
+| Provider | `LLM_BASE_URL` | Free tier |
+|---|---|---|
+| **Groq** (default) | `https://api.groq.com/openai/v1` | ~1,000 req/day, no card |
+| OpenRouter | `https://openrouter.ai/api/v1` | 50 req/day until $10 credit |
+| Cerebras | `https://api.cerebras.ai/v1` | ~1M tokens/day |
+
+The function caps itself at 20 replies/hour per profile and 200/hour globally,
+so a runaway demo can't exhaust a free tier or a budget.
 
 ## Backend
 
