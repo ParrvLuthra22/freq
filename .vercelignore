@@ -1,0 +1,19 @@
+# Vercel installs dependencies and runs the web export itself, so the upload
+# only needs sources. Without this the CLI archives the whole working tree —
+# including the ~1.2GB native `ios/` folder — which pushed the tarball past
+# 400MB and started failing during extraction, before the build even began.
+# `.vercelignore` does not inherit `.gitignore`, so these have to be repeated.
+
+node_modules
+dist
+.expo
+.git
+
+# Native projects — the deploy target is the web export only.
+ios
+android
+
+# Local-only tooling and docs that no build step reads.
+supabase/.temp
+coverage
+*.log

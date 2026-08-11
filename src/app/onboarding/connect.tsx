@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
 import * as React from 'react';
-import { TextInput, View } from 'react-native';
+import { Pressable, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ConnectCard } from '@/components/connect-card';
@@ -30,6 +30,21 @@ export default function ConnectMusicScreen() {
       return;
     }
 
+    router.replace('/onboarding/building');
+  };
+
+  /**
+   * The way through for someone with no Last.fm account.
+   *
+   * Spotify used to be this escape hatch by accident — it "connected" without
+   * any OAuth and let anyone continue. Labelling it honestly closed the only
+   * exit from this screen, which would strand most visitors to a public demo
+   * on the last step of onboarding. This is the same escape hatch, named for
+   * what it actually is: you continue on the sample profile, and the Connect
+   * card on the You tab is still there whenever you want real data.
+   */
+  const handleSkip = () => {
+    if (connecting) return;
     router.replace('/onboarding/building');
   };
 
@@ -98,6 +113,17 @@ export default function ConnectMusicScreen() {
             </View>
           ) : null}
         </View>
+
+        <Pressable
+          onPress={handleSkip}
+          disabled={connecting !== null}
+          className="items-center pt-2 active:opacity-60"
+        >
+          <Mono>Skip for now →</Mono>
+          <Body className="pt-1 text-center text-sm text-muted-foreground">
+            Look around on a sample profile. You can connect later.
+          </Body>
+        </Pressable>
       </View>
     </SafeAreaView>
   );
