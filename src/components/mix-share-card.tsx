@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { View } from 'react-native';
 
-import { AlbumArt } from '@/components/ui/album-art';
+import { TrackArt } from '@/components/ui/track-art';
 import { Body, Display, Mono } from '@/components/ui/typography';
 import type { MixTrack } from '@/lib/mix';
 
@@ -19,6 +19,14 @@ type MixShareCardProps = {
   meName: string;
   matchName: string;
   tracks: MixTrack[];
+  /**
+   * Resolved cover URLs keyed `title::artist`.
+   *
+   * The caller owns these because it must *prefetch* them before capturing:
+   * `captureRef` snapshots whatever is painted at that instant, so an image
+   * still in flight is captured as a hole. See `handleShare` in `/mix/[id]`.
+   */
+  art?: Map<string, string>;
 };
 
 /**
@@ -29,7 +37,7 @@ type MixShareCardProps = {
  * dial one.
  */
 const MixShareCard = React.forwardRef<View, MixShareCardProps>(
-  function MixShareCard({ meName, matchName, tracks }, ref) {
+  function MixShareCard({ meName, matchName, tracks, art }, ref) {
     const shown = tracks.slice(-MAX_TILES);
 
     return (
@@ -62,9 +70,11 @@ const MixShareCard = React.forwardRef<View, MixShareCardProps>(
             }}
           >
             {shown.map((t) => (
-              <AlbumArt
+              <TrackArt
                 key={t.id}
-                seed={`${t.track.title}-${t.track.artist}`}
+                title={t.track.title}
+                artist={t.track.artist}
+                url={art?.get(`${t.track.title}::${t.track.artist}`)}
                 size={TILE_SIZE}
                 shape="square"
               />

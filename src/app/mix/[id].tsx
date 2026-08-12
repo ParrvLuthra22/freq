@@ -1,4 +1,5 @@
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
+import { Image } from 'expo-image';
 import { router, useLocalSearchParams } from 'expo-router';
 import * as Sharing from 'expo-sharing';
 import * as React from 'react';
@@ -37,6 +38,9 @@ import { useReconciled } from '@/lib/store';
  * required already having sent the song to each other, which made the Mix feel
  * like a byproduct of the thread rather than a thing you build together.
  */
+/** How long a share will wait for covers to warm before capturing anyway. */
+const PREFETCH_BUDGET_MS = 2500;
+
 export default function MixScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const user = getUserById(id);
@@ -115,6 +119,19 @@ export default function MixScreen() {
     if (busy) return;
     setBusy(true);
     try {
+      // `captureRef` snapshots whatever is painted at that instant, so a cover
+      // still downloading would be captured as a hole. Warm them first, and
+      // cap the wait: a slow or dead image should cost the share a moment, not
+      // block it — TrackArt already falls back to its own artwork for anything
+      // that never arrives.
+      const urls = [...art.values()];
+      if (urls.length > 0) {
+        await Promise.race([
+          Image.prefetch(urls),
+          new Promise((resolve) => setTimeout(resolve, PREFETCH_BUDGET_MS)),
+        ]);
+      }
+
       const uri = await captureRef(shareCardRef, { format: 'png', quality: 1 });
       const available = await Sharing.isAvailableAsync();
       if (available) {
@@ -252,6 +269,7 @@ export default function MixScreen() {
             meName={me.name}
             matchName={user.name}
             tracks={tracks}
+            art={art}
           />
         </View>
 
