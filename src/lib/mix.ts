@@ -74,6 +74,27 @@ export async function addMixTrack(
 }
 
 /**
+ * Search Last.fm for a track to add.
+ *
+ * Goes through the `track-search` Edge Function rather than calling Last.fm
+ * directly, because the API key lives in function secrets and must never be
+ * in the bundle. Returns an empty list rather than throwing on any failure —
+ * the picker always has your own top tracks to fall back to, so a search that
+ * cannot run degrades to what the app offered before search existed.
+ */
+export async function searchTracks(query: string): Promise<Track[]> {
+  if (!supabase) return [];
+  const q = query.trim();
+  if (q.length < 2) return [];
+
+  const { data, error } = await supabase.functions.invoke('track-search', {
+    body: { q },
+  });
+  if (error || !data?.tracks) return [];
+  return data.tracks as Track[];
+}
+
+/**
  * Asks the mock to contribute one of its own tracks back, fire-and-forget.
  * Meaningful only right after the human's own add succeeds — mirrors
  * `triggerMockReply`: the actual contribution arrives later as a realtime

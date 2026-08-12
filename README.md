@@ -51,7 +51,8 @@ flowchart TB
     AUTH["Auth<br/>Google OAuth · anonymous demo"]
     DB[("Postgres + RLS<br/>profiles · matches · messages")]
     RT["Realtime<br/>messages · notifications · mix"]
-    EDGE["Edge Functions<br/>lastfm-profile · mock-reply<br/>schedule-match · schedule-like"]
+    EDGE["Edge Functions<br/>lastfm-profile · mock-reply · photo-url<br/>track-search · schedule-match · schedule-like"]
+    STORE_B[("Storage<br/>private photo bucket")]
   end
 
   subgraph external["Third-party — keys live only in Edge Functions"]
@@ -69,6 +70,8 @@ flowchart TB
   EDGE --> DB
   EDGE -->|"rebuild profile"| LASTFM
   EDGE -->|"in-character reply"| LLM
+  EDGE -->|"signed URL, after a match"| STORE_B
+  EDGE -->|"track search"| LASTFM
 ```
 
 **Scoring runs client-side and stays pure.** `score.ts` has no imports beyond
@@ -79,6 +82,58 @@ the one part of this codebase with real test coverage.
 **The secrets never reach the bundle.** The Last.fm and LLM keys live only in
 Edge Function secrets. The client holds the Supabase anon key, which is public by
 design and useless without row-level security behind it.
+
+---
+
+## Sealed until matched, enforced by the database
+
+"Nobody sees your face before a mutual match" is the product's whole premise, so
+it is enforced where it cannot be argued with rather than in the UI.
+
+- Photos live in a **private Storage bucket** (`public => false`, 5MB cap, MIME
+  allow-list).
+- Owners get insert/update/delete policies scoped to their own folder, keyed on
+  the first path segment being their profile id.
+- **There is deliberately no SELECT policy on the objects.** Without one, no
+  client — signed in, matched, or otherwise — can read a photo through the
+  ordinary storage API at all.
+- The single read path is the **`photo-url` Edge Function**. It verifies with the
+  *caller's own JWT* that they own the photo or are mutually matched, and only
+  then uses the service role to mint a 60-second signed URL. That ordering is the
+  security argument: the service role can read any object, so it never touches
+  storage until the match check has passed.
+
+The discovery deck never asks for a photo. It renders a procedural album sleeve,
+blurred, with a "?" — so the sealed state isn't a permission that could be
+misconfigured, it's a different component.
+
+Verified against the live project rather than reasoned about, with a photo
+uploaded and the two accounts unmatched:
+
+| Attempt | Result |
+|---|---|
+| Anonymous fetch of the object | `400` |
+| Unmatched user fetching with a valid JWT | `400` |
+| Unmatched user asking `photo-url` | `403` — *"sealed until you both swipe"* |
+| Writing into someone else's folder | `400` |
+| Reading someone else's photo rows | `[]` (RLS filtered) |
+| Signed URL with the signature stripped | `400` |
+| Owner fetching their own | `200`, bytes match |
+| After matching, the same request | `200`, signed |
+
+**Known limit:** signed URLs can't be revoked individually, so the 60s TTL is the
+blast radius of an unmatch. Unmatching doesn't exist yet — there's no UI and the
+client has no delete grant on `matches` — but when it ships, a shorter TTL isn't
+a sufficient answer on its own; cutting off an in-flight viewer means proxying
+the bytes through the function. That seam is named in the code.
+
+**NSFW moderation** is not built. The migration marks where it belongs: a
+`moderation_status` column that `photo-url` requires before it will sign.
+
+Mock profiles carry procedurally generated photos (`scripts/gen_mock_photos.py`)
+so the demo shows the mechanic. They're abstract compositions rather than faces —
+generating realistic likenesses for fictional dating profiles produces exactly
+the artefact fake-profile abuse is made of.
 
 ---
 
@@ -238,7 +293,8 @@ To run against a real backend:
 cp .env.example .env     # fill in the Supabase URL + anon key
 supabase link --project-ref <ref>
 supabase db push
-supabase functions deploy lastfm-profile mock-reply schedule-match schedule-like mock-mix-add
+supabase functions deploy lastfm-profile mock-reply photo-url track-search \
+  schedule-match schedule-like mock-mix-add
 ```
 
 Anonymous sign-ins must be enabled in the Supabase dashboard for the demo login.
@@ -263,7 +319,7 @@ Edge Function secrets (`supabase secrets set …`, never in the bundle):
 
 | Secret | Required | Notes |
 |---|---|---|
-| `LASTFM_API_KEY` | for Last.fm connect | Without it, `lastfm-profile` refuses every request |
+| `LASTFM_API_KEY` | for Last.fm connect + song search | Without it, `lastfm-profile` refuses every request and the Mix picker falls back to your own top tracks |
 | `LLM_API_KEY` | for mock replies | Absent means matches stay silent rather than failing |
 | `LLM_BASE_URL` | no | Defaults to Groq. Any OpenAI-compatible endpoint |
 | `LLM_MODEL` | no | Defaults to `llama-3.3-70b-versatile` |
@@ -322,8 +378,9 @@ An honest inventory, since this is a portfolio piece as much as a product.
 
 **Real** — the scoring algorithm and its corpus statistics; Last.fm connect, which
 rebuilds your profile from actual scrobbles; Supabase auth (Google + anonymous),
-matching, realtime chat, the shared Mix, and the in-thread games; offline caching;
-the archetype, derived from your own listening data.
+matching, realtime chat, the shared Mix (with Last.fm-backed song search), and
+the in-thread games; private photo upload with signed-URL access after a match;
+offline caching; the archetype, derived from your own listening data.
 
 **Mock** — candidate profiles are seeded rather than real users, and they reply
 through an Edge Function rather than being people. Spotify is labelled *coming
