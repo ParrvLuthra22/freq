@@ -11,7 +11,7 @@ import {
   type MixAddSheetHandle,
 } from '@/components/mix-add-sheet';
 import { MixShareCard } from '@/components/mix-share-card';
-import { AlbumArt } from '@/components/ui/album-art';
+import { TrackArt } from '@/components/ui/track-art';
 import { Avatar } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -21,6 +21,7 @@ import { useAuth } from '@/lib/auth';
 import { getMatchId } from '@/lib/chat';
 import {
   fetchMixTracks,
+  fetchTrackArt,
   subscribeToMixTracks,
   triggerMockMixAdd,
   type MixTrack,
@@ -49,6 +50,7 @@ export default function MixScreen() {
   const [busy, setBusy] = React.useState(false);
   const shareCardRef = React.useRef<View>(null);
   const addSheetRef = React.useRef<MixAddSheetHandle>(null);
+  const [art, setArt] = React.useState<Map<string, string>>(new Map());
 
   React.useEffect(() => {
     if (!user) return;
@@ -88,6 +90,20 @@ export default function MixScreen() {
       );
     });
   }, [matchId]);
+
+  // Covers are resolved for whatever is on screen, including tracks that
+  // arrive later over realtime. `fetchTrackArt` caches, so a re-run after one
+  // new track only asks about the one it has not seen.
+  React.useEffect(() => {
+    if (tracks.length === 0) return;
+    let cancelled = false;
+    fetchTrackArt(tracks.map((t) => t.track)).then((found) => {
+      if (!cancelled) setArt(found);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [tracks]);
 
   const contributorName = React.useCallback(
     (slug: string) =>
@@ -181,8 +197,10 @@ export default function MixScreen() {
                     className="gap-2 overflow-hidden rounded-2xl border border-border bg-card p-2.5"
                     style={{ width: '48%' }}
                   >
-                    <AlbumArt
-                      seed={`${t.track.title}-${t.track.artist}`}
+                    <TrackArt
+                      title={t.track.title}
+                      artist={t.track.artist}
+                      url={art.get(`${t.track.title}::${t.track.artist}`)}
                       shape="square"
                       fill
                     />

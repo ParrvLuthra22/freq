@@ -1,3 +1,4 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { RealtimeChannel } from '@supabase/supabase-js';
 
 import { getMyProfileId, getSlugForUuid } from '@/lib/remote-profiles';
@@ -92,6 +93,72 @@ export async function searchTracks(query: string): Promise<Track[]> {
   });
   if (error || !data?.tracks) return [];
   return data.tracks as Track[];
+}
+
+/**
+ * Real album covers for a set of tracks, keyed `title::artist`.
+ *
+ * Cached in AsyncStorage because cover art does not change and the same
+ * handful of tracks is asked about every time a Mix or thread opens — without
+ * it, revisiting a screen would re-hit Last.fm for artwork it already had.
+ * A miss is cached too (as an empty string): "this track has no cover" is just
+ * as stable an answer, and not caching it means re-asking forever for every
+ * obscure track, which is most of them here.
+ *
+ * Anything absent from the result renders its own procedural artwork, so a
+ * missing key, a rate limit, or being offline all degrade to the same place.
+ */
+export async function fetchTrackArt(
+  tracks: Track[],
+): Promise<Map<string, string>> {
+  const found = new Map<string, string>();
+  if (tracks.length === 0) return found;
+
+  const keyOf = (t: Track) => `${t.title}::${t.artist}`;
+  const cacheKeyOf = (t: Track) => `freq:art:${keyOf(t)}`;
+
+  const misses: Track[] = [];
+  for (const track of tracks) {
+    const cached = await readArtCache(cacheKeyOf(track));
+    if (cached === null) {
+      misses.push(track);
+      continue;
+    }
+    if (cached) found.set(keyOf(track), cached);
+  }
+
+  if (misses.length === 0 || !supabase) return found;
+
+  const { data, error } = await supabase.functions.invoke('track-art', {
+    body: { tracks: misses.map((t) => ({ title: t.title, artist: t.artist })) },
+  });
+  if (error || !data?.art) return found;
+
+  const art = data.art as Record<string, string>;
+  for (const track of misses) {
+    const url = art[keyOf(track)] ?? '';
+    await writeArtCache(cacheKeyOf(track), url);
+    if (url) found.set(keyOf(track), url);
+  }
+
+  return found;
+}
+
+/** `null` means "never asked"; `''` means "asked, and there is none". */
+async function readArtCache(key: string): Promise<string | null> {
+  try {
+    return await AsyncStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+
+async function writeArtCache(key: string, value: string): Promise<void> {
+  try {
+    await AsyncStorage.setItem(key, value);
+  } catch {
+    // Best-effort — a cache write failure costs a lookup, not correctness.
+  }
 }
 
 /**

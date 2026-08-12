@@ -18,6 +18,7 @@ import { SongSheet, type SongSheetHandle } from '@/components/song-sheet';
 import { SwapCard } from '@/components/swap-card';
 import { TakeCard } from '@/components/take-card';
 import { Avatar } from '@/components/ui/avatar';
+import { TrackArt } from '@/components/ui/track-art';
 import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
 import { Body, Display, Mono } from '@/components/ui/typography';
@@ -32,7 +33,7 @@ import {
   type SongBody,
   type StoredMessage,
 } from '@/lib/chat';
-import { addMixTrack, triggerMockMixAdd } from '@/lib/mix';
+import { addMixTrack, fetchTrackArt, triggerMockMixAdd } from '@/lib/mix';
 import { markRead, useReconciled } from '@/lib/store';
 import { getMe, getUserById } from '@/lib/seed';
 
@@ -85,6 +86,7 @@ export default function ChatByIdScreen() {
   const [suggestions, setSuggestions] = React.useState<string[] | null>(null);
   const [suggesting, setSuggesting] = React.useState(false);
   const [addedToMix, setAddedToMix] = React.useState<Set<string>>(new Set());
+  const [songArt, setSongArt] = React.useState<Map<string, string>>(new Map());
   const gameSheetRef = React.useRef<GameSheetHandle>(null);
   const songSheetRef = React.useRef<SongSheetHandle>(null);
 
@@ -137,6 +139,28 @@ export default function ChatByIdScreen() {
       );
     });
   }, [matchId, me.id]);
+
+  // Covers for the songs in this thread. Runs off `lines` so a song that
+  // arrives over realtime gets artwork too, and leans on fetchTrackArt's cache
+  // so re-running per message does not mean re-asking Last.fm.
+  React.useEffect(() => {
+    const songs = lines
+      .filter((line) => line.type === 'song')
+      .map((line) => line.body as { title?: string; artist?: string })
+      .filter(
+        (b): b is { title: string; artist: string } => !!b.title && !!b.artist,
+      )
+      .map((b) => ({ title: b.title, artist: b.artist }));
+    if (songs.length === 0) return;
+
+    let cancelled = false;
+    fetchTrackArt(songs).then((found) => {
+      if (!cancelled) setSongArt(found);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [lines]);
 
   const handleSend = () => {
     const text = draft.trim();
@@ -340,10 +364,20 @@ export default function ChatByIdScreen() {
                   }
                 >
                   <Mono className="text-accent">Shared song</Mono>
-                  <Body>
-                    {(line.body as SongBody).title} —{' '}
-                    {(line.body as SongBody).artist}
-                  </Body>
+                  <View className="flex-row items-center gap-2.5">
+                    <TrackArt
+                      title={(line.body as SongBody).title}
+                      artist={(line.body as SongBody).artist}
+                      url={songArt.get(
+                        `${(line.body as SongBody).title}::${(line.body as SongBody).artist}`,
+                      )}
+                      size={44}
+                    />
+                    <Body className="flex-1">
+                      {(line.body as SongBody).title} —{' '}
+                      {(line.body as SongBody).artist}
+                    </Body>
+                  </View>
                   {matchId ? (
                     <Pressable
                       onPress={() => handleAddToMix(line)}
