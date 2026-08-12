@@ -51,7 +51,7 @@ flowchart TB
     AUTH["Auth<br/>Google OAuth · anonymous demo"]
     DB[("Postgres + RLS<br/>profiles · matches · messages")]
     RT["Realtime<br/>messages · notifications · mix"]
-    EDGE["Edge Functions<br/>lastfm-profile · mock-reply · photo-url<br/>track-search · schedule-match · schedule-like"]
+    EDGE["Edge Functions<br/>lastfm-profile · mock-reply · photo-url<br/>track-search · track-art · schedule-match · schedule-like"]
     STORE_B[("Storage<br/>private photo bucket")]
   end
 
@@ -71,7 +71,7 @@ flowchart TB
   EDGE -->|"rebuild profile"| LASTFM
   EDGE -->|"in-character reply"| LLM
   EDGE -->|"signed URL, after a match"| STORE_B
-  EDGE -->|"track search"| LASTFM
+  EDGE -->|"search · cover art"| LASTFM
 ```
 
 **Scoring runs client-side and stays pure.** `score.ts` has no imports beyond
@@ -134,6 +134,63 @@ Mock profiles carry procedurally generated photos (`scripts/gen_mock_photos.py`)
 so the demo shows the mechanic. They're abstract compositions rather than faces —
 generating realistic likenesses for fictional dating profiles produces exactly
 the artefact fake-profile abuse is made of.
+
+---
+
+## The Mix, and getting real cover art out of Last.fm
+
+Each match has a shared, growing playlist. It can be fed two ways: the "add to
+FREQ Mix" action on a song message, or a search-backed picker on the Mix screen
+itself. The picker exists because the first route required you to have already
+sent each other the song, which made the Mix a byproduct of the thread rather
+than something you build together.
+
+**Search results need cleaning before they are usable.** Last.fm's index is
+largely user-submitted scrobbles, so it carries a lot of YouTube rips. Raw
+`track.search` output for "boygenius true blue" put the correct match *second*,
+behind noise:
+
+```
+boygenius - True Blue                     ← title repeats the artist
+the film            BOYGENIUS - TRUE BLUE (OFFICIAL VIDEO FROM…   ← "artist" is a description
+boygenius - True Blue (official audio)
+True Blue                                 ← the one you actually wanted
+```
+
+`track-search` strips duplicated artist prefixes, drops trailing
+`(official audio)`-style suffixes, rejects rows whose artist field is obviously
+a video description, and de-duplicates. That turns 20 noisy hits into 14 clean
+ones with the right answer first.
+
+**Cover art comes from a different endpoint than you would guess.** Two findings,
+both worth checking before writing code rather than after:
+
+| | |
+|---|---|
+| `track.search` | Returns Last.fm's grey **placeholder star** for essentially every result — search results cannot supply artwork at all. |
+| `track.getInfo` | Carries the real album image. |
+| Either endpoint | Returns that same placeholder when it has nothing — and it is a **real URL that loads**, so it has to be filtered by image hash or the UI fills with grey stars instead of falling back. |
+
+`track-art` batches `(title, artist)` lookups through `getInfo`, filters the
+placeholder, and returns only genuine covers. Results are cached in
+AsyncStorage — **misses included**, since "this track has no cover" is as stable
+an answer as a URL, and not caching it would mean re-asking forever for exactly
+the obscure tracks this app is full of.
+
+`<TrackArt>` renders the real cover, or the procedural `AlbumArt` when there
+isn't one. The fallback is the common case rather than the error case: the
+premise here is artists too obscure to be indexed.
+
+**The sealed discovery card stays procedural.** A person's avatar there is their
+own generated sleeve — the signature mechanic, not a placeholder waiting for
+somebody else's JPEG. Real covers appear only on Mix tiles, chat song messages,
+and the shared Mix image.
+
+That last surface needed care: `captureRef` snapshots whatever is painted at
+that instant, and unlike a screen the result is never re-rendered — it is sent.
+A cover still downloading would be baked in as a hole, permanently. So sharing
+warms the images via `Image.prefetch` first, bounded by a 2.5s budget, and fails
+open to the procedural tiles.
 
 ---
 
@@ -294,7 +351,7 @@ cp .env.example .env     # fill in the Supabase URL + anon key
 supabase link --project-ref <ref>
 supabase db push
 supabase functions deploy lastfm-profile mock-reply photo-url track-search \
-  schedule-match schedule-like mock-mix-add
+  track-art schedule-match schedule-like mock-mix-add
 ```
 
 Anonymous sign-ins must be enabled in the Supabase dashboard for the demo login.
@@ -319,7 +376,7 @@ Edge Function secrets (`supabase secrets set …`, never in the bundle):
 
 | Secret | Required | Notes |
 |---|---|---|
-| `LASTFM_API_KEY` | for Last.fm connect + song search | Without it, `lastfm-profile` refuses every request and the Mix picker falls back to your own top tracks |
+| `LASTFM_API_KEY` | for Last.fm connect, song search, cover art | Without it, `lastfm-profile` refuses every request, the Mix picker falls back to your own top tracks, and every track renders procedural artwork |
 | `LLM_API_KEY` | for mock replies | Absent means matches stay silent rather than failing |
 | `LLM_BASE_URL` | no | Defaults to Groq. Any OpenAI-compatible endpoint |
 | `LLM_MODEL` | no | Defaults to `llama-3.3-70b-versatile` |
@@ -378,7 +435,8 @@ An honest inventory, since this is a portfolio piece as much as a product.
 
 **Real** — the scoring algorithm and its corpus statistics; Last.fm connect, which
 rebuilds your profile from actual scrobbles; Supabase auth (Google + anonymous),
-matching, realtime chat, the shared Mix (with Last.fm-backed song search), and
+matching, realtime chat, the shared Mix (Last.fm-backed song search and real
+cover art), and
 the in-thread games; private photo upload with signed-URL access after a match;
 offline caching; the archetype, derived from your own listening data.
 
