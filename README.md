@@ -189,8 +189,20 @@ and the shared Mix image.
 That last surface needed care: `captureRef` snapshots whatever is painted at
 that instant, and unlike a screen the result is never re-rendered — it is sent.
 A cover still downloading would be baked in as a hole, permanently. So sharing
-warms the images via `Image.prefetch` first, bounded by a 2.5s budget, and fails
-open to the procedural tiles.
+warms the images via `Image.prefetch` first, bounded by a budget measured rather
+than guessed — four covers took 108/110/1058/2375ms over a good connection, so
+the cap is 5s — and it fails open to the procedural tiles.
+
+**Sharing the Mix image is native-only, and that is deliberate.** On web,
+`captureRef` is html2canvas, which clones the DOM into an iframe to rasterise
+it. NativeWind's CSS-variable styling, the SVG artwork and the `<img>` covers
+all fail to survive that clone: the exported PNG comes out as black text on
+white with no tiles at all. This was found by stubbing `navigator.share` to
+intercept the real exported file rather than by trusting that the on-screen
+card looked right — the card *did* look right, and the export was still broken.
+Handing someone a broken image is worse than not offering one, so web disables
+the button and says so; the native capture is a true snapshot of the rendered
+view and works.
 
 ---
 

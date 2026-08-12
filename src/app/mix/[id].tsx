@@ -3,7 +3,7 @@ import { Image } from 'expo-image';
 import { router, useLocalSearchParams } from 'expo-router';
 import * as Sharing from 'expo-sharing';
 import * as React from 'react';
-import { Pressable, ScrollView, View } from 'react-native';
+import { Platform, Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { captureRef } from 'react-native-view-shot';
 
@@ -38,8 +38,17 @@ import { useReconciled } from '@/lib/store';
  * required already having sent the song to each other, which made the Mix feel
  * like a byproduct of the thread rather than a thing you build together.
  */
-/** How long a share will wait for covers to warm before capturing anyway. */
-const PREFETCH_BUDGET_MS = 2500;
+/**
+ * How long a share waits for covers to warm before capturing anyway.
+ *
+ * Measured rather than guessed: loading four 300px covers over a good
+ * connection took 108, 110, 1058 and 2375ms — the slowest already grazing the
+ * 2.5s this used to be, and that was a favourable case. 5s leaves real headroom
+ * without being an eternity, and it is rarely paid at all: the covers are
+ * already on screen before anyone taps share, so the prefetch usually resolves
+ * from cache immediately. It fails open to procedural tiles either way.
+ */
+const PREFETCH_BUDGET_MS = 5000;
 
 export default function MixScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -250,12 +259,26 @@ export default function MixScreen() {
               <Mono className="text-accent">+ Add a song</Mono>
             </Pressable>
           ) : null}
+          {/* Web cannot produce a correct image of this card, so it does not
+              offer one. `captureRef` there is html2canvas, which clones the DOM
+              into an iframe — NativeWind's CSS-variable styling, the SVG
+              artwork and the <img> covers all fail to survive that clone, and
+              the exported PNG comes out as black text on white with no tiles.
+              Shipping a share button that hands someone a broken image is
+              worse than not offering it, and the native capture is a real
+              snapshot of the rendered view, so it works there. */}
           <Button
             size="lg"
             onPress={handleShare}
-            disabled={busy || tracks.length === 0}
+            disabled={busy || tracks.length === 0 || Platform.OS === 'web'}
           >
-            <Text>{busy ? 'Preparing…' : 'Share this Mix'}</Text>
+            <Text>
+              {Platform.OS === 'web'
+                ? 'Sharing the image needs the app'
+                : busy
+                  ? 'Preparing…'
+                  : 'Share this Mix'}
+            </Text>
           </Button>
         </View>
 
