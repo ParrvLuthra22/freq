@@ -24,10 +24,22 @@ const SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 
 const BUCKET = 'profile-photos';
 
-// Long enough to load a screen and survive a reload, short enough that a URL
-// pasted elsewhere stops working quickly. A revoked match cannot invalidate an
-// already-issued URL, so this window is also the blast radius of an unmatch.
-const SIGNED_URL_TTL_SECONDS = 300;
+// The match is re-checked on every call, so the only thing this window governs
+// is an ALREADY-issued URL: Supabase signed URLs cannot be revoked
+// individually, so the TTL is the blast radius of an unmatch or a block.
+//
+// 60s is chosen to make that radius small while still covering what the app
+// actually does with the URL, which is hand it straight to an <Image> that
+// loads in well under a second. Expiry only affects new requests — bytes
+// already fetched stay on screen — so a manager left open does not break.
+//
+// Unmatching does not exist yet: there is no UI for it, and the client has no
+// delete grant on `matches`. When it does ship, this constant is not a
+// sufficient answer on its own — cutting off an in-flight viewer means
+// streaming the bytes through this function so every read re-checks the match,
+// at the cost of proxying image traffic. Noting the seam here so that decision
+// is made deliberately rather than inherited.
+const SIGNED_URL_TTL_SECONDS = 60;
 
 type Body = {
   /** Slug of the profile whose photos are wanted. Omit for your own. */
