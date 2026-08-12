@@ -10,7 +10,7 @@ export default function OnboardingNameScreen() {
 
   return (
     <OnboardingStep
-      step="Step 1 of 4"
+      step="Step 1 of 5"
       question="What should we"
       accent="call you?"
       onNext={() => {

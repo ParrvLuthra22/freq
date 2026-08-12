@@ -13,6 +13,7 @@ import {
   type EditProfileSheetHandle,
 } from '@/components/edit-profile-sheet';
 import { LastfmSheet, type LastfmSheetHandle } from '@/components/lastfm-sheet';
+import { PhotoManager } from '@/components/photo-manager';
 import { Avatar } from '@/components/ui/avatar';
 import { EnergyBars } from '@/components/ui/energy-bars';
 import { RhythmChart } from '@/components/ui/rhythm-chart';
@@ -93,6 +94,12 @@ export default function FreqScreen() {
           <View className="flex-row items-center gap-2 self-start rounded-full border border-border bg-card px-3.5 py-2">
             <Body>🔒</Body>
             <Mono>Your photo stays sealed until it&apos;s mutual</Mono>
+          </View>
+
+          {/* Directly under the promise, since this is where you act on it. */}
+          <View className="gap-3">
+            <Mono>Your photos</Mono>
+            <PhotoManager />
           </View>
 
           <View className="items-center gap-3 py-2">

@@ -12,7 +12,7 @@ export default function OnboardingAgeScreen() {
 
   return (
     <OnboardingStep
-      step="Step 2 of 4"
+      step="Step 2 of 5"
       question="How old are"
       accent="you?"
       onNext={() => {

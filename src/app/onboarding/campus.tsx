@@ -11,7 +11,7 @@ export default function OnboardingCampusScreen() {
 
   return (
     <OnboardingStep
-      step="Step 3 of 4"
+      step="Step 3 of 5"
       question="Where do you"
       accent="go?"
       onNext={() => {

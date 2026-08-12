@@ -1,4 +1,5 @@
 import { BlurView } from 'expo-blur';
+import { Image } from 'expo-image';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useColorScheme } from 'nativewind';
 import * as React from 'react';
@@ -16,6 +17,7 @@ import { AlbumArt } from '@/components/ui/album-art';
 import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
 import { Body, Display, Mono } from '@/components/ui/typography';
+import { fetchSignedPhotos } from '@/lib/photos';
 import { getUserById } from '@/lib/seed';
 import { markRead } from '@/lib/store';
 import { THEME } from '@/lib/theme';
@@ -57,6 +59,32 @@ export default function RevealScreen() {
   const [open, setOpen] = React.useState(false);
   const faceOpacity = useSharedValue(0);
   const faceScale = useSharedValue(0.86);
+
+  /**
+   * The real photo, if there is one.
+   *
+   * This is the only screen that asks for it, and the request only succeeds
+   * because a match now exists — `photo-url` checks that server-side, so a
+   * failure here is the privacy model working rather than a bug. A profile
+   * with no photo (or a mock, which has none) simply keeps the album sleeve,
+   * which is why this never blocks the unseal animation.
+   */
+  const [faceUrl, setFaceUrl] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    if (!id) return;
+    let cancelled = false;
+
+    fetchSignedPhotos(id).then((result) => {
+      if (cancelled || !result.ok) return;
+      const primary = result.value.find((p) => p.isPrimary) ?? result.value[0];
+      if (primary) setFaceUrl(primary.url);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [id]);
 
   React.useEffect(() => {
     const timer = setTimeout(() => {
@@ -101,11 +129,22 @@ export default function RevealScreen() {
               <SealRing color={theme.primary} />
             </>
           ) : (
-            // Unsealed: the sleeve resolves sharp rather than becoming a face —
-            // FREQ never traded on photographs.
+            // Unsealed. A real photo if they have one — this is the only place
+            // in the app it is ever shown — and the album sleeve otherwise, so
+            // a profile without a photo still resolves to something rather
+            // than a hole.
             <Animated.View
               style={[{ position: 'absolute', inset: 0, borderRadius: 106, overflow: 'hidden' }, faceStyle]}>
-              <AlbumArt seed={user.id} size={212} shape="circle" />
+              {faceUrl ? (
+                <Image
+                  source={{ uri: faceUrl }}
+                  style={{ width: 212, height: 212 }}
+                  contentFit="cover"
+                  transition={300}
+                />
+              ) : (
+                <AlbumArt seed={user.id} size={212} shape="circle" />
+              )}
             </Animated.View>
           )}
         </View>

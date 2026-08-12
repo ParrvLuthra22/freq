@@ -14,12 +14,12 @@ export default function OnboardingLookingForScreen() {
 
   return (
     <OnboardingStep
-      step="Step 4 of 4"
+      step="Step 4 of 5"
       question="What are you"
       accent="looking for?"
       onNext={() => {
         saveProfile({ lookingFor: choice });
-        router.push('/onboarding/connect');
+        router.push('/onboarding/photos');
       }}
       nextDisabled={!choice}>
       <View className="flex-row flex-wrap gap-3">
