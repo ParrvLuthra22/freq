@@ -4,7 +4,9 @@ import {
   BottomSheetView,
 } from '@gorhom/bottom-sheet';
 import * as React from 'react';
-import { TextInput, View } from 'react-native';
+import { View } from 'react-native';
+
+import { SheetInput } from '@/components/ui/sheet-input';
 
 import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
@@ -82,7 +84,7 @@ const LastfmSheet = React.forwardRef<LastfmSheetHandle>(
 
           <View className="gap-2">
             <Mono>Username</Mono>
-            <TextInput
+            <SheetInput
               value={username}
               onChangeText={setUsername}
               placeholder="e.g. rj"

@@ -326,8 +326,8 @@ number on the card, never for the ranking or the explanation.
 
 | | |
 |---|---|
-| **App** | Expo SDK 57, React Native 0.86, React 19.2, Expo Router (file-based) |
-| **Animation** | Reanimated v4.5 — required; RN 0.86 dropped a shim v3 depends on |
+| **App** | Expo SDK 54, React Native 0.81.5, React 19.1, Expo Router v6 (file-based) — runs in Expo Go |
+| **Animation** | Reanimated 4.1.7 + react-native-worklets, as pinned by the SDK 54 manifest |
 | **Styling** | NativeWind v4 (Tailwind), owned UI primitives themed to brand tokens |
 | **Graphics** | react-native-svg — the score dial, waveform mark, procedural album art |
 | **Backend** | Supabase — Postgres + RLS, Auth, Realtime, Edge Functions (Deno) |

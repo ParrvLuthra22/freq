@@ -2,11 +2,11 @@ import {
   BottomSheetBackdrop,
   BottomSheetModal,
   BottomSheetScrollView,
-  BottomSheetTextInput,
 } from '@gorhom/bottom-sheet';
 import * as React from 'react';
-import { Platform, Pressable, TextInput, View } from 'react-native';
+import { Pressable, View } from 'react-native';
 
+import { SheetInput } from '@/components/ui/sheet-input';
 import { Body, Mono } from '@/components/ui/typography';
 import {
   addMixTrack,
@@ -27,15 +27,6 @@ type MixAddSheetProps = {
 
 /** Long enough that typing a title does not fire a request per keystroke. */
 const DEBOUNCE_MS = 350;
-
-/**
- * `BottomSheetTextInput` reaches into RN internals that react-native-web does
- * not implement (`TextInput.State.currentlyFocusedInput`), so rendering it on
- * web throws outright. Its only job is keyboard handling inside a sheet, which
- * web does not need — so web gets the plain input and native keeps the one
- * that knows how to move out of the keyboard's way.
- */
-const SheetInput = Platform.OS === 'web' ? TextInput : BottomSheetTextInput;
 
 /**
  * Adding a song to the Mix, from anywhere rather than only from a chat message.

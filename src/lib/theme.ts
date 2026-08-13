@@ -1,4 +1,6 @@
-import { DarkTheme, DefaultTheme } from 'expo-router';
+// expo-router v6 (SDK 54) does not re-export the navigation themes; v7 does.
+// Importing from the source package works on both.
+import { DarkTheme, DefaultTheme } from '@react-navigation/native';
 
 export const THEME = {
   light: {

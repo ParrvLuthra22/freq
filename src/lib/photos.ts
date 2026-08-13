@@ -1,3 +1,4 @@
+import * as Crypto from 'expo-crypto';
 import * as ImageManipulator from 'expo-image-manipulator';
 import * as ImagePicker from 'expo-image-picker';
 
@@ -142,7 +143,12 @@ export async function uploadPhoto(uri: string): Promise<PhotoResult<Photo>> {
 
   // The first path segment is the owner's profile id, which is exactly what
   // the storage policies check. Anything else here would be rejected.
-  const path = `${profileId}/${crypto.randomUUID()}.jpg`;
+  //
+  // `expo-crypto` rather than the global `crypto`: the latter is a web/Node
+  // API that Hermes does not provide, so `crypto.randomUUID()` worked on web
+  // and threw "Property 'crypto' doesn't exist" the moment this ran on a
+  // device.
+  const path = `${profileId}/${Crypto.randomUUID()}.jpg`;
 
   const { error: uploadError } = await supabase.storage
     .from(BUCKET)
