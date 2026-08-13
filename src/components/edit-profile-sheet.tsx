@@ -4,7 +4,9 @@ import {
   BottomSheetView,
 } from '@gorhom/bottom-sheet';
 import * as React from 'react';
-import { Pressable, TextInput, View } from 'react-native';
+import { Pressable, View } from 'react-native';
+
+import { SheetInput } from '@/components/ui/sheet-input';
 
 import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
@@ -67,7 +69,7 @@ const EditProfileSheet = React.forwardRef<EditProfileSheetHandle>(
 
           <View className="gap-2">
             <Mono>Name</Mono>
-            <TextInput
+            <SheetInput
               value={name}
               onChangeText={setName}
               placeholder="Your first name"
