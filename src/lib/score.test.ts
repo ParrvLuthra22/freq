@@ -103,6 +103,70 @@ describe('scorePair', () => {
     expect(depthOf(fullOverlapScore)).toBeCloseTo(1, 5);
     expect(depthOf(fullOverlapScore)).toBeGreaterThanOrEqual(depthOf(bridgeOnlyScore));
   });
+
+  test('empty history scores 0, not NaN or a crash', () => {
+    // A brand-new profile before any Last.fm sync: no artists, tracks, tags or hours.
+    const empty = mkProfile('empty', [], [], [], []);
+    const populated = mkProfile('pop', ['X'], ['T1'], ['tagX'], dayHours);
+    const corpus = buildCorpus([empty, populated]);
+
+    const result = scorePair(empty, populated, corpus);
+    expect(result.score).toBe(0);
+    for (const component of result.components) {
+      expect(Number.isNaN(component.value)).toBe(false);
+    }
+  });
+
+  test('a single shared artist among otherwise disjoint profiles is a modest, non-zero signal', () => {
+    const a = mkProfile('a', ['Shared', 'A2', 'A3'], ['TA'], ['tagA'], dayHours);
+    const b = mkProfile('b', ['Shared', 'B2', 'B3'], ['TB'], ['tagB'], dayHours);
+    const corpus = buildCorpus([a, b]);
+
+    const result = scorePair(a, b, corpus);
+    expect(result.sharedArtists).toEqual(['Shared']);
+    expect(result.score).toBeGreaterThan(0);
+    expect(result.score).toBeLessThan(50);
+  });
+
+  test('two distinct profiles with identical taste score 100, same as self-match', () => {
+    const artists = ['Z1', 'Z2', 'Z3'];
+    const a = mkProfile('a', artists, ['T1'], ['tagA'], dayHours);
+    const b = mkProfile('b', artists, ['T1'], ['tagA'], dayHours);
+    const corpus = buildCorpus([a, b]);
+
+    expect(scorePair(a, b, corpus).score).toBe(100);
+  });
+
+  test('identical profiles with a zero-variance rhythm score below 100', () => {
+    // Pearson correlation is undefined when a histogram has no variance (every
+    // hour equal), so rhythmSimilarity's normA === 0 guard returns 0, not 1 —
+    // even between two profiles with the exact same flat listening pattern.
+    const flatHours = Array.from({ length: 24 }, () => 10);
+    const artists = ['Z1', 'Z2', 'Z3'];
+    const a = mkProfile('a', artists, ['T1'], ['tagA'], flatHours);
+    const b = mkProfile('b', artists, ['T1'], ['tagA'], flatHours);
+    const corpus = buildCorpus([a, b]);
+
+    const result = scorePair(a, b, corpus);
+    expect(result.components.find((c) => c.key === 'rhythmMatch')?.value).toBe(0);
+    expect(result.score).toBeLessThan(100);
+  });
+
+  test('a shared megastar counts for far less than a shared rare artist', () => {
+    // Three filler profiles establish the megastar as high-doc-frequency; the
+    // "rare" artist appears only in the pair being compared.
+    const filler = (id: string) => mkProfile(id, ['Megastar'], [], [], dayHours);
+    const megaA = mkProfile('megaA', ['Megastar', 'A2', 'A3'], ['TA'], [], dayHours);
+    const megaB = mkProfile('megaB', ['Megastar', 'B2', 'B3'], ['TB'], [], dayHours);
+    const rareA = mkProfile('rareA', ['Deep Cut', 'A2', 'A3'], ['TA'], [], dayHours);
+    const rareB = mkProfile('rareB', ['Deep Cut', 'B2', 'B3'], ['TB'], [], dayHours);
+
+    const corpus = buildCorpus([filler('f1'), filler('f2'), filler('f3'), megaA, megaB, rareA, rareB]);
+    const artistOverlapOf = (a: BaseProfile, b: BaseProfile) =>
+      scorePair(a, b, corpus).components.find((c) => c.key === 'artistOverlap')!.value;
+
+    expect(artistOverlapOf(megaA, megaB)).toBeLessThan(artistOverlapOf(rareA, rareB));
+  });
 });
 
 describe('calibrate (the x^0.62 display transform)', () => {
