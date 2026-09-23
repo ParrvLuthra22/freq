@@ -46,3 +46,6 @@ example
 # deploy tooling link state — machine-local, not shared config
 .vercel
 supabase/.temp
+
+# local content drafts — never shipped in the repo
+drafts/

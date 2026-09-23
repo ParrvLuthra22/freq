@@ -206,6 +206,15 @@ view and works.
 
 ---
 
+## How matching works
+
+Every score is computed by `src/lib/score.ts` — five weighted, rarity-aware
+components blended into a single 0–100 number, plus a ranked, machine-readable
+reason list. The full derivation — formulas, every tunable constant with its
+reasoning, edge cases, and worked examples run against the real seed corpus —
+lives in [`docs/SCORING.md`](docs/SCORING.md); the summary below covers the
+same ground for anyone who just wants the shape of it.
+
 ## How the FREQ score works
 
 This is the part worth reading. `src/lib/score.ts`.
